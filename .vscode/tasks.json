@@ -1,0 +1,48 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build FEM Project",
+            "type": "cppbuild",
+            "command": "E:\\msys64\\ucrt64\\bin\\g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "-std=c++11",
+                "-I","${workspaceFolder}",
+                "${workspaceFolder}\\main.cpp",
+                "${workspaceFolder}\\fem_solver.cpp",
+                "${workspaceFolder}\\problem_definition.cpp",
+                "${workspaceFolder}\\shape_functions.cpp",
+                "${workspaceFolder}\\gauss_quadrature.cpp",
+                "-o","${workspaceFolder}\\FEM_solution.exe"
+            ],
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "编译整个一维有限元求解器项目"
+        },
+        {
+            "label": "Run FEM Solution",
+            "type": "shell",
+            "command": "${workspaceFolder}\\FEM_solution.exe",
+            "group": "test",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "shell": {
+                    "executable": "cmd.exe",
+                    "args": ["/d", "/c", "chcp 65001 &&"]
+                }
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "dependsOn": "Build FEM Project",
+            "detail": "运行FEM求解器"
+        }
+    ]
+}

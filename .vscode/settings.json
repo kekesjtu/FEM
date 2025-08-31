@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.asm": "masm",
+        "*.uvprojx": "c",
+        "ostream": "cpp"
+    }
+}

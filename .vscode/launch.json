@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run and Debug FEM Solver",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/FEM_solution.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "MIMode": "gdb",
+            "miDebuggerPath": "E:\\msys64\\ucrt64\\bin\\gdb.exe",
+            "preLaunchTask": "Build FEM Project"
+        },
+    ]
+}
