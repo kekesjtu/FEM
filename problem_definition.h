@@ -3,10 +3,30 @@
 
 #include <vector>
 
-// 结构体：定义边界条件
+// 结构体：定义通用边界条件
+// 表示形式为: K * (c * du/dx) + L * u = q
 struct BoundaryCondition {
-    int node_index; // 节点索引
-    double value;   // 边界条件的值
+    int node_index;     // 作用的节点索引
+    int K_bc;        // 导数项的系数
+    double L_bc;        // 值项的系数
+    double q_bc;        // 右侧项
+
+    // 辅助构造函数
+    // 构造狄利克雷边界条件: u = val
+    // 对应 K=0, L=1, q=val
+    static BoundaryCondition Dirichlet(int index, double val) {
+        return {index, 0, 1.0, val};
+    }
+    // 构造罗宾边界条件: c*du/dx + h*u = g
+    // 对应 K=1, L=h, q=g
+    static BoundaryCondition Robin(int index, double h, double g) {
+        return {index, 1, h, g};
+    }
+    // 构造诺曼边界条件: c*du/dx = q_flux
+    // 对应 K=1, L=0, q=q_flux
+    static BoundaryCondition Neumann(int index, double q_flux) {
+        return {index, 1, 0.0, q_flux};
+    }
 };
 
 /**

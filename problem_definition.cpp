@@ -6,7 +6,7 @@
  *        对应于方程 -d/dx( c(x) * du/dx ) = f(x)
  */
 double coefficient_c(double x) {
-    // 对于新问题，c(x) = e^x
+
     return exp(x);
 }
 
@@ -15,7 +15,7 @@ double coefficient_c(double x) {
  *        对应于方程 -d/dx( c(x) * du/dx ) = f(x)
  */
 double source_term_f(double x) {
-    // 对于新问题，f(x) = -e^x * [cos(x) - 2sin(x) - x*cos(x) - x*sin(x)]
+    
     return -exp(x) * (cos(x) - 2 * sin(x) - x * cos(x) - x * sin(x));
 }
 
@@ -23,7 +23,7 @@ double source_term_f(double x) {
  * @brief 定义问题的精确解 u(x) (用于后处理中计算误差)
  */
 double exact_solution_u(double x) {
-    // 对于新问题，u(x) = x * cos(x)
+  
     return x * cos(x);
 }
 
@@ -35,8 +35,18 @@ void defineProblem(int& N_out, int& M_out, std::vector<BoundaryCondition>& bcs_o
     N_out = 4; // 全局总节点数
     M_out = N_out - 1; // 单元总数
 
-    // 2. 边界条件
+    // 2. 边界条件 (使用新的辅助构造函数)
     bcs_out.clear();
-    bcs_out.push_back({0, 0.0});         // 节点 0 (x=0) 处, u=0
-    bcs_out.push_back({N_out - 1, cos(1.0)}); // 节点 N-1 (x=1) 处, u=cos(1)
+    // 节点 0 (x=0) 处, u=0 (狄利克雷)
+    //bcs_out.push_back(BoundaryCondition::Dirichlet(0, 0.0)); 
+    // 节点 N-1 (x=1) 处, u=cos(1) (狄利克雷)
+    //bcs_out.push_back(BoundaryCondition::Dirichlet(N_out - 1, cos(1.0))); 
+
+    // ---- 其他边界条件示例 (如果需要，可以取消注释) ----
+    // 示例1: 罗宾边界条件
+    bcs_out.push_back(BoundaryCondition::Robin(0, 1.0, 1.0));
+    bcs_out.push_back(BoundaryCondition::Robin(N_out - 1, 1.0, 2.718*(cos(1.0)-sin(1.0))+cos(1.0)));
+    // 示例2: 诺曼边界条件
+    //bcs_out.push_back(BoundaryCondition::Neumann(N_out - 1, 2.718*(cos(1.0)-sin(1.0))));
+
 }
