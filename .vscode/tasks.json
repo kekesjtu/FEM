@@ -15,6 +15,8 @@
                 "${workspaceFolder}\\problem_definition.cpp",
                 "${workspaceFolder}\\shape_functions.cpp",
                 "${workspaceFolder}\\gauss_quadrature.cpp",
+                "${workspaceFolder}\\error_analysis.cpp",
+                "${workspaceFolder}\\geometry_mapping.cpp",
                 "-o","${workspaceFolder}\\FEM_solution.exe"
             ],
             "group": "build",

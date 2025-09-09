@@ -28,6 +28,14 @@ double exact_solution_u(double x) {
 }
 
 /**
+ * @brief 定义问题的精确解 u(x) 的导数 (用于后处理中计算误差)
+ */
+double exact_solution_du_dx(double x) {
+  
+     return cos(x) - x * sin(x);
+}
+
+/**
  * @brief 定义网格和边界条件
  */
 void defineProblem(int& N_out, int& M_out, std::vector<BoundaryCondition>& bcs_out) {
@@ -42,7 +50,6 @@ void defineProblem(int& N_out, int& M_out, std::vector<BoundaryCondition>& bcs_o
     // 节点 N-1 (x=1) 处, u=cos(1) (狄利克雷)
     //bcs_out.push_back(BoundaryCondition::Dirichlet(N_out - 1, cos(1.0))); 
 
-    // ---- 其他边界条件示例 (如果需要，可以取消注释) ----
     // 示例1: 罗宾边界条件
     bcs_out.push_back(BoundaryCondition::Robin(0, 1.0, 1.0));
     bcs_out.push_back(BoundaryCondition::Robin(N_out - 1, 1.0, 2.718*(cos(1.0)-sin(1.0))+cos(1.0)));

@@ -53,6 +53,13 @@ double source_term_f(double x);
 double exact_solution_u(double x);
 
 /**
+ * @brief 定义问题的精确解导数 du/dx (用于后处理中计算H1误差)
+ * @param x 坐标
+ * @return double 精确解导数du/dx的值
+ */
+double exact_solution_du_dx(double x);
+
+/**
  * @brief 定义问题的网格参数和边界条件
  * @param N_out 输出参数，全局总节点数
  * @param M_out 输出参数，单元总数

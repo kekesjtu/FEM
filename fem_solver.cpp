@@ -2,17 +2,20 @@
 #include "gauss_quadrature.h"
 #include "shape_functions.h"
 #include "problem_definition.h"
+#include "error_analysis.h"
+#include "geometry_mapping.h"
 #include <iostream>
 #include <iomanip>
 #include <cmath>
-#include <Eigen/Dense>
+#include <Eigen/Sparse>
+#include <Eigen/SparseLU>
 
 // --- 全局变量定义 ---
 int N, M;
 const int n = 2; // 线性单元
-std::vector<double> K_global;//全局刚度矩阵，为了兼容库Eigen，没有使用二维数组
-std::vector<double> b;//载荷向量
-std::vector<double> u;//位移向量
+Eigen::SparseMatrix<double> K_global;//全局刚度矩阵，使用稀疏矩阵存储
+Eigen::VectorXd b;//载荷向量
+Eigen::VectorXd u;//解向量
 std::vector<std::vector<int>> T;//单元编号、局部编号
 std::vector<double> P;//全局编号与对应节点坐标
 std::vector<BoundaryCondition> boundary_conditions;
@@ -20,20 +23,16 @@ std::vector<BoundaryCondition> boundary_conditions;
 // --- 内部辅助函数声明 (仅在此文件内使用) ---
 double calculateStiffnessEntry(int e, int alpha, int beta, int numGaussPoints);//alpha是试探函数的索引，beta是测试（加权）函数的索引
 double calculateLoadEntry(int e, int beta, int numGaussPoints);
-void computeGeometricQuantities_1D(
-    const std::vector<double>& element_coords, double x_ref,
-    const std::vector<double>& dN_dx_ref_trial, const std::vector<double>& dN_dx_ref_test,
-    double& jacobianDet, std::vector<double>& dN_dx_trial, std::vector<double>& dN_dx_test,
-    double& x_physical);
 
 // --- FEM 函数实现 ---
 
 //生成或者导入网格
 void preprocess() {
     defineProblem(N, M, boundary_conditions);
-    K_global.assign(N * N, 0.0);
-    b.assign(N, 0.0);
-    u.assign(N, 0.0);
+    K_global.resize(N, N);  // 创建NxN的稀疏矩阵
+    K_global.reserve(Eigen::VectorXi::Constant(N, 3));  // 每行预计有3个非零元素（1D情况）
+    b = Eigen::VectorXd::Zero(N);  // 零向量
+    u = Eigen::VectorXd::Zero(N);  // 零向量
     T.assign(M, std::vector<int>(n));
     P.assign(N, 0.0);
     const double domain_length = 1.0;
@@ -43,22 +42,32 @@ void preprocess() {
 
 //组装全局刚度矩阵和载荷向量
 void assemble() {
+    // 使用三元组列表收集所有元素
+    typedef Eigen::Triplet<double> T_entry;
+    std::vector<T_entry> tripletList;
+    tripletList.reserve(3 * N); // 预留空间
+    
     for (int e = 0; e < M; ++e) {
-        const int numGaussPoints_e = 3;
+        const int numGaussPoints = 3;
         for (int alpha = 0; alpha < n; ++alpha) {
             for (int beta = 0; beta < n; ++beta) {
-                double K_e_val = calculateStiffnessEntry(e, alpha, beta, numGaussPoints_e);
+                double K_e_val = calculateStiffnessEntry(e, alpha, beta, numGaussPoints);
                 int global_row = T[e][beta];
                 int global_col = T[e][alpha];
-                K_global[global_row * N + global_col] += K_e_val;
+                tripletList.push_back(T_entry(global_row, global_col, K_e_val));
             }
         }
         for (int beta = 0; beta < n; ++beta) {
-            double b_e_val = calculateLoadEntry(e, beta, numGaussPoints_e);
+            double b_e_val = calculateLoadEntry(e, beta, numGaussPoints);
             int global_row = T[e][beta];
-            b[global_row] += b_e_val;
+            b(global_row) += b_e_val;
         }
     }
+    
+    // 从三元组列表构建稀疏矩阵
+    K_global.setFromTriplets(tripletList.begin(), tripletList.end());
+    // 对具有相同索引的元素进行求和
+    K_global.makeCompressed();
 }
 
 //施加边界条件（在全局刚度矩阵和载荷向量上操作）
@@ -80,8 +89,9 @@ void applyBoundaryConditions() {
                 continue; 
             }
 
-            K_global[idx * N + idx] += s * bc.L_bc;
-            b[idx] += s * bc.q_bc;
+            // 对于稀疏矩阵，使用coeffRef来修改元素
+            K_global.coeffRef(idx, idx) += s * bc.L_bc;
+            b(idx) += s * bc.q_bc;
         }
     }
 
@@ -100,27 +110,41 @@ void applyBoundaryConditions() {
             // 修正载荷向量 b
             for (int j = 0; j < N; ++j) {
                 if (j != idx) {
-                    b[j] -= K_global[j * N + idx] * val;
+                    b(j) -= K_global.coeff(j, idx) * val;
                 }
             }
             
-            // 修正刚度矩阵 K (划零法)
+            // 转换为压缩格式以便修改
+            K_global.makeCompressed();
+            
+            // 将整行和整列设置为零 (稀疏矩阵需要逐个元素处理)
             for (int j = 0; j < N; ++j) {
-                K_global[idx * N + j] = 0.0;
-                K_global[j * N + idx] = 0.0;
+                if (j != idx) {
+                    K_global.coeffRef(idx, j) = 0.0;
+                    K_global.coeffRef(j, idx) = 0.0;
+                }
             }
-            K_global[idx * N + idx] = 1.0;
-            b[idx] = val;
+            K_global.coeffRef(idx, idx) = 1.0;
+            b(idx) = val;
         }
     }
 }
 
 //求解线性方程组
 void solveLinearSystem() {
-    Eigen::Map<Eigen::MatrixXd> K_eigen(K_global.data(), N, N);
-    Eigen::Map<Eigen::VectorXd> b_eigen(b.data(), N);
-    Eigen::VectorXd u_eigen = K_eigen.lu().solve(b_eigen);
-    for(int i = 0; i < N; ++i) u[i] = u_eigen(i);
+    // 使用SparseLU求解器求解稀疏线性系统
+    Eigen::SparseLU<Eigen::SparseMatrix<double>> solver;
+    solver.analyzePattern(K_global);
+    solver.factorize(K_global);
+    if(solver.info() != Eigen::Success) {
+        std::cerr << "分解失败！" << std::endl;
+        return;
+    }
+    u = solver.solve(b);
+    if(solver.info() != Eigen::Success) {
+        std::cerr << "求解失败！" << std::endl;
+        return;
+    }
 }
 
 //输出结果
@@ -137,101 +161,89 @@ void postprocess() {
     for (int i = 0; i < N; ++i) {
         double x = P[i];
         double exact_sol = exact_solution_u(x);
-        double error = abs(u[i] - exact_sol);
+        double error = abs(u(i) - exact_sol);
         
         cout << left << setw(10) << i
              << left << setw(15) << fixed << setprecision(4) << x
-             << left << setw(20) << scientific << setprecision(5) << u[i]
+             << left << setw(20) << scientific << setprecision(5) << u(i)
              << left << setw(20) << scientific << setprecision(5) << exact_sol
              << left << setw(20) << scientific << setprecision(5) << error
              << endl;
     }
+    
+    // --- 误差分析 ---
+    cout << "\n--- 误差分析 ---" << endl;
+    
+    // 计算各种误差范数
+    double max_error = computeMaxError(u, exact_solution_u);
+    double l2_error = computeL2Error(u, exact_solution_u);
+    double h1_error = computeH1Error(u, exact_solution_du_dx);
+    
+    cout << "误差范数:" << endl;
+    cout << "  最大误差 (L∞范数): " << scientific << setprecision(6) << max_error << endl;
+    cout << "  L2范数误差:        " << scientific << setprecision(6) << l2_error << endl;
+    cout << "  H1范数误差:        " << scientific << setprecision(6) << h1_error << endl;
 }
 
 // --- 内部辅助函数定义 ---
 
 double calculateStiffnessEntry(int e, int alpha, int beta, int numGaussPoints) {
-    std::vector<double> element_coords_e(n);
-    for (int i = 0; i < n; ++i) element_coords_e[i] = P[T[e][i]];
+    // 创建几何映射对象
+    GeometryMapping1D mapping(e);  // 直接使用单元索引构造
     
     std::vector<double> gaussPoints, gaussWeights;
     getGaussPoints(numGaussPoints, gaussPoints, gaussWeights);
     
     double entryValue = 0.0;
     for (int gp = 0; gp < numGaussPoints; ++gp) {
-        double x_ref = gaussPoints[gp], weight = gaussWeights[gp];//这个地方得到的点是在【-1, 1】参考区间内的
-
-        std::vector<double> dN_dx_ref_trial_gp(n), dN_dx_ref_test_gp(n);
-        for (int i = 0; i < n; ++i) {
-            dN_dx_ref_trial_gp[i] = shapeFunctionDerivative_trial(i, x_ref);//得到参考试探函数alpha=i的导数在x_ref处的值
-            dN_dx_ref_test_gp[i] = shapeFunctionDerivative_test(i, x_ref);//得到参考测试函数beta=i的导数在x_ref处的值
-        }
+        double x_ref_gp = gaussPoints[gp];
+        double weight = gaussWeights[gp];
         
-        double jacobianDet_e;
-        std::vector<double> dN_dx_trial_gp(n), dN_dx_test_gp(n);
-        double x_gp;
-        computeGeometricQuantities_1D(element_coords_e, x_ref, dN_dx_ref_trial_gp, dN_dx_ref_test_gp, jacobianDet_e, dN_dx_trial_gp, dN_dx_test_gp, x_gp);
+        // 获取物理坐标和雅可比
+        double x_gp = mapping.mapToPhysical(x_ref_gp);
+        double jacobian = mapping.getJacobian();
         
+        // 计算形函数导数
+        double dN_dx_ref_trial = shapeFunctionDerivative_trial(alpha, x_ref_gp);
+        double dN_dx_ref_test = shapeFunctionDerivative_test(beta, x_ref_gp);
+        
+        // 转换为物理坐标系下的导数
+        double dN_dx_trial = mapping.transformDerivative(dN_dx_ref_trial);
+        double dN_dx_test = mapping.transformDerivative(dN_dx_ref_test);
+        
+        // 计算积分被积函数
         const double c_x = coefficient_c(x_gp);
-        
-        double integrand = c_x * dN_dx_test_gp[beta] * dN_dx_trial_gp[alpha];
-        entryValue += integrand * jacobianDet_e * weight;
+        double integrand = c_x * dN_dx_test * dN_dx_trial;
+
+        entryValue += integrand * jacobian * weight;
     }
     return entryValue;
 }
 
 double calculateLoadEntry(int e, int beta, int numGaussPoints) {
-    std::vector<double> element_coords_e(n);
-    for(int i=0; i<n; ++i) element_coords_e[i] = P[T[e][i]];
+    // 创建几何映射对象
+    GeometryMapping1D mapping(e);  // 直接使用单元索引构造
 
     std::vector<double> gaussPoints, gaussWeights;
     getGaussPoints(numGaussPoints, gaussPoints, gaussWeights);
     
     double entryValue = 0.0;
     for (int gp = 0; gp < numGaussPoints; ++gp) {
-        double x_ref = gaussPoints[gp], weight = gaussWeights[gp];
+        double x_ref_gp = gaussPoints[gp];
+        double weight = gaussWeights[gp];
         
-        // 获取参考坐标系的导数（虽然载荷向量不需要导数，但为了使用统一的几何变换函数）
-        std::vector<double> dN_dx_ref_trial_gp(n), dN_dx_ref_test_gp(n);
-        for (int i = 0; i < n; ++i) {
-            dN_dx_ref_trial_gp[i] = shapeFunctionDerivative_trial(i, x_ref);
-            dN_dx_ref_test_gp[i] = shapeFunctionDerivative_test(i, x_ref);
-        }
-        
-        // 使用统一的几何变换函数
-        double jacobianDet_e;
-        std::vector<double> dN_dx_trial_gp(n), dN_dx_test_gp(n);
-        double x_gp;
-        computeGeometricQuantities_1D(element_coords_e, x_ref, dN_dx_ref_trial_gp, dN_dx_ref_test_gp, jacobianDet_e, dN_dx_trial_gp, dN_dx_test_gp, x_gp);
+        // 获取物理坐标和雅可比
+        double x_gp = mapping.mapToPhysical(x_ref_gp);
+        double jacobian = mapping.getJacobian();
 
-        double N_ref_test_beta = shapeFunction_test(beta, x_ref);  // 参考测试函数在参考坐标处的值,和真实测试函数在物理坐标处的值一样
-        const double f_x = source_term_f(x_gp);              // 源项在物理坐标处的值
-        double integrand = f_x * N_ref_test_beta; 
-        entryValue += integrand * jacobianDet_e * weight;
+        // 计算形函数值（载荷向量只需要形函数值，不需要导数）,而参考坐标系下的形函数值与物理坐标系下的形函数值相同
+        double N_test_beta = shapeFunction_test(beta, x_ref_gp);
+        
+        // 计算源项
+        const double f_x = source_term_f(x_gp);
+        
+        double integrand = f_x * N_test_beta; 
+        entryValue += integrand * jacobian * weight;
     }
     return entryValue;
-}
-
-//进行仿射变换
-void computeGeometricQuantities_1D(
-    const std::vector<double>& element_coords, double x_ref,
-    const std::vector<double>& dN_dx_ref_trial, const std::vector<double>& dN_dx_ref_test,
-    double& jacobianDet, std::vector<double>& dN_dx_trial, std::vector<double>& dN_dx_test,
-    double& x_physical)
-{
-    // 计算雅可比行列式
-    jacobianDet = 0.0;
-    for (int i = 0; i < n; ++i) jacobianDet += dN_dx_ref_trial[i] * element_coords[i];
-    
-    // 计算物理坐标系下的导数
-    for (int i = 0; i < n; ++i) {
-        dN_dx_trial[i] = dN_dx_ref_trial[i] / jacobianDet;
-        dN_dx_test[i] = dN_dx_ref_test[i] / jacobianDet;
-    }
-    
-    // 计算物理坐标：参考坐标映射到物理坐标
-    x_physical = 0.0;
-    for (int i = 0; i < n; ++i) {
-        x_physical += shapeFunction_trial(i, x_ref) * element_coords[i];
-    }
 }
