@@ -2,39 +2,44 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build FEM Project",
+            "label": "Build FEM 2D Project",
             "type": "cppbuild",
             "command": "E:\\msys64\\ucrt64\\bin\\g++.exe",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
                 "-std=c++11",
-                "-I","${workspaceFolder}",
-                "${workspaceFolder}\\main.cpp",
-                "${workspaceFolder}\\fem_solver.cpp",
+                "-I",
+                "${workspaceFolder}",
+                "${workspaceFolder}\\main_2d.cpp",
+                "${workspaceFolder}\\fem_solver_2d.cpp",
+                "${workspaceFolder}\\shape_functions_2d.cpp",
+                "${workspaceFolder}\\gauss_quadrature_2d.cpp",
+                "${workspaceFolder}\\geometry_mapping_2d.cpp",
                 "${workspaceFolder}\\problem_definition.cpp",
-                "${workspaceFolder}\\shape_functions.cpp",
-                "${workspaceFolder}\\gauss_quadrature.cpp",
-                "${workspaceFolder}\\error_analysis.cpp",
-                "${workspaceFolder}\\geometry_mapping.cpp",
-                "-o","${workspaceFolder}\\FEM_solution.exe"
+                "-o",
+                "${workspaceFolder}\\FEM_2D_solution.exe"
             ],
             "group": "build",
             "problemMatcher": [
                 "$gcc"
             ],
-            "detail": "编译整个一维有限元求解器项目"
+            "detail": "编译整个二维有限元求解器项目"
         },
         {
-            "label": "Run FEM Solution",
+            "label": "Run FEM 2D Solution",
             "type": "shell",
-            "command": "${workspaceFolder}\\FEM_solution.exe",
+            "command": "${workspaceFolder}\\FEM_2D_solution.exe",
             "group": "test",
             "options": {
                 "cwd": "${workspaceFolder}",
                 "shell": {
                     "executable": "cmd.exe",
-                    "args": ["/d", "/c", "chcp 65001 &&"]
+                    "args": [
+                        "/d",
+                        "/c",
+                        "chcp 65001 &&"
+                    ]
                 }
             },
             "presentation": {
@@ -43,8 +48,31 @@
                 "focus": false,
                 "panel": "new"
             },
-            "dependsOn": "Build FEM Project",
-            "detail": "运行FEM求解器"
+            "dependsOn": "Build FEM 2D Project",
+            "detail": "运行二维FEM求解器"
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: g++.exe 生成活动文件",
+            "command": "E:\\msys64\\ucrt64\\bin\\g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "调试器生成的任务。"
         }
     ]
 }
