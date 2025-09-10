@@ -1,5 +1,5 @@
 #include "geometry_mapping_2d.h"
-#include "fem_solver.h"  // 为了访问全局变量P和T
+#include "fem_solver_2d.h"  // 为了访问全局变量P和T
 #include <cmath>
 #include <stdexcept>
 
@@ -99,7 +99,7 @@ void GeometryMapping2D::mapToReference(double x, double y, double& x_ref, double
     y_ref = (-dy_dx_ref * dx + dx_dx_ref * dy) / jacobian_det;
 }
 
-double GeometryMapping2D::getJacobianDeterminant() const {
+double GeometryMapping2D::getJacobianDet() const {
     return jacobian_det;
 }
 

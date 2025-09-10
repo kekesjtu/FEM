@@ -51,7 +51,7 @@ public:
      * @brief 获取雅可比行列式
      * @return double 雅可比行列式
      */
-    double getJacobianDeterminant() const;
+    double getJacobianDet() const;
     
     /**
      * @brief 将参考坐标系下的梯度转换为物理坐标系下的梯度

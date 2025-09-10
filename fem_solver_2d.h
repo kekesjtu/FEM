@@ -14,20 +14,7 @@ extern Eigen::VectorXd b;                     // 载荷向量
 extern Eigen::VectorXd u;                     // 解向量
 extern std::vector<std::vector<int>> T;       // 单元连接矩阵 [element][local_node] = global_node
 extern std::vector<double> P;                 // 节点坐标 [x0, y0, x1, y1, ...]
-extern std::vector<std::vector<int>> boundary_edges; // 边界边信息
-extern std::vector<BoundaryCondition> boundary_conditions;
-
-// 网格生成参数
-struct Domain {
-    double left, right, bottom, top;
-};
-
-struct BoundaryTypes {
-    int bottom; // e.g., -1 for Dirichlet
-    int right;  // e.g., -2 for Neumann
-    int top;
-    int left;
-};
+extern std::vector<BoundaryEdge> boundary_edges; // 边界边信息
 
 // --- 核心 FEM 函数声明 ---
 
@@ -35,15 +22,6 @@ struct BoundaryTypes {
  * @brief 预处理步骤：生成网格、初始化矩阵和向量
  */
 void preprocess2D();
-
-/**
- * @brief 生成二维三角形网格
- * @param domain 计算域
- * @param N1 x方向单元数
- * @param N2 y方向单元数
- * @param bc_types 边界条件类型
- */
-void generateMesh2D(const Domain& domain, int N1, int N2, const BoundaryTypes& bc_types);
 
 /**
  * @brief 组装全局刚度矩阵和载荷向量
