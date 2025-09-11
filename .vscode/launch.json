@@ -1,44 +1,44 @@
 {
-    "version": "0.2.0",
-    "configurations": [
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run and Debug FEM Solver",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/FEM_2D_solution.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "MIMode": "gdb",
+      "miDebuggerPath": "E:\\msys64\\ucrt64\\bin\\gdb.exe",
+      "preLaunchTask": "Build FEM 2D Project"
+    },
+    {
+      "name": "C/C++: g++.exe 构建和调试活动文件",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${fileDirname}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "E:\\msys64\\ucrt64\\bin\\gdb.exe",
+      "setupCommands": [
         {
-            "name": "Run and Debug FEM Solver",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/FEM_2D_solution.exe",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "MIMode": "gdb",
-            "miDebuggerPath": "E:\\msys64\\ucrt64\\bin\\gdb.exe",
-            "preLaunchTask": "Build FEM 2D Project"
+          "description": "为 gdb 启用整齐打印",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
         },
         {
-            "name": "C/C++: g++.exe 构建和调试活动文件",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${fileDirname}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "miDebuggerPath": "E:\\msys64\\ucrt64\\bin\\gdb.exe",
-            "setupCommands": [
-                {
-                    "description": "为 gdb 启用整齐打印",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                },
-                {
-                    "description": "将反汇编风格设置为 Intel",
-                    "text": "-gdb-set disassembly-flavor intel",
-                    "ignoreFailures": true
-                }
-            ],
-            "preLaunchTask": "C/C++: g++.exe 生成活动文件"
+          "description": "将反汇编风格设置为 Intel",
+          "text": "-gdb-set disassembly-flavor intel",
+          "ignoreFailures": true
         }
-    ]
+      ],
+      "preLaunchTask": "C/C++: g++.exe 生成活动文件"
+    }
+  ]
 }

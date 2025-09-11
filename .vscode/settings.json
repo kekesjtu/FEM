@@ -1,7 +1,14 @@
 {
-    "files.associations": {
-        "*.asm": "masm",
-        "*.uvprojx": "c",
-        "ostream": "cpp"
-    }
+  "files.associations": {
+    "*.asm": "masm",
+    "*.uvprojx": "c",
+    "ostream": "cpp"
+  },
+  "clang-format.executable": "E:\\msys64\\ucrt64\\bin\\clang-format.exe",
+  "[cpp]": {
+    "editor.defaultFormatter": "xaver.clang-format"
+  },
+  "[c]": {
+    "editor.defaultFormatter": "xaver.clang-format"
+  }
 }
