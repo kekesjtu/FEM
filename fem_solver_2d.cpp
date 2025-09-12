@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include "comsol_mesh_importer.h"
 #include "error_analysis_2d.h"
 #include "gauss_quadrature_2d.h"
 #include "geometry_mapping_2d.h"
@@ -29,7 +30,7 @@ double calculateLoadEntry2D(int e, int beta, int numGaussPoints);
 void preprocess2D()
 {
     // 调用defineProblem函数获取问题定义，获得N,M,生成网格，P,T,boundary_edges
-    defineProblem();
+    defineProblem_by_mesh_importer();
 
     // 设置全局变量N和M
     N = static_cast<int>(P.size()) / 2;  // 节点数 = 坐标数 / 2
@@ -82,7 +83,6 @@ void applyBoundaryConditions2D()
 {
     std::cout << "开始应用边界条件..." << std::endl;
 
-    // 使用新的BoundaryEdge结构处理边界条件
     // 支持通用边界条件形式：K * (c * du/dn) + L * u = q
 
     // 首先收集所有边界节点及其边界条件
@@ -100,15 +100,6 @@ void applyBoundaryConditions2D()
         node_bc[node1] = edge.bc;
         node_bc[node2] = edge.bc;
     }
-
-    // 统计边界节点数量
-    int boundary_node_count = 0;
-    for (int i = 0; i < N; ++i)
-    {
-        if (is_boundary_node[i])
-            boundary_node_count++;
-    }
-    std::cout << "边界节点数量: " << boundary_node_count << std::endl;
 
     // 确保矩阵已压缩
     K_global.makeCompressed();
@@ -151,40 +142,21 @@ void applyBoundaryConditions2D()
     // 批量处理狄利克雷边界条件
     for (size_t idx = 0; idx < dirichlet_nodes.size(); ++idx)
     {
-        int i = dirichlet_nodes[idx];
+        int i = dirichlet_nodes[idx];  // i存储迪利克雷节点的全局编号
         double boundary_value = dirichlet_values[idx];
 
-        if (idx % 50 == 0)
-        {
-            std::cout << "处理狄利克雷边界条件进度: " << (idx + 1) << "/" << dirichlet_nodes.size()
-                      << std::endl;
-        }
-
-        // 修正载荷向量 - 只处理非零元素
+        // 遍历第i列的非0元素
         for (Eigen::SparseMatrix<double>::InnerIterator it(K_global, i); it; ++it)
         {
-            int j = it.row();
+            int j = it.row();  // 取当前遍历到的行号
             if (j != i)
             {
+                K_global.coeffRef(j, i) = 0.0;
                 b(j) -= it.value() * boundary_value;
             }
         }
 
-        // 清零第i行的非对角元素
-        std::vector<int> row_indices_to_zero;
-        for (Eigen::SparseMatrix<double>::InnerIterator it(K_global, i); it; ++it)
-        {
-            if (it.row() != i)
-            {
-                row_indices_to_zero.push_back(it.row());
-            }
-        }
-        for (int j : row_indices_to_zero)
-        {
-            K_global.coeffRef(j, i) = 0.0;
-        }
-
-        // 清零第i列的非对角元素
+        // 遍历第i行的非0元素，outerSize()返回列数
         for (int k = 0; k < K_global.outerSize(); ++k)
         {
             if (k != i)
@@ -192,6 +164,7 @@ void applyBoundaryConditions2D()
                 K_global.coeffRef(i, k) = 0.0;
             }
         }
+        K_global.prune(0.0);  // 移除所有值为0的元素，保持矩阵稀疏性
 
         // 设置对角元素和右端项
         K_global.coeffRef(i, i) = 1.0;
@@ -278,14 +251,9 @@ void postprocess2D()
 
     // 输出详细误差结果
     cout << "\n--- 误差范数结果 ---" << endl;
-    cout << "最大误差 (L∞范数):  " << scientific << setprecision(6) << max_error << endl;
-    cout << "L2范数误差:        " << scientific << setprecision(6) << l2_error << endl;
-    cout << "H1半范数误差:      " << scientific << setprecision(6) << h1_error << endl;
-
-    cout << "\n--- 网格信息 ---" << endl;
-    cout << "节点数:           " << N << endl;
-    cout << "单元数:           " << M << endl;
-    cout << "特征网格尺寸 h:    " << scientific << setprecision(6) << sqrt(2.0 / M) << endl;
+    cout << "L∞范数（h^2）:  " << scientific << setprecision(6) << max_error << endl;
+    cout << "L2范数（h^2）:        " << scientific << setprecision(6) << l2_error << endl;
+    cout << "H1半范数（h^1）:      " << scientific << setprecision(6) << h1_error << endl;
 }
 
 // --- 内部辅助函数定义 ---

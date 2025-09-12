@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <iostream>
 #include <vector>
+#include "comsol_mesh_importer.h"
 #include "fem_solver_2d.h"
 
 /**
@@ -19,12 +20,11 @@ double coefficient_c(double x, double y)
  * @brief 定义二维泊松方程中的源项 f(x,y)
  *        对应于方程 -∇²u = f(x,y)
  *        在静电场问题中，f表示电荷密度分布
- *        这里实现一个具有解析解的电荷分布：f(x,y) = 2π²sin(πx)sin(πy)
  */
 double source_term_f(double x, double y)
 {
     const double pi = 3.14159265358979323846;
-    return 2.0 * pi * pi * sin(pi * x) * sin(pi * y);
+    return 10.0;
 }
 
 /**
@@ -34,7 +34,7 @@ double source_term_f(double x, double y)
 double exact_solution_u(double x, double y)
 {
     const double pi = 3.14159265358979323846;
-    return sin(pi * x) * sin(pi * y);
+    return 10.0 / 4 * (1 * 1 - x * x - y * y);
 }
 
 /**
@@ -43,7 +43,7 @@ double exact_solution_u(double x, double y)
 double exact_solution_du_dx(double x, double y)
 {
     const double pi = 3.14159265358979323846;
-    return pi * cos(pi * x) * sin(pi * y);
+    return -10.0 / 2 * x;
 }
 
 /**
@@ -52,7 +52,7 @@ double exact_solution_du_dx(double x, double y)
 double exact_solution_du_dy(double x, double y)
 {
     const double pi = 3.14159265358979323846;
-    return pi * sin(pi * x) * cos(pi * y);
+    return -10.0 / 2 * y;
 }
 
 // --- 网格生成函数实现 ---
@@ -169,8 +169,8 @@ void defineProblem()
     domain = {0.0, 1.0, 0.0, 1.0};  // 单位正方形
 
     // 2. 定义网格参数
-    N1 = 40;  // x方向格子数
-    N2 = 40;  // y方向格子数
+    N1 = 80;  // x方向格子数
+    N2 = 80;  // y方向格子数
 
     // 生成网格，得到boundary_edges信息
     generateMesh2D_rectangle(domain, N1, N2, boundary_edges);
@@ -179,8 +179,34 @@ void defineProblem()
     // 在boundary_edges中手动输入边界条件，boundary_edges的索引是按照逆时针方向从左下角单元的底边开始
     for (int i = 0; i < static_cast<int>(boundary_edges.size()); ++i)
     {
-        boundary_edges[i].bc = BoundaryCondition::Dirichlet(0.0);  // φ=0V
+        boundary_edges[i].bc = BoundaryCondition::Dirichlet(0.0);
     }
 }
 
-// 以后有了直接导入网格的程序之后，将不需要defineProblem函数。
+// 有了直接导入网格的程序之后，将不需要原来的defineProblem函数。
+void defineProblem_by_mesh_importer()
+{
+    // 1. 创建COMSOL网格导入器
+    ComsolMeshImporter importer;
+
+    // 2. 导入网格文件
+    std::string mesh_file = "circle_mesh2.mphtxt";
+    if (!importer.importMesh(mesh_file))
+    {
+        std::cerr << "网格导入失败！" << std::endl;
+        return;
+    }
+
+    // 3. 填充全局数组P、T、boundary_edges（边界条件为默认值）
+    importer.populateGlobalArrays();
+
+    // 4. 在defineProblem中显式设置边界条件
+    // 对于圆域问题，设置齐次Dirichlet边界条件
+    std::cout << "设置边界条件..." << std::endl;
+    for (auto &boundary_edge : boundary_edges)
+    {
+        boundary_edge.bc = BoundaryCondition::Dirichlet(0.0);
+    }
+
+    std::cout << "边界条件设置完成，共 " << boundary_edges.size() << " 条边界边" << std::endl;
+}

@@ -102,4 +102,9 @@ void generateMesh2D_rectangle(const Domain& domain, int N1, int N2,
  */
 void defineProblem();
 
+/**
+ * @brief 定义二维泊松方程问题的网格参数，调用ComsolMeshImporter导入网格，并指定边界条件
+ */
+void defineProblem_by_mesh_importer();
+
 #endif  // PROBLEM_DEFINITION_H
