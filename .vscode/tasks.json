@@ -19,6 +19,7 @@
         "${workspaceFolder}\\error_analysis_2d.cpp",
         "${workspaceFolder}\\problem_definition.cpp",
         "${workspaceFolder}\\comsol_mesh_importer.cpp",
+        "${workspaceFolder}\\vtk_output.cpp",
         "-o",
         "${workspaceFolder}\\FEM_2D_solution.exe"
       ],

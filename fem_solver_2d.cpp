@@ -10,6 +10,7 @@
 #include "geometry_mapping_2d.h"
 #include "problem_definition.h"
 #include "shape_functions_2d.h"
+#include "vtk_output.h"
 
 // --- 全局变量定义 ---
 int N, M;
@@ -254,6 +255,23 @@ void postprocess2D()
     cout << "L∞范数（h^2）:  " << scientific << setprecision(6) << max_error << endl;
     cout << "L2范数（h^2）:        " << scientific << setprecision(6) << l2_error << endl;
     cout << "H1半范数（h^1）:      " << scientific << setprecision(6) << h1_error << endl;
+
+    // 输出VTK文件用于ParaView可视化
+    cout << "\n--- VTK文件输出 ---" << endl;
+
+    // 输出数值解
+    outputVTKNumericalSolution("results/numerical_solution", u);
+
+    // 输出解析解
+    outputVTKExactSolution("results/exact_solution", exact_solution_u);
+
+    // 输出对比文件
+    outputVTKDenseSamplingError("results/comparison", u, exact_solution_u);
+
+    cout << "\n ParaView可视化指南:" << endl;
+    cout << "1. numerical_solution.vtu - 查看数值解分布" << endl;
+    cout << "2. exact_solution.vtu     - 查看解析解分布" << endl;
+    cout << "3. comparison.vtu         - 误差分析" << endl;
 }
 
 // --- 内部辅助函数定义 ---
