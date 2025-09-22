@@ -1,7 +1,9 @@
 #include "fem_solver_2d.h"
+#include <Eigen/IterativeLinearSolvers>
 #include <Eigen/Sparse>
 #include <Eigen/SparseLU>
 #include <cmath>
+#include <ctime>
 #include <iomanip>
 #include <iostream>
 #include "comsol_mesh_importer.h"
@@ -171,26 +173,79 @@ void applyBoundaryConditions2D()
         K_global.coeffRef(i, i) = 1.0;
         b(i) = boundary_value;
     }
-
-    std::cout << "边界条件应用完成！" << std::endl;
 }
 
-void solveLinearSystem2D()
+void solveLinearSystem2D(const std::string& solver_type, const std::string& preconditioner_type,
+                         double tol, int max_iter, bool verbose)
 {
-    // 使用SparseLU求解器求解稀疏线性系统
-    Eigen::SparseLU<Eigen::SparseMatrix<double>> solver;
-    solver.analyzePattern(K_global);
-    solver.factorize(K_global);
-    if (solver.info() != Eigen::Success)
+    clock_t start = clock();
+
+    int iterations = 0;
+    double error = 0.0;
+
+    if (solver_type == "SparseLU")
     {
-        std::cerr << "分解失败！" << std::endl;
-        return;
+        // 保留原有的直接求解方法
+        Eigen::SparseLU<Eigen::SparseMatrix<double>> solver;
+        solver.analyzePattern(K_global);
+        solver.factorize(K_global);
+        if (solver.info() != Eigen::Success)
+        {
+            std::cerr << "分解失败！" << std::endl;
+            return;
+        }
+        u = solver.solve(b);
+        if (solver.info() != Eigen::Success)
+        {
+            std::cerr << "求解失败！" << std::endl;
+            return;
+        }
     }
-    u = solver.solve(b);
-    if (solver.info() != Eigen::Success)
+    else if (solver_type == "CG")
     {
-        std::cerr << "求解失败！" << std::endl;
-        return;
+        // 共轭梯度法 - 使用现有的K_global, b, u
+        if (preconditioner_type == "DiagonalPreconditioner")
+        {
+            Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower | Eigen::Upper,
+                                     Eigen::DiagonalPreconditioner<double>>
+                solver;
+            solver.setMaxIterations(max_iter);
+            solver.setTolerance(tol);
+            solver.compute(K_global);  // 直接使用现有的K_global
+            u = solver.solve(b);       // 直接使用现有的b，结果存储到现有的u
+
+            iterations = solver.iterations();
+            error = solver.error();
+        }
+        else
+        {
+            Eigen::ConjugateGradient<Eigen::SparseMatrix<double>> solver;
+            solver.setMaxIterations(max_iter);
+            solver.setTolerance(tol);
+            solver.compute(K_global);
+            u = solver.solve(b);
+
+            iterations = solver.iterations();
+            error = solver.error();
+        }
+
+        if (verbose)  // 通过verbose判断是否输出迭代信息
+        {
+            std::cout << "CG求解完成：" << std::endl;
+            std::cout << "  迭代次数: " << iterations << std::endl;
+            std::cout << "  估计误差: " << error << std::endl;
+        }
+    }
+    // 可以添加其他迭代求解器...
+
+    clock_t end = clock();
+    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+
+    if (verbose)
+    {
+        std::cout << "求解耗时: " << time_spent << " 秒" << std::endl;
+        double residual_norm = (K_global * u - b).norm() / b.norm();
+        std::cout << "相对残差: " << residual_norm << std::endl;
     }
 }
 

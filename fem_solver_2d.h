@@ -36,7 +36,9 @@ void applyBoundaryConditions2D();
 /**
  * @brief 求解线性方程组 K_global * u = b
  */
-void solveLinearSystem2D();
+void solveLinearSystem2D(const std::string& solver_type = "CG",
+                         const std::string& preconditioner_type = "DiagonalPreconditioner",
+                         double tol = 1e-8, int max_iter = 1000, bool verbose = true);
 
 /**
  * @brief 后处理步骤：输出结果并计算误差

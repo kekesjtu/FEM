@@ -18,7 +18,7 @@ int main()
     applyBoundaryConditions2D();
     std::cout << "步骤 3: 二维边界条件施加完成。" << std::endl;
 
-    solveLinearSystem2D();
+    solveLinearSystem2D();//默认参数为"CG", "DiagonalPreconditioner", 1e-8, 1000, true
     std::cout << "步骤 4: 二维线性方程组求解完成。" << std::endl;
 
     postprocess2D();
