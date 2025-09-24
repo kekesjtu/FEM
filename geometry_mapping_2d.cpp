@@ -1,29 +1,6 @@
 #include "geometry_mapping_2d.h"
 #include <cmath>
 #include <stdexcept>
-#include "fem_solver_2d.h"  // 为了访问全局变量P和T
-
-
-GeometryMapping2D::GeometryMapping2D(int element_index)
-{
-    // 从全局T和P矩阵获取单元的三个顶点坐标
-    if (element_index >= static_cast<int>(T.size()) || element_index < 0)
-    {
-        throw std::invalid_argument("Invalid element index");
-    }
-
-    x_coords.resize(3);
-    y_coords.resize(3);
-
-    for (int i = 0; i < 3; ++i)
-    {
-        int node_idx = T[element_index][i];
-        x_coords[i] = P[node_idx * 2];      // x坐标
-        y_coords[i] = P[node_idx * 2 + 1];  // y坐标
-    }
-
-    computeJacobian();
-}
 
 GeometryMapping2D::GeometryMapping2D(const std::vector<double>& coords)
 {

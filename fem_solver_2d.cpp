@@ -10,9 +10,15 @@
 #include "error_analysis_2d.h"
 #include "gauss_quadrature_2d.h"
 #include "geometry_mapping_2d.h"
+#include "mesh_hierarchy.h"
 #include "problem_definition.h"
 #include "shape_functions_2d.h"
 #include "vtk_output.h"
+
+// 获取全局形函数实例
+static auto* g_shapeFunction =
+    ShapeFunctionFactory::getShapeFunction(ShapeFunctionFactory::ElementType::Triangle);
+static auto* g_triangleShapeFunction = dynamic_cast<TriangleShapeFunction*>(g_shapeFunction);
 
 // --- 全局变量定义 ---
 int N, M;
@@ -256,105 +262,96 @@ void postprocess2D()
     cout << "网格信息: " << N << " 个节点，" << M << " 个单元" << endl;
     cout << "边界边数量: " << boundary_edges.size() << endl;
 
-    // 对于大网格，只显示部分节点结果
-    int max_display_nodes = 50;  // 最多显示50个节点
-    bool show_all = (N <= max_display_nodes);
+    // 初始化全局配置
+    FEMConfig::initialize(2);
 
-    cout << "\n--- 节点结果 ---" << endl;
-    if (!show_all)
-    {
-        cout << "注意：由于节点数量过多(" << N << "个)，只显示前" << max_display_nodes
-             << "个节点的结果" << endl;
-    }
+    // 创建临时mesh对象（从全局变量转换）
+    auto mesh = std::make_shared<TriangleMesh2D>();
+    mesh->setNodes(N, P);
+    mesh->setElements(M, T);
 
-    cout << left << setw(8) << "节点ID" << left << setw(12) << "x坐标" << left << setw(12)
-         << "y坐标" << left << setw(20) << "数值解" << left << setw(20) << "精确解" << left
-         << setw(15) << "误差" << endl;
-    cout << string(90, '-') << endl;
+    // 创建重构后的误差分析器
+    auto errorAnalyzer =
+        ErrorAnalysisFactory::create2DWithFullSolution(mesh,                  // mesh对象
+                                                       exact_solution_u,      // 精确解
+                                                       exact_solution_du_dx,  // x方向导数
+                                                       exact_solution_du_dy   // y方向导数
+        );
 
-    int display_count = show_all ? N : max_display_nodes;
-    for (int i = 0; i < display_count; ++i)
-    {
-        double x = P[i * 2];
-        double y = P[i * 2 + 1];
-        double numerical_solution = u(i);
-        double exact_sol = exact_solution_u(x, y);
-        double error = numerical_solution - exact_sol;
+    // 设置计算参数
+    errorAnalyzer->setSamplingPoints(5);  // L∞误差采样点数
+    errorAnalyzer->setGaussPoints(3);     // 数值积分点数
 
-        cout << left << setw(8) << i << left << setw(12) << fixed << setprecision(4) << x << left
-             << setw(12) << fixed << setprecision(4) << y << left << setw(15) << scientific
-             << setprecision(6) << numerical_solution << left << setw(15) << scientific
-             << setprecision(6) << exact_sol << left << setw(15) << scientific << setprecision(6)
-             << error << endl;
-    }
+    // 批量计算所有范数误差
+    errorAnalyzer->computeAllNormErrors(u);
 
-    if (!show_all)
-    {
-        cout << "... (省略剩余 " << (N - max_display_nodes) << " 个节点)" << endl;
-    }
+    // 输出详细的误差分析摘要
+    errorAnalyzer->printErrorSummary();
 
-    cout << "\n=== 详细误差分析 ===" << endl;
-    cout << "计算不同误差范数..." << endl;
-
-    // 计算最大误差 (无穷范数) - 使用更精确的单元内采样
-    double max_error = computeMaxError(u, exact_solution_u);
-
-    // 计算L2范数误差
-    double l2_error = computeL2Error(u, exact_solution_u);
-
-    // 计算H1半范数误差
-    double h1_error = computeH1Error(u, exact_solution_du_dx, exact_solution_du_dy);
-
-    // 输出详细误差结果
-    cout << "\n--- 误差范数结果 ---" << endl;
-    cout << "L∞范数（h^2）:  " << scientific << setprecision(6) << max_error << endl;
-    cout << "L2范数（h^2）:        " << scientific << setprecision(6) << l2_error << endl;
-    cout << "H1半范数（h^1）:      " << scientific << setprecision(6) << h1_error << endl;
+    // 输出节点误差详情（前10个节点）
+    errorAnalyzer->printDetailedNodeErrors(u, 10);
 
     // 输出VTK文件用于ParaView可视化
-    cout << "\n--- VTK文件输出 ---" << endl;
+    cout << "\n--- 二维VTK文件输出 ---" << endl;
 
-    // 输出数值解
-    outputVTKNumericalSolution("results/numerical_solution", u);
+    // 创建VTKOutput2D对象，注入mesh2D对象
+    auto vtkOutput2D = std::make_shared<VTKOutput2D>(mesh);
 
-    // 输出解析解
-    outputVTKExactSolution("results/exact_solution", exact_solution_u);
+    // 输出二维数值解
+    vtkOutput2D->outputNumericalSolution("results/numerical_solution", u);
 
-    // 输出对比文件
-    outputVTKDenseSamplingError("results/comparison", u, exact_solution_u);
+    // 输出二维解析解
+    vtkOutput2D->outputExactSolution("results/exact_solution", exact_solution_u);
+
+    // 输出二维对比文件
+    vtkOutput2D->outputDenseSamplingError("results/comparison", u, exact_solution_u);
 
     cout << "\n ParaView可视化指南:" << endl;
     cout << "1. numerical_solution.vtu - 查看数值解分布" << endl;
     cout << "2. exact_solution.vtu     - 查看解析解分布" << endl;
-    cout << "3. comparison.vtu         - 误差分析" << endl;
+    cout << "3. comparison_dense.vtu   - 误差分析" << endl;
 }
 
 // --- 内部辅助函数定义 ---
 
 double calculateStiffnessEntry2D(int e, int alpha, int beta, int numGaussPoints)
 {
-    // 创建几何映射对象
-    GeometryMapping2D mapping(e);
+    // 获取单元节点坐标（使用全局变量作为临时方案）
+    std::vector<double> element_coords(6);
+    for (int i = 0; i < 3; ++i)
+    {
+        int node_idx = T[e][i];
+        element_coords[i * 2] = P[node_idx * 2];          // x坐标
+        element_coords[i * 2 + 1] = P[node_idx * 2 + 1];  // y坐标
+    }
 
-    std::vector<double> gaussPoints, gaussWeights;
-    getGaussPointsTriangle(numGaussPoints, gaussPoints, gaussWeights);
+    // 创建几何映射对象
+    GeometryMapping2D mapping(element_coords);
+
+    // 使用新的高斯点类
+    auto gaussPoint = GaussPointFactory::createGaussPoint2D(
+        GaussPointFactory::ElementType::Triangle, numGaussPoints);
 
     double entryValue = 0.0;
-    for (int gp = 0; gp < numGaussPoints; ++gp)
+    for (int gp = 0; gp < gaussPoint->getNumPoints(); ++gp)
     {
-        double x_ref_gp = gaussPoints[gp * 2];
-        double y_ref_gp = gaussPoints[gp * 2 + 1];
-        double weight = gaussWeights[gp];
+        double x_ref_gp, y_ref_gp;
+        gaussPoint->getPoint(gp, x_ref_gp, y_ref_gp);
+        double weight = gaussPoint->getWeight(gp);
 
         // 获取物理坐标
         double x_gp, y_gp;
         mapping.mapToPhysical(x_ref_gp, y_ref_gp, x_gp, y_gp);
 
         // 计算形函数在参考坐标系下的导数
-        double dN_dx_ref_trial = shapeFunctionDerivativeXRef_trial(alpha, x_ref_gp, y_ref_gp);
-        double dN_dy_ref_trial = shapeFunctionDerivativeYRef_trial(alpha, x_ref_gp, y_ref_gp);
-        double dN_dx_ref_test = shapeFunctionDerivativeXRef_test(beta, x_ref_gp, y_ref_gp);
-        double dN_dy_ref_test = shapeFunctionDerivativeYRef_test(beta, x_ref_gp, y_ref_gp);
+        double dN_dx_ref_trial =
+            g_triangleShapeFunction->computeTrialDerivativeXi(alpha, x_ref_gp, y_ref_gp);
+        double dN_dy_ref_trial =
+            g_triangleShapeFunction->computeTrialDerivativeEta(alpha, x_ref_gp, y_ref_gp);
+        double dN_dx_ref_test =
+            g_triangleShapeFunction->computeTestDerivativeXi(beta, x_ref_gp, y_ref_gp);
+        double dN_dy_ref_test =
+            g_triangleShapeFunction->computeTestDerivativeEta(beta, x_ref_gp, y_ref_gp);
 
         // 转换为物理坐标系下的导数
         double dN_dx_trial, dN_dy_trial, dN_dx_test, dN_dy_test;
@@ -371,25 +368,36 @@ double calculateStiffnessEntry2D(int e, int alpha, int beta, int numGaussPoints)
 
 double calculateLoadEntry2D(int e, int beta, int numGaussPoints)
 {
-    // 创建几何映射对象
-    GeometryMapping2D mapping(e);
+    // 获取单元节点坐标（使用全局变量作为临时方案）
+    std::vector<double> element_coords(6);
+    for (int i = 0; i < 3; ++i)
+    {
+        int node_idx = T[e][i];
+        element_coords[i * 2] = P[node_idx * 2];          // x坐标
+        element_coords[i * 2 + 1] = P[node_idx * 2 + 1];  // y坐标
+    }
 
-    std::vector<double> gaussPoints, gaussWeights;
-    getGaussPointsTriangle(numGaussPoints, gaussPoints, gaussWeights);
+    // 创建几何映射对象
+    GeometryMapping2D mapping(element_coords);
+
+    // 使用新的高斯点类
+    auto gaussPoint = GaussPointFactory::createGaussPoint2D(
+        GaussPointFactory::ElementType::Triangle, numGaussPoints);
 
     double entryValue = 0.0;
-    for (int gp = 0; gp < numGaussPoints; ++gp)
+    for (int gp = 0; gp < gaussPoint->getNumPoints(); ++gp)
     {
-        double x_ref_gp = gaussPoints[gp * 2];
-        double y_ref_gp = gaussPoints[gp * 2 + 1];
-        double weight = gaussWeights[gp];
+        double x_ref_gp, y_ref_gp;
+        gaussPoint->getPoint(gp, x_ref_gp, y_ref_gp);
+        double weight = gaussPoint->getWeight(gp);
 
         // 获取物理坐标
         double x_gp, y_gp;
         mapping.mapToPhysical(x_ref_gp, y_ref_gp, x_gp, y_gp);
 
         // 计算形函数值
-        double N_test_beta = shapeFunction2D_test(beta, x_ref_gp, y_ref_gp);
+        double N_test_beta =
+            g_triangleShapeFunction->computeTestFunction(beta, {x_ref_gp, y_ref_gp});
 
         // 计算电荷密度（源项）
         const double f_xy = source_term_f(x_gp, y_gp);

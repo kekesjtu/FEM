@@ -19,12 +19,6 @@ class GeometryMapping2D
 
   public:
     /**
-     * @brief 构造函数 - 通过单元索引创建几何映射
-     * @param element_index 单元索引
-     */
-    GeometryMapping2D(int element_index);
-
-    /**
      * @brief 构造函数 - 通过节点坐标创建几何映射
      * @param coords 单元三个顶点的坐标 [x0, y0, x1, y1, x2, y2]
      */

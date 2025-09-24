@@ -8,7 +8,7 @@
       "args": [
         "-fdiagnostics-color=always",
         "-g",
-        "-std=c++11",
+        "-std=c++17",
         "-I",
         "${workspaceFolder}",
         "${workspaceFolder}\\main_2d.cpp",
@@ -20,6 +20,7 @@
         "${workspaceFolder}\\problem_definition.cpp",
         "${workspaceFolder}\\comsol_mesh_importer.cpp",
         "${workspaceFolder}\\vtk_output.cpp",
+        "${workspaceFolder}\\mesh_hierarchy.cpp",
         "-o",
         "${workspaceFolder}\\FEM_2D_solution.exe"
       ],
@@ -55,6 +56,7 @@
       "args": [
         "-fdiagnostics-color=always",
         "-g",
+        "-std=c++17",
         "${file}",
         "-o",
         "${fileDirname}\\${fileBasenameNoExtension}.exe"

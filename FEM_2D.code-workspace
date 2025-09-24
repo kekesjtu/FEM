@@ -70,7 +70,9 @@
       "thread": "cpp",
       "typeinfo": "cpp",
       "variant": "cpp",
-      "fstream": "cpp"
+      "fstream": "cpp",
+      "chrono": "cpp",
+      "stack": "cpp"
     }
   }
 }
