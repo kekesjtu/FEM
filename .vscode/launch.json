@@ -5,7 +5,7 @@
       "name": "Run and Debug FEM Solver",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/FEM_2D_solution.exe",
+      "program": "${workspaceFolder}/build/FEM_2D_solution.exe",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
