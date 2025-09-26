@@ -11,7 +11,7 @@
  *        对应于方程 -∇·(c(x,y)∇u) = f(x,y)
  *        在静电场问题中，c表示介电常数，这里取为常数1
  */
-double coefficient_c(double x, double y)
+double coefficient_c(std::vector<double> coords)
 {
     return 1.0;  // 真空中的相对介电常数
 }
@@ -21,7 +21,7 @@ double coefficient_c(double x, double y)
  *        对应于方程 -∇²u = f(x,y)
  *        在静电场问题中，f表示电荷密度分布
  */
-double source_term_f(double x, double y)
+double source_term_f(std::vector<double> coords)
 {
     const double pi = 3.14159265358979323846;
     return 10.0;
@@ -31,28 +31,21 @@ double source_term_f(double x, double y)
  * @brief 定义二维泊松方程问题的精确解 u(x,y) (用于后处理中计算误差)
  *        在静电场问题中，u表示静电势φ(x,y)
  */
-double exact_solution_u(double x, double y)
+double exact_solution_u(std::vector<double> coords)
 {
     const double pi = 3.14159265358979323846;
-    return 10.0 / 4 * (1 * 1 - x * x - y * y);
+    return 10.0 / 4 * (1 * 1 - coords[0] * coords[0] - coords[1] * coords[1]);
 }
 
 /**
  * @brief 定义二维泊松方程问题的精确解导数 du/dx (用于后处理中计算H1误差)
  */
-double exact_solution_du_dx(double x, double y)
+double exact_solution_gradients(std::vector<double> coords, std::vector<double> &gradients)
 {
     const double pi = 3.14159265358979323846;
-    return -10.0 / 2 * x;
-}
-
-/**
- * @brief 定义二维泊松方程问题的精确解导数 du/dy (用于后处理中计算H1误差)
- */
-double exact_solution_du_dy(double x, double y)
-{
-    const double pi = 3.14159265358979323846;
-    return -10.0 / 2 * y;
+    gradients[0] = -10.0 / 2 * coords[0];  // du/dx
+    gradients[1] = -10.0 / 2 * coords[1];  // du/dy
+    return 0.0;                            // 返回值未使用
 }
 
 // --- 网格生成函数实现 ---

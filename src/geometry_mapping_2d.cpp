@@ -1,108 +1,153 @@
+#include <cmath>  // For std::abs
 #include "geometry_mapping_2d.h"
-#include <cmath>
-#include <stdexcept>
 
-GeometryMapping2D::GeometryMapping2D(const std::vector<double>& coords)
+
+// =========================================================================
+// ==              TriangleLinearMapping Implementation                   ==
+// =========================================================================
+
+/**
+ * @brief 构造函数 - 创建2D线性三角形映射
+ * @param coords 三个顶点的坐标 [x0, y0, x1, y1, x2, y2]
+ */
+TriangleLinearMapping::TriangleLinearMapping(const std::vector<double>& coords)
+    : GeometryMapping2D(coords, 3)  // 调用基类构造函数，指定3个节点
 {
-    if (coords.size() != 6)
-    {
-        throw std::invalid_argument("coords must have 6 elements: [x0, y0, x1, y1, x2, y2]");
-    }
-
-    x_coords.resize(3);
-    y_coords.resize(3);
-
-    for (int i = 0; i < 3; ++i)
-    {
-        x_coords[i] = coords[i * 2];
-        y_coords[i] = coords[i * 2 + 1];
-    }
-
-    computeJacobian();
+    // 基类构造函数已经检查了 coords.size() 是否为 3 * 2 = 6
+    computeConstantJacobian();
 }
 
-void GeometryMapping2D::computeJacobian()
+/**
+ * @brief 计算该单元的常数雅可比矩阵、其行列式和逆矩阵
+ * 对于线性三角形，这些量在整个单元内都是不变的。
+ */
+void TriangleLinearMapping::computeConstantJacobian()
 {
-    // 雅可比矩阵 J = [dx/dx_ref   dx/dy_ref]
-    //               [dy/dx_ref   dy/dy_ref]
-    //
-    // 对于线性三角形单元：
-    // x(x_ref, y_ref) = x0*(1-x_ref-y_ref) + x1*x_ref + x2*y_ref
-    // y(x_ref, y_ref) = y0*(1-x_ref-y_ref) + y1*x_ref + y2*y_ref
-    //
-    // 所以：
-    // dx/dx_ref  = x1 - x0
-    // dx/dy_ref = x2 - x0
-    // dy/dx_ref  = y1 - y0
-    // dy/dy_ref = y2 - y0
+    // 从基类的 element_coords 中提取节点坐标以便于计算
+    // [x0, y0, x1, y1, x2, y2]
+    const double x0 = element_coords[0], y0 = element_coords[1];
+    const double x1 = element_coords[2], y1 = element_coords[3];
+    const double x2 = element_coords[4], y2 = element_coords[5];
 
-    double dx_dx_ref = x_coords[1] - x_coords[0];
-    double dx_dy_ref = x_coords[2] - x_coords[0];
-    double dy_dx_ref = y_coords[1] - y_coords[0];
-    double dy_dy_ref = y_coords[2] - y_coords[0];
+    // 雅可比矩阵 J = [[dx/dxi,  dx/deta],
+    //                [dy/dxi,  dy/deta]]
+    //
+    // 对于线性三角形，形函数为:
+    // N0 = 1 - xi - eta
+    // N1 = xi
+    // N2 = eta
+    //
+    // 坐标映射为:
+    // x(xi, eta) = N0*x0 + N1*x1 + N2*x2
+    // y(xi, eta) = N0*y0 + N1*y1 + N2*y2
+    //
+    // 求导可得:
+    // dx/dxi  = x1 - x0
+    // dx/deta = x2 - x0
+    // dy/dxi  = y1 - y0
+    // dy/deta = y2 - y0
+    const double dx_dxi = x1 - x0;
+    const double dx_deta = x2 - x0;
+    const double dy_dxi = y1 - y0;
+    const double dy_deta = y2 - y0;
 
     // 计算雅可比行列式
-    jacobian_det = dx_dx_ref * dy_dy_ref - dx_dy_ref * dy_dx_ref;
+    jacobian_det = dx_dxi * dy_deta - dx_deta * dy_dxi;
 
     if (std::abs(jacobian_det) < 1e-15)
     {
-        throw std::runtime_error("Degenerate element: jacobian determinant is zero");
+        throw std::runtime_error("Degenerate triangle element: jacobian determinant is zero.");
     }
 
-    // 计算逆雅可比矩阵
+    // 计算逆雅可比矩阵 J^-1 = [[dxi/dx,  dxi/dy],
+    //                          [deta/dx, deta/dy]]
+    const double inv_det = 1.0 / jacobian_det;
     jacobian_inv.resize(2, std::vector<double>(2));
-    jacobian_inv[0][0] = dy_dy_ref / jacobian_det;   // dx_ref/dx
-    jacobian_inv[0][1] = -dx_dy_ref / jacobian_det;  // dx_ref/dy
-    jacobian_inv[1][0] = -dy_dx_ref / jacobian_det;  // dy_ref/dx
-    jacobian_inv[1][1] = dx_dx_ref / jacobian_det;   // dy_ref/dy
+    jacobian_inv[0][0] = dy_deta * inv_det;   // dxi/dx
+    jacobian_inv[0][1] = -dx_deta * inv_det;  // dxi/dy
+    jacobian_inv[1][0] = -dy_dxi * inv_det;   // deta/dx
+    jacobian_inv[1][1] = dx_dxi * inv_det;    // deta/dy
 }
 
-void GeometryMapping2D::mapToPhysical(double x_ref, double y_ref, double& x, double& y) const
+void TriangleLinearMapping::mapToPhysical(const std::vector<double>& coord_ref,
+                                          std::vector<double>& coord_phys) const
 {
-    // 线性插值
-    x = x_coords[0] * (1.0 - x_ref - y_ref) + x_coords[1] * x_ref + x_coords[2] * y_ref;
-    y = y_coords[0] * (1.0 - x_ref - y_ref) + y_coords[1] * x_ref + y_coords[2] * y_ref;
+    if (coord_ref.size() != 2)
+    {
+        throw std::invalid_argument("Reference coordinate must have 2 components (xi, eta).");
+    }
+    coord_phys.resize(2);
+
+    const double xi = coord_ref[0];
+    const double eta = coord_ref[1];
+
+    // 使用形函数进行线性插值
+    const double N0 = 1.0 - xi - eta;
+    const double N1 = xi;
+    const double N2 = eta;
+
+    // x = N0*x0 + N1*x1 + N2*x2
+    coord_phys[0] = N0 * element_coords[0] + N1 * element_coords[2] + N2 * element_coords[4];
+    // y = N0*y0 + N1*y1 + N2*y2
+    coord_phys[1] = N0 * element_coords[1] + N1 * element_coords[3] + N2 * element_coords[5];
 }
 
-void GeometryMapping2D::mapToReference(double x, double y, double& x_ref, double& y_ref) const
+double TriangleLinearMapping::getJacobianDet(const std::vector<double>& coord_ref) const
 {
-    // 求解线性方程组：
-    // x = x0 + (x1-x0)*x_ref + (x2-x0)*y_ref
-    // y = y0 + (y1-y0)*x_ref + (y2-y0)*y_ref
-    //
-    // 重写为：
-    // x - x0 = (x1-x0)*x_ref + (x2-x0)*y_ref
-    // y - y0 = (y1-y0)*x_ref + (y2-y0)*y_ref
-
-    double dx = x - x_coords[0];
-    double dy = y - y_coords[0];
-
-    // 使用逆雅可比矩阵
-    double dx_dx_ref = x_coords[1] - x_coords[0];
-    double dx_dy_ref = x_coords[2] - x_coords[0];
-    double dy_dx_ref = y_coords[1] - y_coords[0];
-    double dy_dy_ref = y_coords[2] - y_coords[0];
-
-    x_ref = (dy_dy_ref * dx - dx_dy_ref * dy) / jacobian_det;
-    y_ref = (-dy_dx_ref * dx + dx_dx_ref * dy) / jacobian_det;
-}
-
-double GeometryMapping2D::getJacobianDet() const
-{
+    // 对于线性三角形，雅可比行列式是常数，因此忽略输入参数 coord_ref
+    (void)coord_ref;  // 避免 "unused parameter" 警告
     return jacobian_det;
 }
 
-void GeometryMapping2D::transformGradient(double dN_dx_ref, double dN_dy_ref, double& dN_dx,
-                                          double& dN_dy) const
+void TriangleLinearMapping::transformGradient(const std::vector<double>& gradient_ref,
+                                              std::vector<double>& gradient_phys,
+                                              const std::vector<double>& coord_ref) const
 {
-    // [dN/dx] = [dx_ref/dx   dy_ref/dx ] [dN/dx_ref ]
-    // [dN/dy]   [dx_ref/dy   dy_ref/dy ] [dN/dy_ref]
+    // 对于线性三角形，逆雅可比矩阵是常数，因此忽略输入参数 coord_ref
+    (void)coord_ref;  // 避免 "unused parameter" 警告
 
-    dN_dx = jacobian_inv[0][0] * dN_dx_ref + jacobian_inv[1][0] * dN_dy_ref;
-    dN_dy = jacobian_inv[0][1] * dN_dx_ref + jacobian_inv[1][1] * dN_dy_ref;
+    if (gradient_ref.size() != 2)
+    {
+        throw std::invalid_argument("Reference gradient must have 2 components (dN/dxi, dN/deta).");
+    }
+    gradient_phys.resize(2);
+
+    const double dN_dxi = gradient_ref[0];
+    const double dN_deta = gradient_ref[1];
+
+    // [dN/dx] = [dxi/dx  deta/dx] [dN/dxi ]
+    // [dN/dy]   [dxi/dy  deta/dy] [dN/deta]
+    // 注意：这里用的是 J_inv 的转置 (J_inv^T)
+    // dN/dx = (dxi/dx) * dN/dxi + (deta/dx) * dN/deta
+    gradient_phys[0] = jacobian_inv[0][0] * dN_dxi + jacobian_inv[1][0] * dN_deta;
+    // dN/dy = (dxi/dy) * dN/dxi + (deta/dy) * dN/deta
+    gradient_phys[1] = jacobian_inv[0][1] * dN_dxi + jacobian_inv[1][1] * dN_deta;
 }
 
-double GeometryMapping2D::getElementArea() const
+double TriangleLinearMapping::getElementArea() const
 {
+    // 三角形面积 = 0.5 * |det(J)|
     return 0.5 * std::abs(jacobian_det);
+}
+
+std::unique_ptr<GeometryMapping> GeometryMappingFactory::createMapping(ElementType elementType, int order,
+                                                      const std::vector<double>& element_coords)
+{
+    switch (elementType)
+    {
+        case ElementType::Triangle:
+            switch (order)
+            {
+                case 1:
+                    return std::make_unique<TriangleLinearMapping>(element_coords);
+                default:
+                    throw std::invalid_argument("Unsupported order for Triangle");
+            }
+
+        case ElementType::Quadrilateral:
+            throw std::invalid_argument(
+                "Requested ElementType is not implemented in GeometryMappingFactory");
+        default:
+            throw std::invalid_argument("Unknown ElementType");
+    }
 }

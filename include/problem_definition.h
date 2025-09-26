@@ -54,7 +54,7 @@ struct BoundaryEdge
  * @param x x坐标（在一维兼容接口中使用）
  * @return double 系数c的值
  */
-double coefficient_c(double x, double y);
+double coefficient_c(std::vector<double> coords);
 
 /**
  * @brief 定义二维泊松方程中的源项 f(x,y)
@@ -63,7 +63,7 @@ double coefficient_c(double x, double y);
  * @param x x坐标（在一维兼容接口中使用）
  * @return double 源项f的值
  */
-double source_term_f(double x, double y);
+double source_term_f(std::vector<double> coords);
 
 /**
  * @brief 定义二维泊松方程问题的精确解 u(x,y) (用于后处理中计算误差)
@@ -71,21 +71,15 @@ double source_term_f(double x, double y);
  * @param x x坐标（在一维兼容接口中使用）
  * @return double 精确解u的值
  */
-double exact_solution_u(double x, double y);
+double exact_solution_u(std::vector<double> coords);
 
 /**
  * @brief 定义二维泊松方程问题的精确解导数 du/dx (用于后处理中计算H1误差)
  * @param x x坐标（在一维兼容接口中使用）
  * @return double 精确解导数du/dx的值
  */
-double exact_solution_du_dx(double x, double y);
+double exact_solution_gradients(std::vector<double> coords, std::vector<double> &gradients);
 
-/**
- * @brief 定义二维泊松方程问题的精确解导数 du/dy (用于后处理中计算H1误差)
- * @param x x坐标（在一维兼容接口中使用）
- * @return double 精确解导数du/dy的值
- */
-double exact_solution_du_dy(double x, double y);
 
 /**
  * @brief 生成二维三角形网格

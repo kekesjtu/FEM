@@ -15,11 +15,6 @@
 #include "shape_functions_2d.h"
 #include "vtk_output.h"
 
-// 获取全局形函数实例
-static auto* g_shapeFunction =
-    ShapeFunctionFactory::getShapeFunction(ShapeFunctionFactory::ElementType::Triangle);
-static auto* g_triangleShapeFunction = dynamic_cast<TriangleShapeFunction*>(g_shapeFunction);
-
 // --- 全局变量定义 ---
 int N, M;
 const int n = 3;  // 一阶三角形单元有3个节点
@@ -29,6 +24,11 @@ Eigen::VectorXd u;
 std::vector<std::vector<int>> T;
 std::vector<double> P;
 std::vector<BoundaryEdge> boundary_edges;
+
+// 全局mesh、形函数建立
+auto mesh = std::make_shared<Mesh>(P, T);
+auto shapeFunction =
+    ShapeFunctionFactory::createShapeFunction(ShapeFunctionFactory::ElementType::Triangle, 1);
 
 // --- 内部辅助函数声明 ---
 double calculateStiffnessEntry2D(int e, int alpha, int beta, int numGaussPoints);
@@ -326,42 +326,38 @@ double calculateStiffnessEntry2D(int e, int alpha, int beta, int numGaussPoints)
     }
 
     // 创建几何映射对象
-    GeometryMapping2D mapping(element_coords);
+    auto mapping = std::make_unique<GeometryMapping2D>(element_coords);
 
     // 使用新的高斯点类
-    auto gaussPoint = GaussPointFactory::createGaussPoint2D(
-        GaussPointFactory::ElementType::Triangle, numGaussPoints);
+    auto gaussPoint = GaussPointFactory::createGaussPoint(GaussPointFactory::ElementType::Triangle,
+                                                          numGaussPoints);
+
+    // 获取积分点坐标和权重向量
+    const auto& points = gaussPoint->getPoints();
+    const auto& weights = gaussPoint->getWeights();
 
     double entryValue = 0.0;
-    for (int gp = 0; gp < gaussPoint->getNumPoints(); ++gp)
+    for (int gpIndex = 0; gpIndex < gaussPoint->getNumPoints(); ++gpIndex)
     {
-        double x_ref_gp, y_ref_gp;
-        gaussPoint->getPoint(gp, x_ref_gp, y_ref_gp);
-        double weight = gaussPoint->getWeight(gp);
+        std::vector<double> pointsRef = {points[gpIndex * 2], points[gpIndex * 2 + 1]};
 
-        // 获取物理坐标
-        double x_gp, y_gp;
-        mapping.mapToPhysical(x_ref_gp, y_ref_gp, x_gp, y_gp);
-
-        // 计算形函数在参考坐标系下的导数
-        double dN_dx_ref_trial =
-            g_triangleShapeFunction->computeTrialDerivativeXi(alpha, x_ref_gp, y_ref_gp);
-        double dN_dy_ref_trial =
-            g_triangleShapeFunction->computeTrialDerivativeEta(alpha, x_ref_gp, y_ref_gp);
-        double dN_dx_ref_test =
-            g_triangleShapeFunction->computeTestDerivativeXi(beta, x_ref_gp, y_ref_gp);
-        double dN_dy_ref_test =
-            g_triangleShapeFunction->computeTestDerivativeEta(beta, x_ref_gp, y_ref_gp);
+        // 计算形函数在参考坐标系下的梯度
+        std::vector<double> trialGradientsRef;
+        std::vector<double> testGradientsRef;
+        trialGradientsRef = shapeFunction->computeTrialGradients(alpha, pointsRef);
+        testGradientsRef = shapeFunction->computeTestGradients(beta, pointsRef);
 
         // 转换为物理坐标系下的导数
-        double dN_dx_trial, dN_dy_trial, dN_dx_test, dN_dy_test;
-        mapping.transformGradient(dN_dx_ref_trial, dN_dy_ref_trial, dN_dx_trial, dN_dy_trial);
-        mapping.transformGradient(dN_dx_ref_test, dN_dy_ref_test, dN_dx_test, dN_dy_test);
+        std::vector<double> trialGradientsPhys;
+        std::vector<double> testGradientsPhys;
+        mapping->transformGradient(trialGradientsRef, trialGradientsPhys, pointsRef);
+        mapping->transformGradient(testGradientsRef, testGradientsPhys, pointsRef);
 
         // 计算积分被积函数（假设扩散系数为1）
-        double integrand = (dN_dx_test * dN_dx_trial + dN_dy_test * dN_dy_trial);
+        double integrand = (trialGradientsPhys[0] * testGradientsPhys[0] +
+                            trialGradientsPhys[1] * testGradientsPhys[1]);
 
-        entryValue += integrand * mapping.getJacobianDet() * weight;
+        entryValue += integrand * mapping->getJacobianDet(pointsRef) * weights[gpIndex];
     }
     return entryValue;
 }
@@ -378,31 +374,32 @@ double calculateLoadEntry2D(int e, int beta, int numGaussPoints)
     }
 
     // 创建几何映射对象
-    GeometryMapping2D mapping(element_coords);
+    auto mapping = std::make_unique<GeometryMapping2D>(element_coords);
 
     // 使用新的高斯点类
-    auto gaussPoint = GaussPointFactory::createGaussPoint2D(
-        GaussPointFactory::ElementType::Triangle, numGaussPoints);
+    auto gaussPoint = GaussPointFactory::createGaussPoint(GaussPointFactory::ElementType::Triangle,
+                                                          numGaussPoints);
+
+    // 获取积分点坐标和权重向量
+    const auto& points = gaussPoint->getPoints();
+    const auto& weights = gaussPoint->getWeights();
 
     double entryValue = 0.0;
-    for (int gp = 0; gp < gaussPoint->getNumPoints(); ++gp)
+    for (int gpIndex = 0; gpIndex < gaussPoint->getNumPoints(); ++gpIndex)
     {
-        double x_ref_gp, y_ref_gp;
-        gaussPoint->getPoint(gp, x_ref_gp, y_ref_gp);
-        double weight = gaussPoint->getWeight(gp);
+        std::vector<double> pointsRef = {points[gpIndex * 2], points[gpIndex * 2 + 1]};
 
         // 获取物理坐标
-        double x_gp, y_gp;
-        mapping.mapToPhysical(x_ref_gp, y_ref_gp, x_gp, y_gp);
+        std::vector<double> pointsPhys;
+        mapping->mapToPhysical(pointsRef, pointsPhys);
 
         // 计算形函数值
-        double N_test_beta =
-            g_triangleShapeFunction->computeTestFunction(beta, {x_ref_gp, y_ref_gp});
+        double N_test_beta = shapeFunction->computeTestFunction(beta, pointsRef);
 
         // 计算电荷密度（源项）
-        const double f_xy = source_term_f(x_gp, y_gp);
+        const double f_xy = source_term_f(pointsPhys[0], pointsPhys[1]);
         double integrand = f_xy * N_test_beta;
-        entryValue += integrand * mapping.getJacobianDet() * weight;
+        entryValue += integrand * mapping->getJacobianDet(pointsRef) * weights[gpIndex];
     }
     return entryValue;
 }

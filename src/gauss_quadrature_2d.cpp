@@ -2,35 +2,9 @@
 #include <stdexcept>
 
 // ============================================================================
-// GaussPoint 基类实现
-// ============================================================================
-
-double GaussPoint::getWeight(int index) const
-{
-    if (index < 0 || index >= numPoints_)
-    {
-        throw std::out_of_range("Index out of range for Gauss quadrature");
-    }
-    return weights_[index];
-}
-
-// ============================================================================
-// TriangleGaussPoint 实现
-// ============================================================================
-
-void TriangleGaussPoint::getPoint(int index, double& x_ref, double& y_ref) const
-{
-    if (index < 0 || index >= numPoints_)
-    {
-        throw std::out_of_range("Index out of range for triangle Gauss quadrature");
-    }
-    x_ref = points_[index * 2];
-    y_ref = points_[index * 2 + 1];
-}
-
-// ============================================================================
 // 具体三角形高斯点类实现
 // ============================================================================
+
 
 // TriangleGauss1Point 实现
 TriangleGauss1Point::TriangleGauss1Point() : TriangleGaussPoint(1)
@@ -121,64 +95,32 @@ void TriangleGauss4Point::initializeGaussPoints()
 // GaussPointFactory 实现
 // ============================================================================
 
-namespace
-{
-/**
- * @brief 创建三角形高斯积分对象的辅助函数
- * @tparam T 返回的智能指针类型
- * @param numPoints 积分点数量
- * @return 三角形高斯积分对象的智能指针
- */
-template <typename T>
-std::unique_ptr<T> createTriangleGaussPointHelper(int numPoints)
-{
-    switch (numPoints)
-    {
-        case 1:
-            return std::unique_ptr<T>(new TriangleGauss1Point());
-        case 3:
-            return std::unique_ptr<T>(new TriangleGauss3Point());
-        case 4:
-            return std::unique_ptr<T>(new TriangleGauss4Point());
-        default:
-            throw std::invalid_argument("Unsupported number of Gauss points for triangle");
-    }
-}
-}  // namespace
-
 std::unique_ptr<GaussPoint> GaussPointFactory::createGaussPoint(ElementType elementType,
                                                                 int numPoints)
 {
     switch (elementType)
     {
         case ElementType::Triangle:
-            return createTriangleGaussPointHelper<GaussPoint>(numPoints);
+            switch (numPoints)
+            {
+                case 1:
+                    return std::make_unique<TriangleGauss1Point>();
+                case 3:
+                    return std::make_unique<TriangleGauss3Point>();
+                case 4:
+                    return std::make_unique<TriangleGauss4Point>();
+                default:
+                    throw std::invalid_argument("Unsupported number of Gauss points for Triangle");
+            }
+
         case ElementType::Quadrilateral:
-            throw std::invalid_argument("Quadrilateral elements not implemented yet");
         case ElementType::Tetrahedron:
-            throw std::invalid_argument("Tetrahedron elements not implemented yet");
         case ElementType::Hexahedron:
-            throw std::invalid_argument("Hexahedron elements not implemented yet");
-        default:
-            throw std::invalid_argument("Unknown element type");
-    }
-}
+            // 目前未实现其他单元类型的高斯点
+            throw std::invalid_argument(
+                "Requested ElementType is not implemented in GaussPointFactory");
 
-std::unique_ptr<GaussPoint2D> GaussPointFactory::createGaussPoint2D(ElementType elementType,
-                                                                    int numPoints)
-{
-    switch (elementType)
-    {
-        case ElementType::Triangle:
-            return createTriangleGaussPointHelper<GaussPoint2D>(numPoints);
-        case ElementType::Quadrilateral:
-            throw std::invalid_argument("Quadrilateral elements not implemented yet");
         default:
-            throw std::invalid_argument("Unsupported 2D element type");
+            throw std::invalid_argument("Unknown ElementType");
     }
-}
-
-std::unique_ptr<TriangleGaussPoint> GaussPointFactory::createTriangleGaussPoint(int numPoints)
-{
-    return createTriangleGaussPointHelper<TriangleGaussPoint>(numPoints);
 }

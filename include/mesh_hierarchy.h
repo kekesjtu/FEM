@@ -160,20 +160,20 @@ class TriangleMesh2D : public Mesh2D
 };
 
 /**
- * @brief 网格类型枚举
- */
-enum class MeshType
-{
-    TRIANGLE_2D,
-    QUADRILATERAL_2D,
-    // 可以扩展其他类型...
-};
-
-/**
  * @brief 网格工厂类
  */
 class MeshFactory
 {
+    /**
+     * @brief 网格类型枚举
+     */
+    enum class MeshType
+    {
+        TRIANGLE_2D,
+        QUADRILATERAL_2D,
+        // 可以扩展其他类型...
+    };
+
   public:
     /**
      * @brief 创建指定类型的网格

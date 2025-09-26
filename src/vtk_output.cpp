@@ -8,11 +8,6 @@
 #include "geometry_mapping_2d.h"  // 用于几何映射
 #include "shape_functions_2d.h"   // 用于形函数计算
 
-// 获取全局形函数实例
-static auto* g_shapeFunction =
-    ShapeFunctionFactory::getShapeFunction(ShapeFunctionFactory::ElementType::Triangle);
-static auto* g_triangleShapeFunction = dynamic_cast<TriangleShapeFunction*>(g_shapeFunction);
-
 /**
  * @brief 本地实现：计算单元内某点的数值解（使用mesh对象）
  */

@@ -116,29 +116,13 @@ void TriangleMesh2D::computeBoundaryEdges()
 
 std::unique_ptr<Mesh> MeshFactory::createMesh(MeshType type)
 {
-    switch (type)
-    {
-        case MeshType::TRIANGLE_2D:
-            return std::make_unique<TriangleMesh2D>();
-        case MeshType::QUADRILATERAL_2D:
-            // TODO: 实现四边形网格类
-            throw std::runtime_error("四边形网格类型尚未实现");
-        default:
-            throw std::invalid_argument("不支持的网格类型");
-    }
+   //先不需要实现
+   return nullptr;
 }
 
 std::unique_ptr<Mesh> MeshFactory::createMeshFromFile(const std::string& filename)
 {
-    // 根据文件扩展名自动检测网格类型
-    if (filename.find(".mphtxt") != std::string::npos)
-    {
-        auto mesh = createMesh(MeshType::TRIANGLE_2D);
-        // 简化实现，直接返回空网格
-        return mesh;
-    }
-    else
-    {
-        throw std::runtime_error("不支持的文件格式");
-    }
+    //模仿comsol_mesh_importer.cpp的逻辑进行导入，读取信息创建网格对象
+    //首先进行实现
+    return nullptr;
 }

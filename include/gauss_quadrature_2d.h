@@ -49,13 +49,6 @@ class GaussPoint
     }
 
     /**
-     * @brief 获取指定索引的积分权重
-     * @param index 积分点索引
-     * @return 权重值
-     */
-    double getWeight(int index) const;
-
-    /**
      * @brief 获取维度
      * @return 空间维度 (1D, 2D, 3D)
      */
@@ -73,14 +66,6 @@ class GaussPoint2D : public GaussPoint
     {
     }
     virtual ~GaussPoint2D() = default;
-
-    /**
-     * @brief 获取指定索引的积分点坐标 (二维特化)
-     * @param index 积分点索引
-     * @param x_ref 输出x坐标
-     * @param y_ref 输出y坐标
-     */
-    virtual void getPoint(int index, double& x_ref, double& y_ref) const = 0;
 
     /**
      * @brief 获取维度 (固定为2D)
@@ -103,9 +88,6 @@ class TriangleGaussPoint : public GaussPoint2D
     {
     }
     virtual ~TriangleGaussPoint() = default;
-
-    // 实现二维高斯点的getPoint方法
-    void getPoint(int index, double& x_ref, double& y_ref) const override final;
 
   protected:
     /**
@@ -174,21 +156,6 @@ class GaussPointFactory
      * @return 高斯积分对象的智能指针
      */
     static std::unique_ptr<GaussPoint> createGaussPoint(ElementType elementType, int numPoints);
-
-    /**
-     * @brief 创建2D高斯积分对象
-     * @param elementType 单元类型 (仅支持2D单元)
-     * @param numPoints 积分点数量
-     * @return 2D高斯积分对象的智能指针
-     */
-    static std::unique_ptr<GaussPoint2D> createGaussPoint2D(ElementType elementType, int numPoints);
-
-    /**
-     * @brief 创建三角形高斯积分对象（具体类型）
-     * @param numPoints 积分点数量
-     * @return 三角形高斯积分对象的智能指针
-     */
-    static std::unique_ptr<TriangleGaussPoint> createTriangleGaussPoint(int numPoints);
 };
 
 #endif  // GAUSS_QUADRATURE_2D_H
