@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build FEM 2D Project",
+      "label": "Build FEM Project",
       "type": "cppbuild",
       "command": "E:\\msys64\\ucrt64\\bin\\g++.exe",
       "args": [
@@ -17,21 +17,20 @@
         "${workspaceFolder}/src/gauss_quadrature.cpp",
         "${workspaceFolder}/src/geometry_mapping.cpp",
         "${workspaceFolder}/src/error_analysis.cpp",
-        "${workspaceFolder}/src/problem_definition.cpp",
+        "${workspaceFolder}/src/config.cpp",
         "${workspaceFolder}/src/comsol_mesh_importer.cpp",
         "${workspaceFolder}/src/vtk_output.cpp",
-        "${workspaceFolder}/src/mesh_hierarchy.cpp",
         "-o",
-        "${workspaceFolder}/build/FEM_2D_solution.exe"
+        "${workspaceFolder}/build/FEM_solution.exe"
       ],
       "group": "build",
       "problemMatcher": ["$gcc"],
-      "detail": "编译整个二维有限元求解器项目"
+      "detail": "编译整个有限元求解器项目"
     },
     {
-      "label": "Run FEM 2D Solution",
+      "label": "Run FEM Solution",
       "type": "shell",
-      "command": "${workspaceFolder}/build/FEM_2D_solution.exe",
+      "command": "${workspaceFolder}/build/FEM_solution.exe",
       "group": "test",
       "options": {
         "cwd": "${workspaceFolder}",
@@ -46,8 +45,8 @@
         "focus": false,
         "panel": "new"
       },
-      "dependsOn": "Build FEM 2D Project",
-      "detail": "运行二维FEM求解器"
+      "dependsOn": "Build FEM Project",
+      "detail": "运行FEM求解器"
     },
     {
       "type": "cppbuild",

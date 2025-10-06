@@ -12,7 +12,7 @@
       "environment": [],
       "MIMode": "gdb",
       "miDebuggerPath": "E:\\msys64\\ucrt64\\bin\\gdb.exe",
-      "preLaunchTask": "Build FEM 2D Project"
+      "preLaunchTask": "Build FEM Project"
     },
     {
       "name": "C/C++: g++.exe 构建和调试活动文件",

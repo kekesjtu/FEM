@@ -1,4 +1,4 @@
-#include "fem_solver_2d.h"
+#include "fem_solver.h"
 #include <Eigen/IterativeLinearSolvers>
 #include <Eigen/Sparse>
 #include <Eigen/SparseLU>
@@ -14,66 +14,79 @@
 
 // --- 全局变量定义 ---
 int N, M;
-const int n = 3;  // 一阶三角形单元有3个节点
+int n;  // 每个单元的节点数，根据单元类型动态确定
 Eigen::SparseMatrix<double> K_global;
 Eigen::VectorXd b;
 Eigen::VectorXd u;
-std::vector<std::vector<int>> T;
-std::vector<double> P;
-std::vector<BoundaryEdge> boundary_edges;
 
-Config config;  // 配置对象，包含网格和问题定义
-auto shapeFunction = ShapeFunctionFactory::createShapeFunction(std::make_shared<Config>(config));
+std::shared_ptr<Config> config = std::make_shared<Config>();  // 配置对象，包含网格和问题定义
 
 // --- 内部辅助函数声明 ---
-double calculateStiffnessEntry2D(int e, int alpha, int beta, int numGaussPoints);
-double calculateLoadEntry2D(int e, int beta, int numGaussPoints);
+double calculateStiffnessEntry(int e, int alpha, int beta, int numGaussPoints);
+double calculateLoadEntry(int e, int beta, int numGaussPoints);
 
 // --- FEM 函数实现 ---
 
-void preprocess2D()
+void preprocess()
 {
-    // 调用defineProblem函数获取问题定义，获得N,M,生成网格，P,T,boundary_edges
-    defineProblem_by_mesh_importer();
+    // 从Config获取网格信息
+    N = config->getNodesNum();
+    M = config->getElementsNum();
 
-    // 设置全局变量N和M
-    N = static_cast<int>(P.size()) / 2;  // 节点数 = 坐标数 / 2
-    M = static_cast<int>(T.size());      // 单元数
+    // 动态确定单元节点数（根据网格类型）
+    const auto& connectivity = config->getElementConnectivity();
+    if (!connectivity.empty())
+    {
+        n = connectivity[0].size();  // 第一个单元的节点数
+    }
+    else
+    {
+        n = 3;  // 默认三角形单元
+    }
+
+    // 动态计算稀疏矩阵预留空间
+    int dimension = config->getDimension();
+    int estimated_nnz_per_row = n * n;  // 每个节点大约连接n²个其他节点
 
     // 初始化矩阵和向量
     K_global.resize(N, N);
-    K_global.reserve(Eigen::VectorXi::Constant(N, 9));  // 每行预计有9个非零元素（2D情况）
+    K_global.reserve(Eigen::VectorXi::Constant(N, estimated_nnz_per_row));
     b = Eigen::VectorXd::Zero(N);
     u = Eigen::VectorXd::Zero(N);
 
     std::cout << "网格生成完成：" << N << " 个节点，" << M << " 个单元" << std::endl;
-    std::cout << "边界边数量：" << boundary_edges.size() << std::endl;
+    std::cout << "维度: " << dimension << "D" << std::endl;
+    std::cout << "单元类型: 每个单元" << n << "个节点" << std::endl;
 }
 
-void assemble2D()
+void assemble()
 {
     // 使用三元组列表收集所有元素
     typedef Eigen::Triplet<double> T_entry;
     std::vector<T_entry> tripletList;
-    tripletList.reserve(9 * M);  // 每个单元贡献9个矩阵元素
+    tripletList.reserve(n * n * M);  // 每个单元贡献n²个矩阵元素
+
+    const auto& connectivity = config->getElementConnectivity();
+
+    // 使用config中设置的高斯积分点数
+    int numGaussPoints = config->getAssembleGaussPoints();
 
     for (int e = 0; e < M; ++e)
     {
-        const int numGaussPoints = 3;  // 使用3点高斯积分
         for (int alpha = 0; alpha < n; ++alpha)
         {
             for (int beta = 0; beta < n; ++beta)
             {
-                double K_e_val = calculateStiffnessEntry2D(e, alpha, beta, numGaussPoints);
-                int global_row = T[e][beta];
-                int global_col = T[e][alpha];
+                double K_e_val = calculateStiffnessEntry(e, alpha, beta, numGaussPoints);
+                int global_row = connectivity[e][beta];
+                int global_col = connectivity[e][alpha];
                 tripletList.push_back(T_entry(global_row, global_col, K_e_val));
             }
         }
         for (int beta = 0; beta < n; ++beta)
         {
-            double b_e_val = calculateLoadEntry2D(e, beta, numGaussPoints);
-            int global_row = T[e][beta];
+            double b_e_val = calculateLoadEntry(e, beta, numGaussPoints);
+            int global_row = connectivity[e][beta];
             b(global_row) += b_e_val;
         }
     }
@@ -83,71 +96,57 @@ void assemble2D()
     K_global.makeCompressed();
 }
 
-void applyBoundaryConditions2D()
+void applyBoundaryConditions()
 {
     std::cout << "开始应用边界条件..." << std::endl;
 
     // 支持通用边界条件形式：K * (c * du/dn) + L * u = q
 
-    // 首先收集所有边界节点及其边界条件
+    // 应用默认狄利克雷边界条件（u=0）到所有边界节点
+    // 注意：实际的边界条件信息需要从COMSOL网格中提取或手动指定
     std::vector<bool> is_boundary_node(N, false);
-    std::vector<BoundaryCondition> node_bc(N);
 
-    for (const auto& edge : boundary_edges)
+    // 简化处理：将所有边界节点设为齐次狄利克雷条件
+    // TODO: 根据实际问题设置合适的边界条件
+    const auto& coords = config->getNodeCoordinates();
+    int dimension = config->getDimension();
+
+    for (int i = 0; i < N; ++i)
     {
-        int node1 = edge.global_node_index1;
-        int node2 = edge.global_node_index2;
+        // 通用的边界检测（假设单位球/圆边界）
+        double distance_squared = 0.0;
+        for (int d = 0; d < dimension; ++d)
+        {
+            double coord = coords[i * dimension + d];
+            distance_squared += coord * coord;
+        }
 
-        // 标记边界节点并设置边界条件
-        is_boundary_node[node1] = true;
-        is_boundary_node[node2] = true;
-        node_bc[node1] = edge.bc;
-        node_bc[node2] = edge.bc;
+        // 检查是否在边界上
+        if (std::abs(distance_squared - 1.0) < 1e-6)
+        {
+            is_boundary_node[i] = true;
+        }
     }
 
     // 确保矩阵已压缩
     K_global.makeCompressed();
 
-    // 收集所有狄利克雷边界条件节点，批量处理
+    // 应用齐次狄利克雷边界条件 u = 0
     std::vector<int> dirichlet_nodes;
-    std::vector<double> dirichlet_values;
-
     for (int i = 0; i < N; ++i)
     {
         if (is_boundary_node[i])
         {
-            const BoundaryCondition& bc = node_bc[i];
-
-            if (bc.K_bc == 0)
-            {
-                // 狄利克雷边界条件
-                double boundary_value = bc.q_bc / bc.L_bc;
-                dirichlet_nodes.push_back(i);
-                dirichlet_values.push_back(boundary_value);
-            }
-            else
-            {
-                // 诺曼或罗宾边界条件
-                if (bc.L_bc == 0.0)
-                {
-                    b(i) += bc.q_bc;
-                }
-                else
-                {
-                    K_global.coeffRef(i, i) += bc.L_bc;
-                    b(i) += bc.q_bc;
-                }
-            }
+            dirichlet_nodes.push_back(i);
         }
     }
 
     std::cout << "狄利克雷边界条件节点数量: " << dirichlet_nodes.size() << std::endl;
 
     // 批量处理狄利克雷边界条件
-    for (size_t idx = 0; idx < dirichlet_nodes.size(); ++idx)
+    for (int i : dirichlet_nodes)
     {
-        int i = dirichlet_nodes[idx];  // i存储迪利克雷节点的全局编号
-        double boundary_value = dirichlet_values[idx];
+        double boundary_value = 0.0;  // 齐次边界条件
 
         // 遍历第i列的非0元素
         for (Eigen::SparseMatrix<double>::InnerIterator it(K_global, i); it; ++it)
@@ -176,8 +175,8 @@ void applyBoundaryConditions2D()
     }
 }
 
-void solveLinearSystem2D(const std::string& solver_type, const std::string& preconditioner_type,
-                         double tol, int max_iter, bool verbose)
+void solveLinearSystem(const std::string& solver_type, const std::string& preconditioner_type,
+                       double tol, int max_iter, bool verbose)
 {
     clock_t start = clock();
 
@@ -250,78 +249,68 @@ void solveLinearSystem2D(const std::string& solver_type, const std::string& prec
     }
 }
 
-void postprocess2D()
+void postprocess()
 {
     using namespace std;
 
+    int dimension = config->getDimension();
     cout << "网格信息: " << N << " 个节点，" << M << " 个单元" << endl;
-    cout << "边界边数量: " << boundary_edges.size() << endl;
+    cout << "维度: " << dimension << "D" << endl;
+    cout << "单元类型: 每个单元" << n << "个节点" << endl;
 
-    // 初始化全局配置
-    FEMConfig::initialize(2);
+    // 创建误差分析器
+    auto errorAnalyzer = std::make_shared<ErrorAnalysis>(config, u);
 
-    // 创建临时mesh对象（从全局变量转换）
-    auto mesh = std::make_shared<TriangleMesh2D>();
-    mesh->setNodes(N, P);
-    mesh->setElements(M, T);
-
-    // 创建重构后的误差分析器
-    auto errorAnalyzer =
-        ErrorAnalysisFactory::create2DWithFullSolution(mesh,                  // mesh对象
-                                                       exact_solution_u,      // 精确解
-                                                       exact_solution_du_dx,  // x方向导数
-                                                       exact_solution_du_dy   // y方向导数
-        );
-
-    // 设置计算参数
-    errorAnalyzer->setSamplingPoints(5);  // L∞误差采样点数
-    errorAnalyzer->setGaussPoints(3);     // 数值积分点数
-
-    // 批量计算所有范数误差
-    errorAnalyzer->computeAllNormErrors(u);
-
-    // 输出详细的误差分析摘要
+    // 输出误差分析摘要
     errorAnalyzer->printErrorSummary();
 
     // 输出节点误差详情（前10个节点）
-    errorAnalyzer->printDetailedNodeErrors(u, 10);
+    errorAnalyzer->printDetailedNodeErrors(10);
 
     // 输出VTK文件用于ParaView可视化
-    cout << "\n--- 二维VTK文件输出 ---" << endl;
+    cout << "\n--- " << dimension << "维VTK文件输出 ---" << endl;
 
-    // 创建VTKOutput2D对象，注入mesh2D对象
-    auto vtkOutput2D = std::make_shared<VTKOutput2D>(mesh);
+    // 创建VTK输出对象
+    auto vtkOutput = VTKOutputFactory::createVTKOutput(config, u);
 
-    // 输出二维数值解
-    vtkOutput2D->outputNumericalSolution("results/numerical_solution", u);
+    // 输出数值解
+    vtkOutput->outputNumericalSolution("results/numerical_solution");
 
-    // 输出二维解析解
-    vtkOutput2D->outputExactSolution("results/exact_solution", exact_solution_u);
+    // 输出精确解
+    auto exact_func = [&](const std::vector<double>& coords) -> double
+    { return config->exact_solution_u(coords); };
+    vtkOutput->outputExactSolution("results/exact_solution", exact_func);
 
-    // 输出二维对比文件
-    vtkOutput2D->outputDenseSamplingError("results/comparison", u, exact_solution_u);
+    // 输出加密采样误差文件
+    vtkOutput->outputDenseSamplingError("results/comparison", config);
 
     cout << "\n ParaView可视化指南:" << endl;
     cout << "1. numerical_solution.vtu - 查看数值解分布" << endl;
     cout << "2. exact_solution.vtu     - 查看解析解分布" << endl;
-    cout << "3. comparison_dense.vtu   - 误差分析" << endl;
+    cout << "3. comparison.vtu         - 误差分析" << endl;
 }
 
 // --- 内部辅助函数定义 ---
 
-double calculateStiffnessEntry2D(int e, int alpha, int beta, int numGaussPoints)
+double calculateStiffnessEntry(int e, int alpha, int beta, int numGaussPoints)
 {
-    // 获取单元节点坐标（使用全局变量作为临时方案）
-    std::vector<double> element_coords(6);
-    for (int i = 0; i < 3; ++i)
+    // 从Config获取单元节点坐标
+    const auto& connectivity = config->getElementConnectivity();
+    const auto& coordinates = config->getNodeCoordinates();
+    int dimension = config->getDimension();
+
+    std::vector<double> element_coords(n * dimension);
+    for (int i = 0; i < n; ++i)
     {
-        int node_idx = T[e][i];
-        element_coords[i * 2] = P[node_idx * 2];          // x坐标
-        element_coords[i * 2 + 1] = P[node_idx * 2 + 1];  // y坐标
+        int node_idx = connectivity[e][i];
+        for (int d = 0; d < dimension; ++d)
+        {
+            element_coords[i * dimension + d] = coordinates[node_idx * dimension + d];
+        }
     }
 
     // 创建几何映射对象
-    auto mapping = std::make_unique<GeometryMapping2D>(element_coords);
+    auto mapping = GeometryMappingFactory::createMapping(element_coords, config);
 
     // 使用新的高斯点类
     auto gaussPoint = GaussPointFactory::createGaussPoint(GaussPointFactory::ElementType::Triangle,
@@ -334,13 +323,17 @@ double calculateStiffnessEntry2D(int e, int alpha, int beta, int numGaussPoints)
     double entryValue = 0.0;
     for (int gpIndex = 0; gpIndex < gaussPoint->getNumPoints(); ++gpIndex)
     {
-        std::vector<double> pointsRef = {points[gpIndex * 2], points[gpIndex * 2 + 1]};
+        std::vector<double> pointsRef(dimension);
+        for (int d = 0; d < dimension; ++d)
+        {
+            pointsRef[d] = points[gpIndex * dimension + d];
+        }
 
         // 计算形函数在参考坐标系下的梯度
-        std::vector<double> trialGradientsRef;
-        std::vector<double> testGradientsRef;
-        trialGradientsRef = shapeFunction->computeTrialGradients(alpha, pointsRef);
-        testGradientsRef = shapeFunction->computeTestGradients(beta, pointsRef);
+        auto shapeFunction = ShapeFunctionFactory::createShapeFunction(config);
+        std::vector<double> trialGradientsRef =
+            shapeFunction->computeTrialGradients(alpha, pointsRef);
+        std::vector<double> testGradientsRef = shapeFunction->computeTestGradients(beta, pointsRef);
 
         // 转换为物理坐标系下的导数
         std::vector<double> trialGradientsPhys;
@@ -349,27 +342,36 @@ double calculateStiffnessEntry2D(int e, int alpha, int beta, int numGaussPoints)
         mapping->transformGradient(testGradientsRef, testGradientsPhys, pointsRef);
 
         // 计算积分被积函数（假设扩散系数为1）
-        double integrand = (trialGradientsPhys[0] * testGradientsPhys[0] +
-                            trialGradientsPhys[1] * testGradientsPhys[1]);
+        double integrand = 0.0;
+        for (int d = 0; d < dimension; ++d)
+        {
+            integrand += trialGradientsPhys[d] * testGradientsPhys[d];
+        }
 
         entryValue += integrand * mapping->getJacobianDet(pointsRef) * weights[gpIndex];
     }
     return entryValue;
 }
 
-double calculateLoadEntry2D(int e, int beta, int numGaussPoints)
+double calculateLoadEntry(int e, int beta, int numGaussPoints)
 {
-    // 获取单元节点坐标（使用全局变量作为临时方案）
-    std::vector<double> element_coords(6);
-    for (int i = 0; i < 3; ++i)
+    // 从Config获取单元节点坐标
+    const auto& connectivity = config->getElementConnectivity();
+    const auto& coordinates = config->getNodeCoordinates();
+    int dimension = config->getDimension();
+
+    std::vector<double> element_coords(n * dimension);
+    for (int i = 0; i < n; ++i)
     {
-        int node_idx = T[e][i];
-        element_coords[i * 2] = P[node_idx * 2];          // x坐标
-        element_coords[i * 2 + 1] = P[node_idx * 2 + 1];  // y坐标
+        int node_idx = connectivity[e][i];
+        for (int d = 0; d < dimension; ++d)
+        {
+            element_coords[i * dimension + d] = coordinates[node_idx * dimension + d];
+        }
     }
 
     // 创建几何映射对象
-    auto mapping = std::make_unique<GeometryMapping2D>(element_coords);
+    auto mapping = GeometryMappingFactory::createMapping(element_coords, config);
 
     // 使用新的高斯点类
     auto gaussPoint = GaussPointFactory::createGaussPoint(GaussPointFactory::ElementType::Triangle,
@@ -382,17 +384,22 @@ double calculateLoadEntry2D(int e, int beta, int numGaussPoints)
     double entryValue = 0.0;
     for (int gpIndex = 0; gpIndex < gaussPoint->getNumPoints(); ++gpIndex)
     {
-        std::vector<double> pointsRef = {points[gpIndex * 2], points[gpIndex * 2 + 1]};
+        std::vector<double> pointsRef(dimension);
+        for (int d = 0; d < dimension; ++d)
+        {
+            pointsRef[d] = points[gpIndex * dimension + d];
+        }
 
         // 获取物理坐标
         std::vector<double> pointsPhys;
         mapping->mapToPhysical(pointsRef, pointsPhys);
 
         // 计算形函数值
+        auto shapeFunction = ShapeFunctionFactory::createShapeFunction(config);
         double N_test_beta = shapeFunction->computeTestFunction(beta, pointsRef);
 
-        // 计算电荷密度（源项）
-        const double f_xy = source_term_f(pointsPhys[0], pointsPhys[1]);
+        // 计算源项
+        const double f_xy = config->source_term_f(pointsPhys);
         double integrand = f_xy * N_test_beta;
         entryValue += integrand * mapping->getJacobianDet(pointsRef) * weights[gpIndex];
     }

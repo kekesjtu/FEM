@@ -1,6 +1,196 @@
 #include "config.h"
 #include "comsol_mesh_importer.h"
 
+// 构造函数实现
+Config::Config() : Config(5, 3, 1)
+{
+}
+
+Config::Config(int max_error_sampling_points, int gauss_error_points, int order_)
+    : max_error_sampling_points_(max_error_sampling_points),
+      gauss_error_points_(gauss_error_points),
+      order_(order_)
+{
+    loadMeshFromFile("circle_mesh2.mphtxt");  // 网格相关变量初始化完毕
+    setGaussAssemblePoints();                 // 矩阵组装计算参数初始化完毕
+    setProblem();                             // 问题定义初始化完毕
+}
+
+// 高斯积分点数设置
+void Config::setGaussAssemblePoints()
+{
+    // 对于形函数阶数order_的单元，刚度矩阵积分涉及2*order_阶多项式
+    // n个高斯点能精确积分2n-1阶多项式，所以需要至少(2*order_+1+1)/2 = order_+1个点
+    // 但实际中通常取稍多一些以保证精度
+
+    if (dimension_ == 2)
+    {
+        if (element_type_ == TRIANGLE)
+        {
+            // 三角形单元：
+            // 1点：精确积分1阶多项式（常数）
+            // 3点：精确积分2阶多项式
+            // 4点：精确积分3阶多项式
+            // 7点：精确积分5阶多项式
+            if (order_ == 1)
+            {
+                gauss_assemble_points_ = 3;  // 线性单元用3点高斯积分
+            }
+            else if (order_ == 2)
+            {
+                gauss_assemble_points_ = 4;  // 二次单元用4点高斯积分
+            }
+            else
+            {
+                gauss_assemble_points_ = 7;  // 高阶单元用7点高斯积分
+            }
+        }
+        else if (element_type_ == QUADRILATERAL)
+        {
+            // 四边形单元：使用张量积高斯积分
+            // 每个方向上order_+1个点
+            int points_per_direction = order_ + 1;
+            gauss_assemble_points_ = points_per_direction * points_per_direction;
+        }
+    }
+    else
+    {
+        // 一维情况或其他未实现的维度
+        gauss_assemble_points_ = order_ + 1;
+    }
+
+    std::cout << "设置高斯积分点数: " << gauss_assemble_points_ << " (维度=" << dimension_
+              << ", 单元类型=" << element_type_ << ", 阶数=" << order_ << ")" << std::endl;
+}
+
+// Setter方法实现
+void Config::setCoefficientC(std::function<double(const std::vector<double>&)> func)
+{
+    coefficient_c_func = func;
+}
+
+void Config::setSourceTermF(std::function<double(const std::vector<double>&)> func)
+{
+    source_term_f_func = func;
+}
+
+void Config::setExactSolutionU(std::function<double(const std::vector<double>&)> func)
+{
+    exact_solution_u_func = func;
+}
+
+void Config::setExactSolutionGradients(
+    std::function<double(const std::vector<double>&, std::vector<double>&)> func)
+{
+    exact_solution_gradients_func = func;
+}
+
+// Getter方法实现
+int Config::getDimension() const
+{
+    return dimension_;
+}
+
+int Config::getSamplingPoints() const
+{
+    return max_error_sampling_points_;
+}
+
+int Config::getErrorGaussPoints() const
+{
+    return gauss_error_points_;
+}
+
+int Config::getAssembleGaussPoints() const
+{
+    return gauss_assemble_points_;
+}
+
+int Config::getNodesNum() const
+{
+    return nodes_num_;
+}
+
+int Config::getElementsNum() const
+{
+    return elements_num_;
+}
+
+int Config::getNodesPerElement() const
+{
+    return nodes_num_per_element_;
+}
+
+int Config::getOrder() const
+{
+    return order_;
+}
+
+int Config::getElementType() const
+{
+    return element_type_;
+}
+
+const std::vector<double>& Config::getNodeCoordinates() const
+{
+    return node_coordinates_;
+}
+
+const std::vector<std::vector<int>>& Config::getElementConnectivity() const
+{
+    return element_connectivity_;
+}
+
+bool Config::hasExactSolution() const
+{
+    return exact_solution_u_func != nullptr;
+}
+
+bool Config::hasExactGradients() const
+{
+    return exact_solution_gradients_func != nullptr;
+}
+
+// 调用函数实现
+double Config::coefficient_c(const std::vector<double>& coords) const
+{
+    if (coefficient_c_func)
+    {
+        return coefficient_c_func(coords);
+    }
+    throw std::runtime_error("coefficient_c function not set");
+}
+
+double Config::source_term_f(const std::vector<double>& coords) const
+{
+    if (source_term_f_func)
+    {
+        return source_term_f_func(coords);
+    }
+    throw std::runtime_error("source_term_f function not set");
+}
+
+double Config::exact_solution_u(const std::vector<double>& coords) const
+{
+    if (exact_solution_u_func)
+    {
+        return exact_solution_u_func(coords);
+    }
+    throw std::runtime_error("exact_solution_u function not set");
+}
+
+double Config::exact_solution_gradients(const std::vector<double>& coords,
+                                        std::vector<double>& gradients) const
+{
+    if (exact_solution_gradients_func)
+    {
+        return exact_solution_gradients_func(coords, gradients);
+    }
+    throw std::runtime_error("exact_solution_gradients function not set");
+}
+
+// 网格加载实现
+
 void Config::loadMeshFromFile(const std::string& filename)
 {
     // 使用COMSOL网格导入器导入网格

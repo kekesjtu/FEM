@@ -44,7 +44,6 @@ class GeometryMapping
             throw std::invalid_argument(
                 "Coordinate vector size does not match nodes and dimension.");
         }
-        computeJacobian();
     }
 
     virtual ~GeometryMapping() = default;
@@ -138,8 +137,9 @@ class TriangleLinearMapping : public GeometryMapping2D
      * @param coords 三个顶点的坐标 [x0, y0, x1, y1, x2, y2]
      */
     TriangleLinearMapping(const std::vector<double>& element_coords)
-        : GeometryMapping2D(element_coords, 3, 1)  // 调用基类构造函数，指定3个节点,线性
+        : GeometryMapping2D(element_coords, 1, 3)  // 调用基类构造函数，order=1, nodes=3
     {
+        computeJacobian();  // 计算常数雅可比矩阵
     }
 
     void mapToPhysical(const std::vector<double>& coord_ref,

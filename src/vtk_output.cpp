@@ -52,11 +52,11 @@ void TriangleVTKOutput2D::outputNumericalSolution(const std::string& filename)
 
     std::cout << "正在写入二维VTK文件: " << fullname << std::endl;
 
-    const auto& coordinates = coordinates_;
-    const auto& connectivity = connectivity_;
-    int nodes_num = nodes_num_;
-    int elements_num = elements_num_;
-    int dimension = dimension_;
+    const auto& coordinates = config_->getNodeCoordinates();
+    const auto& connectivity = config_->getElementConnectivity();
+    int nodes_num = config_->getNodesNum();
+    int elements_num = config_->getElementsNum();
+    int dimension = config_->getDimension();
 
     // 设置输出精度
     file << std::fixed << std::setprecision(6);
@@ -180,11 +180,11 @@ void TriangleVTKOutput2D::outputExactSolution(
 
     std::cout << "正在写入二维解析解VTK文件: " << fullname << std::endl;
 
-    const auto& coordinates = coordinates_;
-    const auto& connectivity = connectivity_;
-    int nodes_num = nodes_num_;
-    int elements_num = elements_num_;
-    int dimension = dimension_;
+    const auto& coordinates = config_->getNodeCoordinates();
+    const auto& connectivity = config_->getElementConnectivity();
+    int nodes_num = config_->getNodesNum();
+    int elements_num = config_->getElementsNum();
+    int dimension = config_->getDimension();
 
     // 设置输出精度
     file << std::fixed << std::setprecision(6);
@@ -291,11 +291,11 @@ void TriangleVTKOutput2D::outputDenseSamplingError(const std::string& filename,
     std::cout << "采样密度: 每个三角形单元 " << num_points_per_side_ << "×" << num_points_per_side_
               << " 采样点" << std::endl;
 
-    const auto& coordinates = coordinates_;
-    const auto& connectivity = connectivity_;
-    int nodes_num = nodes_num_;
-    int elements_num = elements_num_;
-    int dimension = dimension_;
+    const auto& coordinates = config_->getNodeCoordinates();
+    const auto& connectivity = config_->getElementConnectivity();
+    int nodes_num = config_->getNodesNum();
+    int elements_num = config_->getElementsNum();
+    int dimension = config_->getDimension();
 
     // 计算加密后的总点数和单元数
     std::vector<double> dense_points;     // 存储所有采样点的坐标
@@ -325,7 +325,8 @@ void TriangleVTKOutput2D::outputDenseSamplingError(const std::string& filename,
 
                     // 获取单元节点坐标
                     std::vector<double> element_coords;
-                    for (int local_node = 0; local_node < nodes_num_per_element_; ++local_node)
+                    for (int local_node = 0; local_node < config_->getNodesPerElement();
+                         ++local_node)
                     {
                         int global_node = connectivity[e][local_node];
                         element_coords.push_back(coordinates[global_node * dimension]);
@@ -489,7 +490,7 @@ double TriangleVTKOutput2D::evaluateNumericalSolutionAt(int element_index,
                                                         std::shared_ptr<Config> config) const
 {
     double numerical_solution = 0.0;
-    const auto& connectivity = connectivity_;
+    const auto& connectivity = config_->getElementConnectivity();
     int n = connectivity[element_index].size();  // 每个单元的节点数
 
     auto shape_func = ShapeFunctionFactory::createShapeFunction(config);
@@ -509,9 +510,8 @@ std::unique_ptr<VTKOutput> VTKOutputFactory::createVTKOutput(std::shared_ptr<Con
     switch (config->getElementType())
     {
         case Config::ElementType::TRIANGLE:
-            return std::make_unique<TriangleVTKOutput2D>(
-                config->getNodesNum(), config->getElementsNum(), config->getSamplingPoints(),
-                config->getNodeCoordinates(), config->getElementConnectivity(), solution);
+            return std::make_unique<TriangleVTKOutput2D>(config, solution,
+                                                         config->getSamplingPoints());
         case Config::ElementType::QUADRILATERAL:
             throw std::invalid_argument("Requested ElementType is not implemented in VTKOutput");
         default:

@@ -21,27 +21,17 @@
 class VTKOutput
 {
   protected:
-    int dimension_;
-    int nodes_num_;
-    int elements_num_;
-    int nodes_num_per_element_;
-    const std::vector<double>& coordinates_;
-    const std::vector<std::vector<int>>& connectivity_;
+    // 保存全局配置，所有网格与问题定义从此处读取
+    std::shared_ptr<Config> config_;
+    // 数值解向量（与网格节点一一对应）
     const Eigen::VectorXd& solution_;
-    int num_points_per_side_ = 5;  // 每个单元边上采样点数（用于加密采样）
+    // 每个单元边上采样点数（用于加密采样）
+    int num_points_per_side_ = 5;
 
   public:
-    VTKOutput(int dimension, int nodes_num, int elements_num, int nodes_num_per_element,
-              int num_points_per_side, const std::vector<double>& coordinates,
-              const std::vector<std::vector<int>>& connectivity, const Eigen::VectorXd& solution)
-        : dimension_(dimension),
-          nodes_num_(nodes_num),
-          elements_num_(elements_num),
-          nodes_num_per_element_(nodes_num_per_element),
-          num_points_per_side_(num_points_per_side),
-          coordinates_(coordinates),
-          connectivity_(connectivity),
-          solution_(solution)
+    VTKOutput(std::shared_ptr<Config> config, const Eigen::VectorXd& solution,
+              int num_points_per_side)
+        : config_(std::move(config)), solution_(solution), num_points_per_side_(num_points_per_side)
     {
     }
 
@@ -80,11 +70,9 @@ class VTKOutput
 class VTKOutput2D : public VTKOutput
 {
   public:
-    VTKOutput2D(int nodes_num, int elements_num, int nodes_num_per_element,int num_points_per_side,
-                const std::vector<double>& coordinates,
-                const std::vector<std::vector<int>>& connectivity, const Eigen::VectorXd& solution)
-        : VTKOutput(2, nodes_num, elements_num, nodes_num_per_element, num_points_per_side, coordinates, connectivity,
-                    solution)
+    VTKOutput2D(std::shared_ptr<Config> config, const Eigen::VectorXd& solution,
+                int num_points_per_side)
+        : VTKOutput(std::move(config), solution, num_points_per_side)
     {
     }
 };
@@ -95,12 +83,9 @@ class VTKOutput2D : public VTKOutput
 class TriangleVTKOutput2D : public VTKOutput2D
 {
   public:
-    TriangleVTKOutput2D(int nodes_num, int elements_num, int num_points_per_side,
-                        const std::vector<double>& coordinates,
-                        const std::vector<std::vector<int>>& connectivity,
-                        const Eigen::VectorXd& solution)
-        : VTKOutput2D(nodes_num, elements_num, 3, num_points_per_side, coordinates, connectivity,
-                      solution)
+    TriangleVTKOutput2D(std::shared_ptr<Config> config, const Eigen::VectorXd& solution,
+                        int num_points_per_side)
+        : VTKOutput2D(std::move(config), solution, num_points_per_side)
     {
     }
 

@@ -15,10 +15,9 @@ class Config
     {
         TRIANGLE,
         QUADRILATERAL,
-        // 三维的四面体
+        // 三维还没有实现
     };
 
-  private:
     // 问题定义相关结构体
     struct BoundaryCondition
     {
@@ -40,7 +39,7 @@ class Config
             return {1, h, g};
         }
         // 构造诺曼边界条件: c*du/dn = q_flux
-        // 对应 K=1, L=0, q=q_flux
+        // 对应 K=1, L=0, q_flux
         static BoundaryCondition Neumann(double q_flux)
         {
             return {1, 0.0, q_flux};
@@ -91,26 +90,11 @@ class Config
     std::function<double(const std::vector<double>&, std::vector<double>&)>
         exact_solution_gradients_func;
 
-    void setCoefficientC(std::function<double(const std::vector<double>&)> func)
-    {
-        coefficient_c_func = func;
-    }
-
-    void setSourceTermF(std::function<double(const std::vector<double>&)> func)
-    {
-        source_term_f_func = func;
-    }
-
-    void setExactSolutionU(std::function<double(const std::vector<double>&)> func)
-    {
-        exact_solution_u_func = func;
-    }
-
+    void setCoefficientC(std::function<double(const std::vector<double>&)> func);
+    void setSourceTermF(std::function<double(const std::vector<double>&)> func);
+    void setExactSolutionU(std::function<double(const std::vector<double>&)> func);
     void setExactSolutionGradients(
-        std::function<double(const std::vector<double>&, std::vector<double>&)> func)
-    {
-        exact_solution_gradients_func = func;
-    }
+        std::function<double(const std::vector<double>&, std::vector<double>&)> func);
 
     // 用户手动配置问题的函数 - 在这里定义具体问题
     void setProblem()
@@ -162,117 +146,31 @@ class Config
     }
 
   public:
-    Config(int max_error_sampling_points, int gauss_error_points, int order_)
-        : max_error_sampling_points_(max_error_sampling_points),
-          gauss_error_points_(gauss_error_points),
-          order_(order_)
-    {
-        loadMeshFromFile("circle_mesh2.mphtxt");  // 网格相关变量初始化完毕
-        // setGaussAssemblePoints();                 // 矩阵组装计算参数初始化完毕
-        setProblem();  // 问题定义初始化完毕
-    }
+    // 默认构造函数，使用默认参数
+    Config();
+    Config(int max_error_sampling_points, int gauss_error_points, int order_);
 
     // 访问器
-    int getDimension() const
-    {
-        return dimension_;
-    }
-    int getSamplingPoints() const
-    {
-        return max_error_sampling_points_;
-    }
-    int getErrorGaussPoints() const
-    {
-        return gauss_error_points_;
-    }
-
-    int getAssembleGaussPoints() const
-    {
-        return gauss_assemble_points_;
-    }
-
-    int getNodesNum() const
-    {
-        return nodes_num_;
-    }
-
-    int getElementsNum() const
-    {
-        return elements_num_;
-    }
-
-    int getNodesPerElement() const
-    {
-        return nodes_num_per_element_;
-    }
-
-    int getOrder() const
-    {
-        return order_;
-    }
-
-    int getElementType() const
-    {
-        return element_type_;
-    }
-
-    const std::vector<double>& getNodeCoordinates() const
-    {
-        return node_coordinates_;
-    }
-
-    const std::vector<std::vector<int>>& getElementConnectivity() const
-    {
-        return element_connectivity_;
-    }
-
-    bool hasExactSolution() const
-    {
-        return exact_solution_u_func != nullptr;
-    }
-
-    bool hasExactGradients() const
-    {
-        return exact_solution_gradients_func != nullptr;
-    }
+    int getDimension() const;
+    int getSamplingPoints() const;
+    int getErrorGaussPoints() const;
+    int getAssembleGaussPoints() const;
+    int getNodesNum() const;
+    int getElementsNum() const;
+    int getNodesPerElement() const;
+    int getOrder() const;
+    int getElementType() const;
+    const std::vector<double>& getNodeCoordinates() const;
+    const std::vector<std::vector<int>>& getElementConnectivity() const;
+    bool hasExactSolution() const;
+    bool hasExactGradients() const;
 
     // 调用函数
-    double coefficient_c(const std::vector<double>& coords) const
-    {
-        if (coefficient_c_func)
-        {
-            return coefficient_c_func(coords);
-        }
-        throw std::runtime_error("coefficient_c function not set");
-    }
-
-    double source_term_f(const std::vector<double>& coords) const
-    {
-        if (source_term_f_func)
-        {
-            return source_term_f_func(coords);
-        }
-        throw std::runtime_error("source_term_f function not set");
-    }
-
-    double exact_solution_u(const std::vector<double>& coords) const
-    {
-        if (exact_solution_u_func)
-        {
-            return exact_solution_u_func(coords);
-        }
-        throw std::runtime_error("exact_solution_u function not set");
-    }
-
+    double coefficient_c(const std::vector<double>& coords) const;
+    double source_term_f(const std::vector<double>& coords) const;
+    double exact_solution_u(const std::vector<double>& coords) const;
     double exact_solution_gradients(const std::vector<double>& coords,
-                                    std::vector<double>& gradients) const
-    {
-        if (exact_solution_gradients_func)
-        {
-            return exact_solution_gradients_func(coords, gradients);
-        }
-        throw std::runtime_error("exact_solution_gradients function not set");
-    }
+                                    std::vector<double>& gradients) const;
 };
 
 #endif  // CONFIG_H
