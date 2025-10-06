@@ -6,13 +6,10 @@
 #include <ctime>
 #include <iomanip>
 #include <iostream>
-#include "comsol_mesh_importer.h"
-#include "error_analysis_2d.h"
-#include "gauss_quadrature_2d.h"
-#include "geometry_mapping_2d.h"
-#include "mesh_hierarchy.h"
-#include "problem_definition.h"
-#include "shape_functions_2d.h"
+#include "error_analysis.h"
+#include "gauss_quadrature.h"
+#include "geometry_mapping.h"
+#include "shape_functions.h"
 #include "vtk_output.h"
 
 // --- 全局变量定义 ---
@@ -25,10 +22,8 @@ std::vector<std::vector<int>> T;
 std::vector<double> P;
 std::vector<BoundaryEdge> boundary_edges;
 
-// 全局mesh、形函数建立
-auto mesh = std::make_shared<Mesh>(P, T);
-auto shapeFunction =
-    ShapeFunctionFactory::createShapeFunction(ShapeFunctionFactory::ElementType::Triangle, 1);
+Config config;  // 配置对象，包含网格和问题定义
+auto shapeFunction = ShapeFunctionFactory::createShapeFunction(std::make_shared<Config>(config));
 
 // --- 内部辅助函数声明 ---
 double calculateStiffnessEntry2D(int e, int alpha, int beta, int numGaussPoints);

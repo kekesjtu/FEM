@@ -5,7 +5,7 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "problem_definition.h"
+#include "config.h"
 
 /**
  * @brief COMSOL网格导入器类
@@ -45,11 +45,21 @@ class ComsolMeshImporter
      */
     void printImportStatistics() const;
 
+    // --- 数据访问接口 ---
+    int getDimension() const;
+    const std::vector<std::pair<double, double>>& getNodes() const;
+    const std::vector<std::vector<int>>& getTriangularElements() const;
+    int getNodesNum() const;
+    int getElementsNum() const;
+    int getNodesPerElement() const;
+
   private:
     // 解析状态
     bool is_imported_;
     // 导入的文件名
     std::string filename_;
+    // 网格维度
+    int dimension_;
 
     // 网格数据（简化存储）
     std::vector<std::pair<double, double>> nodes_;       // 节点坐标，索引就是节点编号

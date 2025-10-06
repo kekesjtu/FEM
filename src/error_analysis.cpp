@@ -1,329 +1,288 @@
-#include "error_analysis_2d.h"
+#include "error_analysis.h"
+#include "config.h"
+#include "gauss_quadrature.h"
+#include "geometry_mapping.h"
+#include "shape_functions.h"
+#include <Eigen/Dense>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
-#include "gauss_quadrature_2d.h"
-#include "geometry_mapping_2d.h"
-#include "shape_functions_2d.h"
+#include <memory>
+#include <numeric>
+#include <vector>
 
-// ================================
-// ErrorAnalysis 基类实现
-// ================================
+ErrorAnalysis::ErrorAnalysis(std::shared_ptr<Config> config,
+                             const Eigen::VectorXd& solution)
+    : config_(config), solution_(solution)
+{
+}
+
+bool ErrorAnalysis::hasExactSolution() const
+{
+    return config_->hasExactSolution();
+}
+
+bool ErrorAnalysis::hasExactGradients() const
+{
+    return config_->hasExactGradients();
+}
+
+double ErrorAnalysis::computeNormError(NormType norm) const
+{
+    switch (norm)
+    {
+        case NormType::L_INFINITY:
+            return computeLInfinityError();
+        case NormType::L2:
+            return computeL2Error();
+        case NormType::H1_SEMINORM:
+            return computeH1SeminormError();
+    }
+    return 0.0;
+}
 
 void ErrorAnalysis::printErrorSummary() const
 {
-    std::cout << "\n=== 误差分析摘要 ===" << std::endl;
-    std::cout << "空间维数: " << dimension_ << "D" << std::endl;
+    std::cout << "\n=== Error Analysis Summary ===" << std::endl;
+    std::cout << "Space Dimension: " << config_->getDimension() << "D" << std::endl;
     std::cout << std::string(50, '-') << std::endl;
 
-    // 按顺序输出各种范数误差
     const std::vector<std::pair<NormType, std::string>> norm_names = {
-        {NormType::L_INFINITY, "L∞范数误差"},
-        {NormType::L2, "L2范数误差"},
-        {NormType::H1_SEMINORM, "H1半范数误差"}};
+        {NormType::L_INFINITY, "L-infinity norm error"},
+        {NormType::L2, "L2 norm error"},
+        {NormType::H1_SEMINORM, "H1 seminorm error"}};
 
-    for (const auto [norm, name] : norm_names)
+    for (const auto& [norm, name] : norm_names)
     {
         std::cout << name << ": " << std::scientific << std::setprecision(6)
-                  << computeNormError(norm, solution) << std::endl;
+                  << computeNormError(norm) << std::endl;
     }
+    std::cout << std::flush;
 }
 
-// ================================
-// ErrorAnalysis2D 类实现
-// ================================
-
-bool ErrorAnalysis::supportsNorm(NormType norm) const
+void ErrorAnalysis::printDetailedNodeErrors(int max_nodes) const
 {
-    switch (norm)
+    const int sdim = config_->getDimension();
+    std::cout << "\n=== Detailed Node Errors ===" << std::endl;
+    std::cout << std::left << std::setw(8) << "Node";
+    for (int i = 0; i < sdim; ++i)
+        std::cout << std::setw(15) << "coord_" + std::to_string(i);
+    std::cout << std::setw(18) << "Numerical" << std::setw(18) << "Exact"
+              << std::setw(18) << "Absolute Error" << std::endl;
+    std::cout << std::string(8 + sdim * 15 + 3 * 18, '-') << std::endl;
+
+    const int num_nodes = config_->getNodesNum();
+    const int display_count = std::min(max_nodes, num_nodes);
+    const auto& nodes = config_->getNodeCoordinates();
+
+    for (int i = 0; i < display_count; ++i)
     {
-        case NormType::L_INFINITY:
-            return hasExactSolution();
-        case NormType::L2:
-            return hasExactSolution();
-        case NormType::H1_SEMINORM:
-            return hasExactGradients();
-        default:
-            return false;
-    }
-}
-
-double ErrorAnalysis::computeNormError(NormType norm, const Eigen::VectorXd& solution) const
-{
-    if (!supportsNorm(norm))
-    {
-        std::cerr << "警告: 缺少精确解或梯度" << std::endl;
-        return 0.0;
-    }
-
-    double error = 0.0;
-    switch (norm)
-    {
-        case NormType::L_INFINITY:
-            error = computeLInfinityError(solution);
-            break;
-        case NormType::L2:
-            error = computeL2Error(solution);
-            break;
-        case NormType::H1_SEMINORM:
-            error = computeH1SeminormError(solution);
-            break;
-    }
-    return error;
-}
-
-double ErrorAnalysis::computeLInfinityError(const Eigen::VectorXd& solution) const
-{
-    double max_error = 0.0;
-
-    // 在每个单元内密集采样求最大误差
-    for (int elem = 0; elem < mesh_->getNumElements(); ++elem)
-    {
-        // 获取单元节点坐标（使用 mesh 方法）
-        auto element_coords = mesh_->getElementNodes(elem);
-
-        auto mapping = GeometryMappingFactory::createMapping(
-            GeometryMappingFactory::ElementType::Triangle, 1, element_coords);
-
-        // 在三角形参考单元内采样
-        for (int i = 0; i < max_error_sampling_points_; ++i)
+        std::cout << std::left << std::setw(8) << i;
+        std::vector<double> coords(sdim);
+        for (int d = 0; d < sdim; ++d)
         {
-            for (int j = 0; j < max_error_sampling_points_ - i; ++j)
-            {
-                double xi = double(i) / (max_error_sampling_points_ - 1);
-                double eta = double(j) / (max_error_sampling_points_ - 1);
+            coords[d] = nodes[i * sdim + d];
+            std::cout << std::fixed << std::setprecision(6) << std::setw(15) << coords[d];
+        }
 
-                // 确保在参考三角形内
-                if (xi + eta <= 1.0)
-                {
-                    // 转换到物理坐标
-                    double x, y;
-                    mapping.mapToPhysical(xi, eta, x, y);
+        double numerical = solution_(i);
+        double exact = config_->exact_solution_u(coords);
+        double error = std::abs(exact - numerical);
 
-                    // 计算误差
-                    double numerical = calculateNumericalSolution(elem, solution, xi, eta);
-                    double exact = exact_solution_(x, y);
-                    double error = std::abs(exact - numerical);
+        std::cout << std::scientific << std::setprecision(6) << std::setw(18)
+                  << numerical << std::setw(18) << exact << std::setw(18) << error
+                  << std::endl;
+    }
 
-                    max_error = std::max(max_error, error);
-                }
-            }
+    if (display_count < num_nodes)
+    {
+        std::cout << "... (omitting " << (num_nodes - display_count)
+                  << " other nodes)" << std::endl;
+    }
+}
+
+double ErrorAnalysis::calculateNumericalSolution(
+    int element_idx, const std::vector<double>& coords_ref) const
+{
+    double numerical_value = 0.0;
+    auto shape_func = ShapeFunctionFactory::createShapeFunction(config_);
+    const auto& elements = config_->getElementConnectivity();
+    const int nodes_per_element = config_->getNodesPerElement();
+
+    for (int i = 0; i < nodes_per_element; ++i)
+    {
+        int global_node_idx = elements[element_idx][i];
+        double shape_value = shape_func->computeTrialFunction(i, coords_ref);
+        numerical_value += solution_(global_node_idx) * shape_value;
+    }
+    return numerical_value;
+}
+
+std::vector<double> ErrorAnalysis::calculateNumericalGradient(
+    int element_idx, const std::vector<double>& coords_ref) const
+{
+    const int sdim = config_->getDimension();
+    std::vector<double> numerical_gradient(sdim, 0.0);
+
+    auto shape_func = ShapeFunctionFactory::createShapeFunction(config_);
+    const auto& elements = config_->getElementConnectivity();
+    const int nodes_per_element = config_->getNodesPerElement();
+    const auto& all_nodes = config_->getNodeCoordinates();
+
+    std::vector<double> element_nodes_coords;
+    element_nodes_coords.reserve(nodes_per_element * sdim);
+    for (int i = 0; i < nodes_per_element; ++i)
+    {
+        int global_node_idx = elements[element_idx][i];
+        for (int d = 0; d < sdim; ++d)
+        {
+            element_nodes_coords.push_back(all_nodes[global_node_idx * sdim + d]);
         }
     }
 
+    auto mapping = GeometryMappingFactory::createMapping(element_nodes_coords, config_);
+
+    for (int i = 0; i < nodes_per_element; ++i)
+    {
+        int global_node_idx = elements[element_idx][i];
+        auto grad_ref = shape_func->computeTrialGradients(i, coords_ref);
+        std::vector<double> grad_phys(sdim);
+        mapping->transformGradient(grad_ref, grad_phys, coords_ref);
+
+        for (int d = 0; d < sdim; ++d)
+        {
+            numerical_gradient[d] += solution_(global_node_idx) * grad_phys[d];
+        }
+    }
+    return numerical_gradient;
+}
+
+double ErrorAnalysis::computeLInfinityError() const
+{
+    double max_error = 0.0;
+    const int num_nodes = config_->getNodesNum();
+    const int sdim = config_->getDimension();
+    const auto& nodes = config_->getNodeCoordinates();
+
+    for (int i = 0; i < num_nodes; ++i)
+    {
+        std::vector<double> coords(sdim);
+        for (int d = 0; d < sdim; ++d)
+        {
+            coords[d] = nodes[i * sdim + d];
+        }
+        double numerical = solution_(i);
+        double exact = config_->exact_solution_u(coords);
+        max_error = std::max(max_error, std::abs(exact - numerical));
+    }
     return max_error;
 }
 
-double ErrorAnalysis::computeL2Error(const Eigen::VectorXd& solution) const
+double ErrorAnalysis::computeL2Error() const
 {
-    if (!hasExactSolution())
-    {
-        return 0.0;
-    }
-
     double l2_error_squared = 0.0;
+    const int num_elements = config_->getElementsNum();
+    const int sdim = config_->getDimension();
+    const int nodes_per_element = config_->getNodesPerElement();
+    const auto& elements = config_->getElementConnectivity();
+    const auto& all_nodes = config_->getNodeCoordinates();
 
-    // 使用高斯积分计算 L2 误差
     auto gauss_points = GaussPointFactory::createGaussPoint(
-        GaussPointFactory::ElementType::Triangle, gauss_integration_points_);
+        static_cast<GaussPointFactory::ElementType>(config_->getElementType()),
+        config_->getErrorGaussPoints());
 
-    for (int elem = 0; elem < mesh_->getNumElements(); ++elem)
+    for (int i = 0; i < num_elements; ++i)
     {
-        // 获取单元节点坐标（使用 mesh 方法）
-        auto element_coords = mesh_->getElementNodes(elem);
+        std::vector<double> element_nodes_coords;
+        element_nodes_coords.reserve(nodes_per_element * sdim);
+        for (int j = 0; j < nodes_per_element; ++j)
+        {
+            int global_node_idx = elements[i][j];
+            for (int d = 0; d < sdim; ++d)
+            {
+                element_nodes_coords.push_back(all_nodes[global_node_idx * sdim + d]);
+            }
+        }
 
-        GeometryMapping2D mapping(element_coords);
-        double jacobian = mapping.getJacobianDet();
+        auto mapping = GeometryMappingFactory::createMapping(element_nodes_coords, config_);
 
-        // 获取积分点坐标和权重向量
-        const auto& points = gauss_points->getPoints();
-        const auto& weights = gauss_points->getWeights();
-
-        // 高斯积分
         for (int gp = 0; gp < gauss_points->getNumPoints(); ++gp)
         {
-            double xi = points[gp * 2];
-            double eta = points[gp * 2 + 1];
-            double weight = weights[gp];
+            std::vector<double> gp_coords_ref;
+            const auto& all_gp_coords = gauss_points->getPoints();
+            gp_coords_ref.assign(all_gp_coords.begin() + gp * sdim,
+                                 all_gp_coords.begin() + (gp + 1) * sdim);
 
-            // 物理坐标
-            double x, y;
-            mapping.mapToPhysical(xi, eta, x, y);
+            double weight = gauss_points->getWeights()[gp];
+            std::vector<double> phys_coords(sdim);
+            mapping->mapToPhysical(gp_coords_ref, phys_coords);
+            double jacobian = mapping->getJacobianDet(gp_coords_ref);
 
-            // 计算误差
-            double numerical = calculateNumericalSolution(elem, solution, xi, eta);
-            double exact = exact_solution_(x, y);
+            double numerical = calculateNumericalSolution(i, gp_coords_ref);
+            double exact = config_->exact_solution_u(phys_coords);
             double error = exact - numerical;
 
-            l2_error_squared += weight * jacobian * error * error;
+            l2_error_squared += error * error * weight * jacobian;
         }
     }
 
     return std::sqrt(l2_error_squared);
 }
 
-double ErrorAnalysis::computeH1SeminormError(const Eigen::VectorXd& solution) const
+double ErrorAnalysis::computeH1SeminormError() const
 {
-    if (!hasExactGradients())
-    {
-        return 0.0;
-    }
-
     double h1_error_squared = 0.0;
+    const int num_elements = config_->getElementsNum();
+    const int sdim = config_->getDimension();
+    const int nodes_per_element = config_->getNodesPerElement();
+    const auto& elements = config_->getElementConnectivity();
+    const auto& all_nodes = config_->getNodeCoordinates();
 
-    // 使用高斯积分计算 H1 半范数误差
     auto gauss_points = GaussPointFactory::createGaussPoint(
-        GaussPointFactory::ElementType::Triangle, gauss_integration_points_);
+        static_cast<GaussPointFactory::ElementType>(config_->getElementType()),
+        config_->getErrorGaussPoints());
 
-    for (int elem = 0; elem < mesh_->getNumElements(); ++elem)
+    for (int i = 0; i < num_elements; ++i)
     {
-        // 获取单元节点坐标（使用 mesh 方法）
-        auto element_coords = mesh_->getElementNodes(elem);
+        std::vector<double> element_nodes_coords;
+        element_nodes_coords.reserve(nodes_per_element * sdim);
+        for (int j = 0; j < nodes_per_element; ++j)
+        {
+            int global_node_idx = elements[i][j];
+            for (int d = 0; d < sdim; ++d)
+            {
+                element_nodes_coords.push_back(all_nodes[global_node_idx * sdim + d]);
+            }
+        }
 
-        GeometryMapping2D mapping(element_coords);
-        double jacobian = mapping.getJacobianDet();
+        auto mapping = GeometryMappingFactory::createMapping(element_nodes_coords, config_);
 
-        // 获取积分点坐标和权重向量
-        const auto& points = gauss_points->getPoints();
-        const auto& weights = gauss_points->getWeights();
-
-        // 高斯积分
         for (int gp = 0; gp < gauss_points->getNumPoints(); ++gp)
         {
-            double xi = points[gp * 2];
-            double eta = points[gp * 2 + 1];
-            double weight = weights[gp];
+            std::vector<double> gp_coords_ref;
+            const auto& all_gp_coords = gauss_points->getPoints();
+            gp_coords_ref.assign(all_gp_coords.begin() + gp * sdim,
+                                 all_gp_coords.begin() + (gp + 1) * sdim);
 
-            // 物理坐标
-            double x, y;
-            mapping.mapToPhysical(xi, eta, x, y);
+            double weight = gauss_points->getWeights()[gp];
+            std::vector<double> phys_coords(sdim);
+            mapping->mapToPhysical(gp_coords_ref, phys_coords);
+            double jacobian = mapping->getJacobianDet(gp_coords_ref);
 
-            // 计算梯度误差
-            double num_grad_x, num_grad_y;
-            calculateNumericalGradient(elem, solution, xi, eta, num_grad_x, num_grad_y);
+            auto num_grad = calculateNumericalGradient(i, gp_coords_ref);
+            std::vector<double> exact_grad(sdim);
+            config_->exact_solution_gradients(phys_coords, exact_grad);
 
-            double exact_grad_x = exact_du_dx_(x, y);
-            double exact_grad_y = exact_du_dy_(x, y);
+            double grad_error_squared = 0;
+            for (int d = 0; d < sdim; ++d)
+            {
+                double error_d = exact_grad[d] - num_grad[d];
+                grad_error_squared += error_d * error_d;
+            }
 
-            double grad_error_x = exact_grad_x - num_grad_x;
-            double grad_error_y = exact_grad_y - num_grad_y;
-
-            // H1 半范数只包含梯度项
-            double integrand = grad_error_x * grad_error_x + grad_error_y * grad_error_y;
-            h1_error_squared += weight * jacobian * integrand;
+            h1_error_squared += grad_error_squared * weight * jacobian;
         }
     }
 
     return std::sqrt(h1_error_squared);
-}
-
-double ErrorAnalysis::calculateNumericalSolution(int element_idx, const Eigen::VectorXd& solution,
-                                                 std::vector<double> coords) const
-{
-    double numerical_value = 0.0;
-    const auto& connectivity = mesh_->getElementConnectivity();
-
-    for (int alpha = 0; alpha < mesh_->getNodesPerElement(); ++alpha)
-    {
-        int global_node = connectivity[element_idx][alpha];
-        double shape_value = g_triangleShapeFunction->computeTrialFunction2D(alpha, coords[0], coords[1]);
-        numerical_value += solution(global_node) * shape_value;
-    }
-
-    return numerical_value;
-}
-
-void ErrorAnalysis::calculateNumericalGradient(int element_idx, const Eigen::VectorXd& solution,
-                                               std::vector<double> coords,
-                                               std::vector<double>& gradients) const
-{
-    gradients.resize(2);
-    double& grad_x = gradients[0];
-    double& grad_y = gradients[1];
-
-    // 获取单元节点坐标（使用 mesh 方法）
-    auto element_coords = mesh_->getElementNodes(element_idx);
-    const auto& connectivity = mesh_->getElementConnectivity();
-
-    GeometryMapping2D mapping(element_coords);
-
-    for (int alpha = 0; alpha < mesh_->getNodesPerElement(); ++alpha)
-    {
-        int global_node = connectivity[element_idx][alpha];
-
-        // 参考单元内的形函数导数
-        double dphi_dxi = g_triangleShapeFunction->computeTrialDerivativeXi(alpha, xi, eta);
-        double dphi_deta = g_triangleShapeFunction->computeTrialDerivativeEta(alpha, xi, eta);
-
-        // 变换到物理空间
-        double dphi_dx, dphi_dy;
-        mapping.transformGradient(dphi_dxi, dphi_deta, dphi_dx, dphi_dy);
-
-        // 累加
-        grad_x += solution(global_node) * dphi_dx;
-        grad_y += solution(global_node) * dphi_dy;
-    }
-}
-
-void ErrorAnalysis2D::printDetailedNodeErrors(const Eigen::VectorXd& solution, int max_nodes) const
-{
-    if (!hasExactSolution())
-    {
-        std::cout << "无精确解，无法显示节点误差详情" << std::endl;
-        return;
-    }
-
-    std::cout << "\n=== 节点误差详情 ===" << std::endl;
-    std::cout << std::left << std::setw(6) << "节点" << std::setw(12) << "x坐标" << std::setw(12)
-              << "y坐标" << std::setw(15) << "数值解" << std::setw(15) << "精确解" << std::setw(15)
-              << "绝对误差" << std::endl;
-    std::cout << std::string(75, '-') << std::endl;
-
-    int display_count = std::min(max_nodes, mesh_->getNumNodes());
-    const auto& coordinates = mesh_->getNodeCoordinates();
-
-    for (int i = 0; i < display_count; ++i)
-    {
-        double x = coordinates[2 * i];
-        double y = coordinates[2 * i + 1];
-        double numerical = solution(i);
-        double exact = exact_solution_(x, y);
-        double error = std::abs(exact - numerical);
-
-        std::cout << std::left << std::setw(6) << i << std::setw(12) << std::fixed
-                  << std::setprecision(6) << x << std::setw(12) << std::fixed
-                  << std::setprecision(6) << y << std::setw(15) << std::scientific
-                  << std::setprecision(6) << numerical << std::setw(15) << std::scientific
-                  << std::setprecision(6) << exact << std::setw(15) << std::scientific
-                  << std::setprecision(6) << error << std::endl;
-    }
-
-    if (display_count < mesh_->getNumNodes())
-    {
-        std::cout << "... (省略剩余 " << (mesh_->getNumNodes() - display_count) << " 个节点)"
-                  << std::endl;
-    }
-}
-
-// ================================
-// ErrorAnalysisFactory 工厂实现
-// ================================
-
-std::unique_ptr<ErrorAnalysis2D> ErrorAnalysisFactory::create2D(
-    std::shared_ptr<Mesh2D> mesh, ErrorAnalysis2D::ExactSolutionFunc exact_sol,
-    ErrorAnalysis2D::ExactGradientFunc exact_dx, ErrorAnalysis2D::ExactGradientFunc exact_dy)
-{
-    return std::make_unique<ErrorAnalysis2D>(mesh, exact_sol, exact_dx, exact_dy);
-}
-
-std::unique_ptr<ErrorAnalysis2D> ErrorAnalysisFactory::create2DWithFullSolution(
-    std::shared_ptr<Mesh2D> mesh, ErrorAnalysis2D::ExactSolutionFunc exact_sol,
-    ErrorAnalysis2D::ExactGradientFunc exact_dx, ErrorAnalysis2D::ExactGradientFunc exact_dy)
-{
-    if (!exact_sol || !exact_dx || !exact_dy)
-    {
-        throw std::invalid_argument("完整解析解需要提供解函数和两个方向的导数函数");
-    }
-
-    return std::make_unique<ErrorAnalysis2D>(mesh, exact_sol, exact_dx, exact_dy);
 }

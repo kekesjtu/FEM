@@ -1,6 +1,6 @@
 #include <iostream>
-#include "error_analysis_2d.h"
-#include "fem_solver_2d.h"
+#include "error_analysis.h"
+#include "fem_solver.h"
 
 /**
  * @brief 二维有限元求解器的主函数

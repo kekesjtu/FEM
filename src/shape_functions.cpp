@@ -1,4 +1,5 @@
-#include "shape_functions_2d.h"
+#include "shape_functions.h"
+#include "config.h"
 #include <stdexcept>
 
 // ================ 面向对象实现 ================
@@ -85,13 +86,13 @@ std::vector<double> TriangleLinearShapeFunction::computeTestGradients(int elemen
 
 // ================ 工厂模式实现 ================
 
-std::unique_ptr<ShapeFunction> ShapeFunctionFactory::createShapeFunction(ElementType elementType,
-                                                                         int order)
+std::unique_ptr<ShapeFunction> ShapeFunctionFactory::createShapeFunction(
+    std::shared_ptr<Config> config_)
 {
-    switch (elementType)
+    switch (config_->getElementType())
     {
-        case ElementType::Triangle:
-            switch (order)
+        case Config::ElementType::TRIANGLE:
+            switch (config_->getOrder())
             {
                 case 1:
                     return std::make_unique<TriangleLinearShapeFunction>();
@@ -99,7 +100,7 @@ std::unique_ptr<ShapeFunction> ShapeFunctionFactory::createShapeFunction(Element
                     throw std::invalid_argument("Unsupported order for Triangle");
             }
 
-        case ElementType::Quadrilateral:
+        case Config::ElementType::QUADRILATERAL:
             throw std::invalid_argument(
                 "Requested ElementType is not implemented in ShapeFunctionFactory");
         default:

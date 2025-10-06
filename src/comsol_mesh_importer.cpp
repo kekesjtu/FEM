@@ -4,9 +4,8 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include "fem_solver_2d.h"
 
-ComsolMeshImporter::ComsolMeshImporter() : is_imported_(false)
+ComsolMeshImporter::ComsolMeshImporter() : is_imported_(false), dimension_(0)
 {
 }
 
@@ -42,50 +41,8 @@ void ComsolMeshImporter::populateGlobalArrays()
         std::cerr << "错误：必须先成功导入网格才能填充全局数组" << std::endl;
         return;
     }
-
-    // 清空全局数组
-    P.clear();
-    T.clear();
-    boundary_edges.clear();
-
-    // 1. 填充节点坐标数组P（直接按顺序存储）
-    P.reserve(nodes_.size() * 2);
-    for (const auto& node_pair : nodes_)
-    {
-        P.push_back(node_pair.first);   // x坐标
-        P.push_back(node_pair.second);  // y坐标
-    }
-
-    // 2. 填充单元连接数组T（直接使用原始索引）
-    T.reserve(triangular_elements_.size());
-    for (const auto& element_nodes : triangular_elements_)
-    {
-        T.push_back(element_nodes);
-    }
-
-    // 3. 填充边界边数组boundary_edges（直接使用原始索引）
-    boundary_edges.reserve(edge_elements_.size());
-    for (const auto& edge_nodes : edge_elements_)
-    {
-        int node1 = edge_nodes[0];
-        int node2 = edge_nodes[1];
-
-        // 寻找包含此边界边的三角形单元
-        int element_index = findElementContainingEdge(node1, node2);
-
-        BoundaryEdge boundary_edge;
-        boundary_edge.bc = BoundaryCondition::Dirichlet(0.0);  // 默认边界条件
-        boundary_edge.element_index = element_index;
-        boundary_edge.global_node_index1 = node1;
-        boundary_edge.global_node_index2 = node2;
-
-        boundary_edges.push_back(boundary_edge);
-    }
-
-    std::cout << "全局数组填充完成：" << std::endl;
-    std::cout << "  节点数 N = " << P.size() / 2 << std::endl;
-    std::cout << "  单元数 M = " << T.size() << std::endl;
-    std::cout << "  边界边数 = " << boundary_edges.size() << std::endl;
+    // 此函数为旧版兼容代码，在新设计中应被废弃
+    // 仅为示例保留
 }
 
 bool ComsolMeshImporter::parseFile(const std::string& filename)
@@ -98,6 +55,21 @@ bool ComsolMeshImporter::parseFile(const std::string& filename)
     }
 
     std::string line;
+
+    // 优先解析维度
+    while (std::getline(file, line))
+    {
+        if (line.find("sdim") != std::string::npos)
+        {
+            std::istringstream iss(line);
+            iss >> dimension_; // 直接读取行首的数字
+            break;
+        }
+    }
+    
+    // 重置文件流以重新搜索
+    file.clear();
+    file.seekg(0, std::ios::beg);
 
     // 跳过文件头，找到节点坐标部分
     while (std::getline(file, line))
@@ -151,11 +123,15 @@ bool ComsolMeshImporter::parseNodes(std::ifstream& file, std::string& line)
 
         // 尝试解析坐标
         std::istringstream iss(line);
-        double x, y;
-        if (iss >> x >> y)
+        double x, y, z; // 为3D做准备
+        if (dimension_ == 2 && (iss >> x >> y))
         {
-            // 直接存储坐标对，索引就是在vector中的位置
             nodes_.push_back({x, y});
+        }
+        else if (dimension_ == 3 && (iss >> x >> y >> z))
+        {
+            // 当前数据结构只支持2D，但为未来扩展留下接口
+            nodes_.push_back({x, y}); // 暂时只存xy
         }
         else
         {
@@ -385,6 +361,7 @@ void ComsolMeshImporter::printImportStatistics() const
 {
     std::cout << "\n=== 网格导入统计信息 ===" << std::endl;
     std::cout << "文件名: " << filename_ << std::endl;
+    std::cout << "网格维度: " << dimension_ << std::endl;
     std::cout << "节点总数: " << nodes_.size() << std::endl;
     std::cout << "三角形单元数: " << triangular_elements_.size() << std::endl;
     std::cout << "边界边数: " << edge_elements_.size() << std::endl;
@@ -410,6 +387,7 @@ void ComsolMeshImporter::clearData()
     triangular_elements_.clear();
     edge_elements_.clear();
     is_imported_ = false;
+    dimension_ = 0;
 }
 
 void ComsolMeshImporter::trimString(std::string& str) const
@@ -422,4 +400,40 @@ void ComsolMeshImporter::trimString(std::string& str) const
         std::find_if(str.rbegin(), str.rend(), [](unsigned char ch) { return !std::isspace(ch); })
             .base(),
         str.end());
+}
+
+// --- 数据访问接口实现 ---
+
+int ComsolMeshImporter::getDimension() const
+{
+    return dimension_;
+}
+
+const std::vector<std::pair<double, double>>& ComsolMeshImporter::getNodes() const
+{
+    return nodes_;
+}
+
+const std::vector<std::vector<int>>& ComsolMeshImporter::getTriangularElements() const
+{
+    return triangular_elements_;
+}
+
+int ComsolMeshImporter::getNodesNum() const
+{
+    return nodes_.size();
+}
+
+int ComsolMeshImporter::getElementsNum() const
+{
+    return triangular_elements_.size();
+}
+
+int ComsolMeshImporter::getNodesPerElement() const
+{
+    if (!triangular_elements_.empty())
+    {
+        return triangular_elements_[0].size();
+    }
+    return 0;
 }

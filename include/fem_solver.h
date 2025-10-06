@@ -3,7 +3,7 @@
 
 #include <Eigen/Sparse>
 #include <vector>
-#include "problem_definition.h"
+#include "config.h"
 
 // --- 全局变量与数据结构 ---
 // 使用 extern 关键字声明全局变量，定义将在 fem_solver_2d.cpp 中
@@ -14,7 +14,7 @@ extern Eigen::VectorXd b;                     // 载荷向量
 extern Eigen::VectorXd u;                     // 解向量
 extern std::vector<std::vector<int>> T;       // 单元连接矩阵 [element][local_node] = global_node
 extern std::vector<double> P;                 // 节点坐标 [x0, y0, x1, y1, ...]
-extern std::vector<BoundaryEdge> boundary_edges;  // 边界边信息
+extern std::vector<Config::Boundary> boundary_edges;  // 边界边信息
 
 // --- 核心 FEM 函数声明 ---
 

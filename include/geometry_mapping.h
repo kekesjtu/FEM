@@ -1,9 +1,10 @@
 #ifndef GEOMETRY_MAPPING_H
 #define GEOMETRY_MAPPING_H
 
+#include <memory>
 #include <stdexcept>  // 用于抛出异常
 #include <vector>
-#include <memory>
+#include "config.h"
 
 /**
  * @brief 几何映射的抽象基类
@@ -15,9 +16,15 @@
 class GeometryMapping
 {
   protected:
-    std::vector<double> element_coords;  // 单元节点坐标
-    int num_nodes;                       // 单元节点数量
-    int dimension;                       // 空间维度 (2D/3D)
+    std::vector<double> element_coords_;             // 单元节点坐标
+    int nodes_num_per_element_;                      // 单元节点数量
+    int order_;                                      // 单元的阶数
+    int dimension_;                                  // 空间维度 (2D/3D)
+    double jacobian_det_;                            // 雅可比行列式 (常数)
+    std::vector<std::vector<double>> jacobian_inv_;  // 逆雅可比矩阵 (常数)
+
+  private:
+    virtual void computeJacobian() = 0;
 
   public:
     /**
@@ -26,14 +33,18 @@ class GeometryMapping
      * @param nodes 节点数量
      * @param dim 空间维度
      */
-    GeometryMapping(const std::vector<double>& coords, int nodes, int dim)
-        : element_coords(coords), num_nodes(nodes), dimension(dim)
+    GeometryMapping(const std::vector<double>& element_coords, int nodes, int order, int dim)
+        : element_coords_(element_coords),
+          nodes_num_per_element_(nodes),
+          order_(order),
+          dimension_(dim)
     {
-        if (coords.size() != static_cast<size_t>(nodes * dim))
+        if (element_coords_.size() != static_cast<size_t>(nodes * dim))
         {
             throw std::invalid_argument(
                 "Coordinate vector size does not match nodes and dimension.");
         }
+        computeJacobian();
     }
 
     virtual ~GeometryMapping() = default;
@@ -64,13 +75,17 @@ class GeometryMapping
                                    const std::vector<double>& coord_ref) const = 0;
 
     // 获取基本信息
-    int getNumNodes() const
+    int getNumNodesPerElement() const
     {
-        return num_nodes;
+        return nodes_num_per_element_;
     }
     int getDimension() const
     {
-        return dimension;
+        return dimension_;
+    }
+    int getOrder() const
+    {
+        return order_;
     }
 };
 
@@ -87,8 +102,8 @@ class GeometryMapping2D : public GeometryMapping
      * @param coords 单元节点坐标
      * @param nodes 节点数量
      */
-    GeometryMapping2D(const std::vector<double>& coords, int nodes)
-        : GeometryMapping(coords, nodes, 2)  // 维度固定为 2
+    GeometryMapping2D(const std::vector<double>& element_coords, int order, int nodes)
+        : GeometryMapping(element_coords, nodes, order, 2)  // 维度固定为 2
     {
     }
 
@@ -111,20 +126,21 @@ class GeometryMapping2D : public GeometryMapping
 class TriangleLinearMapping : public GeometryMapping2D
 {
   private:
-    double jacobian_det;                            // 雅可比行列式 (常数)
-    std::vector<std::vector<double>> jacobian_inv;  // 逆雅可比矩阵 (常数)
-
-    /**
-     * @brief 计算常数雅可比矩阵及其相关量
-     */
-    void computeConstantJacobian();
+    void computeJacobian() override;
 
   public:
     /**
      * @brief 构造函数 - 创建2D线性三角形映射
      * @param coords 三个顶点的坐标 [x0, y0, x1, y1, x2, y2]
      */
-    TriangleLinearMapping(const std::vector<double>& coords);
+    /**
+     * @brief 构造函数 - 创建2D线性三角形映射
+     * @param coords 三个顶点的坐标 [x0, y0, x1, y1, x2, y2]
+     */
+    TriangleLinearMapping(const std::vector<double>& element_coords)
+        : GeometryMapping2D(element_coords, 3, 1)  // 调用基类构造函数，指定3个节点,线性
+    {
+    }
 
     void mapToPhysical(const std::vector<double>& coord_ref,
                        std::vector<double>& coord_phys) const override;
@@ -138,10 +154,6 @@ class TriangleLinearMapping : public GeometryMapping2D
     double getElementArea() const override;
 };
 
-//-----------------------------------------------------------------------------
-// 工厂类
-// =========================================================================
-
 /**
  * @brief 几何映射工厂类
  *
@@ -150,17 +162,10 @@ class TriangleLinearMapping : public GeometryMapping2D
  */
 class GeometryMappingFactory
 {
-  public:
-  
-    /**
-     * @brief 单元类型枚举
-     */
-    enum class ElementType
-    {
-        Triangle,      // 三角形单元
-        Quadrilateral  // 四边形单元
-    };
+  protected:
+    std::shared_ptr<Config> config_;
 
+  public:
     /**
      * @brief 创建几何映射对象
      *
@@ -169,8 +174,8 @@ class GeometryMappingFactory
      * @param coords 该单元所有节点的坐标
      * @return 指向创建的几何映射对象的 unique_ptr。返回基类指针以支持多态。
      */
-    static std::unique_ptr<GeometryMapping> createMapping(ElementType type, int order,
-                                                          const std::vector<double>& element_coords);
+    static std::unique_ptr<GeometryMapping> createMapping(const std::vector<double>& element_coords,
+                                                          std::shared_ptr<Config> config_);
 };
 
 #endif  // GEOMETRY_MAPPING_H

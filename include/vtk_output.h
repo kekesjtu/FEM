@@ -1,121 +1,138 @@
 #ifndef VTK_OUTPUT_H
 #define VTK_OUTPUT_H
 
-#include <Eigen/Core>  // 只需要VectorXd，不需要整个Dense模块
+#include <Eigen/Core>
+#include <functional>
 #include <memory>
 #include <string>
-#include "mesh_hierarchy.h"
+#include "config.h"
 
 /**
  * @brief VTK输出基类
+ *
+ * 负责将有限元计算的结果（数值解、精确解、误差）输出为VTK格式文件，
+ * 以便在ParaView等后处理软件中进行可视化。
+ *
+ * 设计原则：此类存储从Config对象中提取的、用于可视化的核心网格数据副本。
+ * 这种设计使其在数据层面自包含，便于单独测试和调试。
+ * 对于需要复杂计算（如密集采样）的方法，将Config对象作为参数传入，
+ * 以便在方法内部访问工厂来创建所需组件（如GeometryMapping）。
  */
 class VTKOutput
 {
+  protected:
+    int dimension_;
+    int nodes_num_;
+    int elements_num_;
+    int nodes_num_per_element_;
+    const std::vector<double>& coordinates_;
+    const std::vector<std::vector<int>>& connectivity_;
+    const Eigen::VectorXd& solution_;
+    int num_points_per_side_ = 5;  // 每个单元边上采样点数（用于加密采样）
+
   public:
-    VTKOutput() = default;
+    VTKOutput(int dimension, int nodes_num, int elements_num, int nodes_num_per_element,
+              int num_points_per_side, const std::vector<double>& coordinates,
+              const std::vector<std::vector<int>>& connectivity, const Eigen::VectorXd& solution)
+        : dimension_(dimension),
+          nodes_num_(nodes_num),
+          elements_num_(elements_num),
+          nodes_num_per_element_(nodes_num_per_element),
+          num_points_per_side_(num_points_per_side),
+          coordinates_(coordinates),
+          connectivity_(connectivity),
+          solution_(solution)
+    {
+    }
+
     virtual ~VTKOutput() = default;
 
     /**
-     * @brief 输出VTK格式文件用于ParaView可视化（纯虚函数）
-     *
-     * @param filename 输出文件名 (不包含.vtu扩展名)
-     * @param solution 求解向量，包含每个节点的数值解
+     * @brief 输出数值解的VTK文件
+     * @param filename 输出文件名 (不含.vtu)
      */
-    virtual void outputNumericalSolution(const std::string& filename,
-                                         const Eigen::VectorXd& solution) = 0;
+    virtual void outputNumericalSolution(const std::string& filename) = 0;
 
     /**
-     * @brief 输出包含解析解的VTK文件（纯虚函数）
-     *
-     * @param filename 输出文件名 (不包含.vtu扩展名)
-     * @param exact_func 精确解函数指针
+     * @brief 输出精确解的VTK文件
+     * @param filename 输出文件名 (不含.vtu)
+     * @param exact_func 用于计算精确解的函数
      */
-    virtual void outputExactSolution(const std::string& filename,
-                                     double (*exact_func)(double, double)) = 0;
+    virtual void outputExactSolution(
+        const std::string& filename,
+        const std::function<double(const std::vector<double>&)>& exact_func) = 0;
 
     /**
-     * @brief 输出包含数值解、解析解和误差的对比VTK文件（纯虚函数）
-     *
-     * @param filename 输出文件名 (不包含.vtu扩展名)
-     * @param solution 数值解向量
-     * @param exact_func 精确解函数指针
+     * @brief 输出加密采样的误差VTK文件
+     * @param filename 输出文件名 (不含.vtu)
+     * @param config 配置对象，用于访问工厂和问题定义
      */
-    virtual void outputComparison(const std::string& filename, const Eigen::VectorXd& solution,
-                                  double (*exact_func)(double, double)) = 0;
+    virtual void outputDenseSamplingError(const std::string& filename,
+                                          std::shared_ptr<Config> config) = 0;
+
+  protected:
+    bool ensureDirectoryExists(const std::string& directory);
 };
 
 /**
- * @brief 二维VTK输出类，注入Mesh2D
+ * @brief 二维VTK输出类
  */
 class VTKOutput2D : public VTKOutput
 {
-  private:
-    std::shared_ptr<Mesh2D> mesh2D_;
-
   public:
-    explicit VTKOutput2D(std::shared_ptr<Mesh2D> mesh2D) : mesh2D_(mesh2D)
+    VTKOutput2D(int nodes_num, int elements_num, int nodes_num_per_element,int num_points_per_side,
+                const std::vector<double>& coordinates,
+                const std::vector<std::vector<int>>& connectivity, const Eigen::VectorXd& solution)
+        : VTKOutput(2, nodes_num, elements_num, nodes_num_per_element, num_points_per_side, coordinates, connectivity,
+                    solution)
     {
-    }
-
-    /**
-     * @brief 输出二维VTK格式文件用于ParaView可视化
-     *
-     * 输出包含三角形网格和数值解的VTU文件，可以在ParaView中打开进行可视化
-     *
-     * @param filename 输出文件名 (不包含.vtu扩展名)
-     * @param solution 求解向量，包含每个节点的数值解
-     */
-    void outputNumericalSolution(const std::string& filename,
-                                 const Eigen::VectorXd& solution) override;
-
-    /**
-     * @brief 输出包含解析解的二维VTK文件
-     *
-     * @param filename 输出文件名 (不包含.vtu扩展名)
-     * @param exact_func 精确解函数指针
-     */
-    void outputExactSolution(const std::string& filename,
-                             double (*exact_func)(double, double)) override;
-
-    /**
-     * @brief 输出包含数值解、解析解和误差的对比二维VTK文件
-     *
-     * @param filename 输出文件名 (不包含.vtu扩展名)
-     * @param solution 数值解向量
-     * @param exact_func 精确解函数指针
-     */
-    void outputComparison(const std::string& filename, const Eigen::VectorXd& solution,
-                          double (*exact_func)(double, double)) override;
-
-    /**
-     * @brief 输出加密采样网格的二维VTK文件
-     *
-     * @param filename 输出文件名 (不包含.vtu扩展名)
-     * @param solution 数值解向量
-     * @param exact_func 精确解函数指针
-     * @param num_points_per_side 每边采样点数（默认5）
-     */
-    void outputDenseSamplingError(const std::string& filename, const Eigen::VectorXd& solution,
-                                  double (*exact_func)(double, double),
-                                  int num_points_per_side = 5);
-
-    /**
-     * @brief 获取注入的Mesh2D对象
-     *
-     * @return std::shared_ptr<Mesh2D> 注入的网格对象
-     */
-    std::shared_ptr<Mesh2D> getMesh2D() const
-    {
-        return mesh2D_;
     }
 };
 
 /**
- * @brief 确保输出目录存在
- *
- * @param directory 目录路径
- * @return bool 目录创建是否成功
+ * @brief 二维三角形单元VTK输出类
  */
-bool ensureDirectoryExists(const std::string& directory);
+class TriangleVTKOutput2D : public VTKOutput2D
+{
+  public:
+    TriangleVTKOutput2D(int nodes_num, int elements_num, int num_points_per_side,
+                        const std::vector<double>& coordinates,
+                        const std::vector<std::vector<int>>& connectivity,
+                        const Eigen::VectorXd& solution)
+        : VTKOutput2D(nodes_num, elements_num, 3, num_points_per_side, coordinates, connectivity,
+                      solution)
+    {
+    }
+
+    void outputNumericalSolution(const std::string& filename) override;
+
+    void outputExactSolution(
+        const std::string& filename,
+        const std::function<double(const std::vector<double>&)>& exact_func) override;
+
+    void outputDenseSamplingError(const std::string& filename,
+                                  std::shared_ptr<Config> config) override;
+
+  private:
+    // 辅助函数，计算单元内任意参考坐标点的数值解
+    double evaluateNumericalSolutionAt(int element_index, const std::vector<double>& coords_ref,
+                                       std::shared_ptr<Config> config) const;
+};
+
+/**
+ * @brief VTK输出工厂类
+ */
+class VTKOutputFactory
+{
+  public:
+    /**
+     * @brief 根据Config创建VTK输出对象
+     * @param config 配置对象
+     * @param solution 数值解向量
+     * @return 指向创建的VTK输出对象的 unique_ptr
+     */
+    static std::unique_ptr<VTKOutput> createVTKOutput(std::shared_ptr<Config> config,
+                                                      const Eigen::VectorXd& solution);
+};
 
 #endif  // VTK_OUTPUT_H

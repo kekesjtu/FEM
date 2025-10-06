@@ -1,4 +1,4 @@
-#include "gauss_quadrature_2d.h"
+#include "gauss_quadrature.h"
 #include <stdexcept>
 
 // ============================================================================

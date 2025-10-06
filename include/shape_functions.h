@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include "config.h"
 
 /**
  * @brief 形函数基类 - 定义形函数的通用接口
@@ -15,7 +16,7 @@ class ShapeFunction
     /**
      * @brief 获取形函数的节点数量
      */
-    virtual int getNumNodes() const = 0;
+    virtual int getNumNodesPerElement() const = 0;
 
     /**
      * @brief 计算试探函数值
@@ -65,7 +66,7 @@ class ShapeFunction2D : public ShapeFunction
     /**
      * @brief 获取参考坐标维度（二维）
      */
-    virtual int getDimension() const
+    int getDimension() const
     {
         return 2;
     }
@@ -80,7 +81,7 @@ class TriangleLinearShapeFunction : public ShapeFunction2D
     TriangleLinearShapeFunction() = default;
     virtual ~TriangleLinearShapeFunction() = default;
 
-    int getNumNodes() const override
+    int getNumNodesPerElement() const override
     {
         return 3;
     }
@@ -100,24 +101,17 @@ class TriangleLinearShapeFunction : public ShapeFunction2D
  */
 class ShapeFunctionFactory
 {
+  protected:
+    std::shared_ptr<Config> config_;
+
   public:
-    /**
-     * @brief 单元类型枚举
-     */
-    enum class ElementType
-    {
-        Triangle,       // 三角形单元
-        Quadrilateral,  // 四边形单元 (预留)
-        Tetrahedron,    // 四面体单元 (预留)
-        Hexahedron      // 六面体单元 (预留)
-    };
     /**
      * @brief 统一的形函数创建接口 - 用户只需调用这一个函数
      * @param elementType 单元类型
      * @param order 形函数阶数
      * @return 形函数对象的智能指针，自动返回对应的具体类型
      */
-    static std::unique_ptr<ShapeFunction> createShapeFunction(ElementType elementType, int order);
+    static std::unique_ptr<ShapeFunction> createShapeFunction(std::shared_ptr<Config> config_);
 };
 
 #endif  // SHAPE_FUNCTIONS_2D_H
