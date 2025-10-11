@@ -1,0 +1,104 @@
+[
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\comsol_mesh_importer.cpp.obj -c E:\\code\\FEM\\src\\comsol_mesh_importer.cpp",
+  "file": "E:/code/FEM/src/comsol_mesh_importer.cpp",
+  "output": "CMakeFiles/FEM_solution.dir/src/comsol_mesh_importer.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\config.cpp.obj -c E:\\code\\FEM\\src\\config.cpp",
+  "file": "E:/code/FEM/src/config.cpp",
+  "output": "CMakeFiles/FEM_solution.dir/src/config.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\error_analysis.cpp.obj -c E:\\code\\FEM\\src\\error_analysis.cpp",
+  "file": "E:/code/FEM/src/error_analysis.cpp",
+  "output": "CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\fem_solver.cpp.obj -c E:\\code\\FEM\\src\\fem_solver.cpp",
+  "file": "E:/code/FEM/src/fem_solver.cpp",
+  "output": "CMakeFiles/FEM_solution.dir/src/fem_solver.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\gauss_quadrature.cpp.obj -c E:\\code\\FEM\\src\\gauss_quadrature.cpp",
+  "file": "E:/code/FEM/src/gauss_quadrature.cpp",
+  "output": "CMakeFiles/FEM_solution.dir/src/gauss_quadrature.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\geometry_mapping.cpp.obj -c E:\\code\\FEM\\src\\geometry_mapping.cpp",
+  "file": "E:/code/FEM/src/geometry_mapping.cpp",
+  "output": "CMakeFiles/FEM_solution.dir/src/geometry_mapping.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\main.cpp.obj -c E:\\code\\FEM\\src\\main.cpp",
+  "file": "E:/code/FEM/src/main.cpp",
+  "output": "CMakeFiles/FEM_solution.dir/src/main.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\shape_functions.cpp.obj -c E:\\code\\FEM\\src\\shape_functions.cpp",
+  "file": "E:/code/FEM/src/shape_functions.cpp",
+  "output": "CMakeFiles/FEM_solution.dir/src/shape_functions.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\vtk_output.cpp.obj -c E:\\code\\FEM\\src\\vtk_output.cpp",
+  "file": "E:/code/FEM/src/vtk_output.cpp",
+  "output": "CMakeFiles/FEM_solution.dir/src/vtk_output.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\comsol_mesh_importer.cpp.obj -c E:\\code\\FEM\\src\\comsol_mesh_importer.cpp",
+  "file": "E:/code/FEM/src/comsol_mesh_importer.cpp",
+  "output": "CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\config.cpp.obj -c E:\\code\\FEM\\src\\config.cpp",
+  "file": "E:/code/FEM/src/config.cpp",
+  "output": "CMakeFiles/FEM_lib.dir/src/config.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\error_analysis.cpp.obj -c E:\\code\\FEM\\src\\error_analysis.cpp",
+  "file": "E:/code/FEM/src/error_analysis.cpp",
+  "output": "CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\fem_solver.cpp.obj -c E:\\code\\FEM\\src\\fem_solver.cpp",
+  "file": "E:/code/FEM/src/fem_solver.cpp",
+  "output": "CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\gauss_quadrature.cpp.obj -c E:\\code\\FEM\\src\\gauss_quadrature.cpp",
+  "file": "E:/code/FEM/src/gauss_quadrature.cpp",
+  "output": "CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\geometry_mapping.cpp.obj -c E:\\code\\FEM\\src\\geometry_mapping.cpp",
+  "file": "E:/code/FEM/src/geometry_mapping.cpp",
+  "output": "CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\shape_functions.cpp.obj -c E:\\code\\FEM\\src\\shape_functions.cpp",
+  "file": "E:/code/FEM/src/shape_functions.cpp",
+  "output": "CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\vtk_output.cpp.obj -c E:\\code\\FEM\\src\\vtk_output.cpp",
+  "file": "E:/code/FEM/src/vtk_output.cpp",
+  "output": "CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj"
+}
+]

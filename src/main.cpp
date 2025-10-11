@@ -18,7 +18,7 @@ int main()
     applyBoundaryConditions();
     std::cout << "步骤 3: 边界条件施加完成。" << std::endl;
 
-    solveLinearSystem();  // 默认参数为"CG", "DiagonalPreconditioner", 1e-8, 1000, true
+    solveLinearSystem(); 
     std::cout << "步骤 4: 线性方程组求解完成。" << std::endl;
 
     postprocess();

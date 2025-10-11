@@ -1,0 +1,40 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.associations": {
+      "*.asm": "masm",
+      "*.uvprojx": "c",
+      "ostream": "cpp",
+      "array": "cpp",
+      "atomic": "cpp",
+      "bit": "cpp",
+      "cctype": "cpp",
+      "charconv": "cpp",
+      "clocale": "cpp",
+      "cmath": "cpp",
+      "compare": "cpp",
+      "complex": "cpp",
+      "concepts": "cpp",
+      "cstddef": "cpp",
+      "cstdint": "cpp",
+      "cstdio": "cpp",
+      "cstdlib": "cpp",
+      "cstring": "cpp",
+      "ctime": "cpp",
+      "cwchar": "cpp",
+      "cwctype": "cpp",
+      "deque": "cpp",
+      "list": "cpp",
+      "map": "cpp",
+      "set": "cpp",
+      "string": "cpp",
+      "unordered_map": "cpp",
+      "vector": "cpp"
+    }
+    // ...existing code...
+  }
+}

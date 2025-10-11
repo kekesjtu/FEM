@@ -1,0 +1,24 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "default",
+      "displayName": "默认配置",
+      "description": "FEM项目默认调试配置",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "E:/msys64/ucrt64/bin/gcc.exe",
+        "CMAKE_CXX_COMPILER": "E:/msys64/ucrt64/bin/g++.exe"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "displayName": "默认构建",
+      "configurePreset": "default"
+    }
+  ]
+}

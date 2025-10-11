@@ -1,8 +1,4 @@
 #include "error_analysis.h"
-#include "config.h"
-#include "gauss_quadrature.h"
-#include "geometry_mapping.h"
-#include "shape_functions.h"
 #include <Eigen/Dense>
 #include <cmath>
 #include <iomanip>
@@ -10,9 +6,12 @@
 #include <memory>
 #include <numeric>
 #include <vector>
+#include "config.h"
+#include "gauss_quadrature.h"
+#include "geometry_mapping.h"
+#include "shape_functions.h"
 
-ErrorAnalysis::ErrorAnalysis(std::shared_ptr<Config> config,
-                             const Eigen::VectorXd& solution)
+ErrorAnalysis::ErrorAnalysis(std::shared_ptr<Config> config, const Eigen::VectorXd& solution)
     : config_(config), solution_(solution)
 {
 }
@@ -67,8 +66,8 @@ void ErrorAnalysis::printDetailedNodeErrors(int max_nodes) const
     std::cout << std::left << std::setw(8) << "Node";
     for (int i = 0; i < sdim; ++i)
         std::cout << std::setw(15) << "coord_" + std::to_string(i);
-    std::cout << std::setw(18) << "Numerical" << std::setw(18) << "Exact"
-              << std::setw(18) << "Absolute Error" << std::endl;
+    std::cout << std::setw(18) << "Numerical" << std::setw(18) << "Exact" << std::setw(18)
+              << "Absolute Error" << std::endl;
     std::cout << std::string(8 + sdim * 15 + 3 * 18, '-') << std::endl;
 
     const int num_nodes = config_->getNodesNum();
@@ -89,20 +88,19 @@ void ErrorAnalysis::printDetailedNodeErrors(int max_nodes) const
         double exact = config_->exact_solution_u(coords);
         double error = std::abs(exact - numerical);
 
-        std::cout << std::scientific << std::setprecision(6) << std::setw(18)
-                  << numerical << std::setw(18) << exact << std::setw(18) << error
-                  << std::endl;
+        std::cout << std::scientific << std::setprecision(6) << std::setw(18) << numerical
+                  << std::setw(18) << exact << std::setw(18) << error << std::endl;
     }
 
     if (display_count < num_nodes)
     {
-        std::cout << "... (omitting " << (num_nodes - display_count)
-                  << " other nodes)" << std::endl;
+        std::cout << "... (omitting " << (num_nodes - display_count) << " other nodes)"
+                  << std::endl;
     }
 }
 
-double ErrorAnalysis::calculateNumericalSolution(
-    int element_idx, const std::vector<double>& coords_ref) const
+double ErrorAnalysis::calculateNumericalSolution(int element_idx,
+                                                 const std::vector<double>& coords_ref) const
 {
     double numerical_value = 0.0;
     auto shape_func = ShapeFunctionFactory::createShapeFunction(config_);
@@ -189,7 +187,7 @@ double ErrorAnalysis::computeL2Error() const
 
     auto gauss_points = GaussPointFactory::createGaussPoint(
         static_cast<GaussPointFactory::ElementType>(config_->getElementType()),
-        config_->getErrorGaussPoints());
+        config_->getErrorGaussPointsNum());
 
     for (int i = 0; i < num_elements; ++i)
     {
@@ -240,7 +238,7 @@ double ErrorAnalysis::computeH1SeminormError() const
 
     auto gauss_points = GaussPointFactory::createGaussPoint(
         static_cast<GaussPointFactory::ElementType>(config_->getElementType()),
-        config_->getErrorGaussPoints());
+        config_->getErrorGaussPointsNum());
 
     for (int i = 0; i < num_elements; ++i)
     {

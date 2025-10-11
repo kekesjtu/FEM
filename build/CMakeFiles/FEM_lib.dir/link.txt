@@ -1,0 +1,2 @@
+E:\msys64\ucrt64\bin\ar.exe qc lib\libFEM_lib.a CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.obj CMakeFiles/FEM_lib.dir/src/config.cpp.obj CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.obj CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj
+E:\msys64\ucrt64\bin\ranlib.exe lib\libFEM_lib.a

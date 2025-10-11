@@ -22,8 +22,8 @@ Eigen::VectorXd u;
 std::shared_ptr<Config> config = std::make_shared<Config>();  // 配置对象，包含网格和问题定义
 
 // --- 内部辅助函数声明 ---
-double calculateStiffnessEntry(int e, int alpha, int beta, int numGaussPoints);
-double calculateLoadEntry(int e, int beta, int numGaussPoints);
+double calculateStiffnessEntry(int e, int alpha, int beta, int gaussPointsNum);
+double calculateLoadEntry(int e, int beta, int gaussPointsNum);
 
 // --- FEM 函数实现 ---
 
@@ -39,18 +39,13 @@ void preprocess()
     {
         n = connectivity[0].size();  // 第一个单元的节点数
     }
-    else
-    {
-        n = 3;  // 默认三角形单元
-    }
 
-    // 动态计算稀疏矩阵预留空间
     int dimension = config->getDimension();
-    int estimated_nnz_per_row = n * n;  // 每个节点大约连接n²个其他节点
 
     // 初始化矩阵和向量
     K_global.resize(N, N);
-    K_global.reserve(Eigen::VectorXi::Constant(N, estimated_nnz_per_row));
+    // 动态计算稀疏矩阵预留空间每个节点大约连接n²个其他节点
+    K_global.reserve(Eigen::VectorXi::Constant(N, n * n));
     b = Eigen::VectorXd::Zero(N);
     u = Eigen::VectorXd::Zero(N);
 
@@ -69,7 +64,7 @@ void assemble()
     const auto& connectivity = config->getElementConnectivity();
 
     // 使用config中设置的高斯积分点数
-    int numGaussPoints = config->getAssembleGaussPoints();
+    int gaussPointsNum = config->getAssembleGaussPointsNum();
 
     for (int e = 0; e < M; ++e)
     {
@@ -77,7 +72,7 @@ void assemble()
         {
             for (int beta = 0; beta < n; ++beta)
             {
-                double K_e_val = calculateStiffnessEntry(e, alpha, beta, numGaussPoints);
+                double K_e_val = calculateStiffnessEntry(e, alpha, beta, gaussPointsNum);
                 int global_row = connectivity[e][beta];
                 int global_col = connectivity[e][alpha];
                 tripletList.push_back(T_entry(global_row, global_col, K_e_val));
@@ -85,7 +80,7 @@ void assemble()
         }
         for (int beta = 0; beta < n; ++beta)
         {
-            double b_e_val = calculateLoadEntry(e, beta, numGaussPoints);
+            double b_e_val = calculateLoadEntry(e, beta, gaussPointsNum);
             int global_row = connectivity[e][beta];
             b(global_row) += b_e_val;
         }
@@ -98,41 +93,20 @@ void assemble()
 
 void applyBoundaryConditions()
 {
-    std::cout << "开始应用边界条件..." << std::endl;
-
     // 支持通用边界条件形式：K * (c * du/dn) + L * u = q
-
     // 应用默认狄利克雷边界条件（u=0）到所有边界节点
     // 注意：实际的边界条件信息需要从COMSOL网格中提取或手动指定
     std::vector<bool> is_boundary_node(N, false);
 
-    // 简化处理：将所有边界节点设为齐次狄利克雷条件
-    // TODO: 根据实际问题设置合适的边界条件
+    // 目前简化处理：将所有边界节点设为齐次狄利克雷条件
     const auto& coords = config->getNodeCoordinates();
     int dimension = config->getDimension();
-
-    for (int i = 0; i < N; ++i)
-    {
-        // 通用的边界检测（假设单位球/圆边界）
-        double distance_squared = 0.0;
-        for (int d = 0; d < dimension; ++d)
-        {
-            double coord = coords[i * dimension + d];
-            distance_squared += coord * coord;
-        }
-
-        // 检查是否在边界上
-        if (std::abs(distance_squared - 1.0) < 1e-6)
-        {
-            is_boundary_node[i] = true;
-        }
-    }
 
     // 确保矩阵已压缩
     K_global.makeCompressed();
 
     // 应用齐次狄利克雷边界条件 u = 0
-    std::vector<int> dirichlet_nodes;
+    std::vector<int> dirichlet_nodes;  // 存放所有狄利克雷边界节点的全局索引
     for (int i = 0; i < N; ++i)
     {
         if (is_boundary_node[i])
@@ -152,7 +126,7 @@ void applyBoundaryConditions()
         for (Eigen::SparseMatrix<double>::InnerIterator it(K_global, i); it; ++it)
         {
             int j = it.row();  // 取当前遍历到的行号
-            if (j != i)
+            if (j != i)                 
             {
                 K_global.coeffRef(j, i) = 0.0;
                 b(j) -= it.value() * boundary_value;
@@ -175,9 +149,14 @@ void applyBoundaryConditions()
     }
 }
 
-void solveLinearSystem(const std::string& solver_type, const std::string& preconditioner_type,
-                       double tol, int max_iter, bool verbose)
+void solveLinearSystem()
 {
+    // 从Config获取求解器参数
+    const std::string& solver_type = config->getSolverType();
+    const std::string& preconditioner_type = config->getPreconditionerType();
+    double tol = config->getSolverTolerance();
+    int max_iter = config->getSolverMaxIterations();
+
     clock_t start = clock();
 
     int iterations = 0;
@@ -229,24 +208,20 @@ void solveLinearSystem(const std::string& solver_type, const std::string& precon
             error = solver.error();
         }
 
-        if (verbose)  // 通过verbose判断是否输出迭代信息
-        {
-            std::cout << "CG求解完成：" << std::endl;
-            std::cout << "  迭代次数: " << iterations << std::endl;
-            std::cout << "  估计误差: " << error << std::endl;
-        }
+        // 默认输出CG求解器的迭代信息
+        std::cout << "CG求解完成：" << std::endl;
+        std::cout << "  迭代次数: " << iterations << std::endl;
+        std::cout << "  估计误差: " << error << std::endl;
     }
     // 可以添加其他迭代求解器...
 
     clock_t end = clock();
     double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
 
-    if (verbose)
-    {
-        std::cout << "求解耗时: " << time_spent << " 秒" << std::endl;
-        double residual_norm = (K_global * u - b).norm() / b.norm();
-        std::cout << "相对残差: " << residual_norm << std::endl;
-    }
+    // 默认输出求解信息
+    std::cout << "求解耗时: " << time_spent << " 秒" << std::endl;
+    double residual_norm = (K_global * u - b).norm() / b.norm();
+    std::cout << "相对残差: " << residual_norm << std::endl;
 }
 
 void postprocess()
@@ -292,7 +267,7 @@ void postprocess()
 
 // --- 内部辅助函数定义 ---
 
-double calculateStiffnessEntry(int e, int alpha, int beta, int numGaussPoints)
+double calculateStiffnessEntry(int e, int alpha, int beta, int gaussPointsNum)
 {
     // 从Config获取单元节点坐标
     const auto& connectivity = config->getElementConnectivity();
@@ -314,7 +289,7 @@ double calculateStiffnessEntry(int e, int alpha, int beta, int numGaussPoints)
 
     // 使用新的高斯点类
     auto gaussPoint = GaussPointFactory::createGaussPoint(GaussPointFactory::ElementType::Triangle,
-                                                          numGaussPoints);
+                                                          gaussPointsNum);
 
     // 获取积分点坐标和权重向量
     const auto& points = gaussPoint->getPoints();
@@ -353,7 +328,7 @@ double calculateStiffnessEntry(int e, int alpha, int beta, int numGaussPoints)
     return entryValue;
 }
 
-double calculateLoadEntry(int e, int beta, int numGaussPoints)
+double calculateLoadEntry(int e, int beta, int gaussPointsNum)
 {
     // 从Config获取单元节点坐标
     const auto& connectivity = config->getElementConnectivity();
@@ -375,7 +350,7 @@ double calculateLoadEntry(int e, int beta, int numGaussPoints)
 
     // 使用新的高斯点类
     auto gaussPoint = GaussPointFactory::createGaussPoint(GaussPointFactory::ElementType::Triangle,
-                                                          numGaussPoints);
+                                                          gaussPointsNum);
 
     // 获取积分点坐标和权重向量
     const auto& points = gaussPoint->getPoints();

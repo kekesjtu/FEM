@@ -34,10 +34,9 @@ void applyBoundaryConditions();
 
 /**
  * @brief 求解线性方程组 K_global * u = b
+ * 求解器参数从Config对象中获取，包括求解器类型、预条件子类型、容差和最大迭代次数
  */
-void solveLinearSystem(const std::string& solver_type = "CG",
-                       const std::string& preconditioner_type = "DiagonalPreconditioner",
-                       double tol = 1e-8, int max_iter = 1000, bool verbose = true);
+void solveLinearSystem();
 
 /**
  * @brief 后处理步骤：输出结果并计算误差

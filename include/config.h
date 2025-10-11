@@ -56,6 +56,7 @@ class Config
 
   private:
     // 网格相关
+    std::string mesh_filename_ = "circle_mesh2.mphtxt";  // 网格文件名，用户可直接在此修改
     int dimension_;
     int nodes_num_;
     int elements_num_;
@@ -67,14 +68,21 @@ class Config
     std::vector<Boundary> boundarys;  // 边界边信息
 
     // 矩阵组装相关
-    int gauss_assemble_points_;
+    int gauss_assemble_points_num_;
 
     // 形函数阶数
-    const int order_ = 1;  // 形函数阶数，默认为线性
+    int shape_function_order_ = 1;  // 形函数阶数默认为线性，用户可直接在此修改
 
     // 误差分析相关
-    const int max_error_sampling_points_ = 5;
-    const int gauss_error_points_ = 3;
+    int max_error_sampling_points_num_ = 5;  // 最大误差采样点数，用户可直接在此修改
+    int gauss_error_points_num_ = 3;         // 高斯误差积分点数，用户可直接在此修改
+
+    // 求解器相关参数
+    std::string solver_type_ = "CG";  // 求解器类型："SparseLU"或"CG"，用户可直接在此修改
+    std::string preconditioner_type_ =
+        "DiagonalPreconditioner";       // 预条件子类型，用户可直接在此修改
+    double solver_tolerance_ = 1e-6;    // 求解器收敛容差，用户可直接在此修改
+    int solver_max_iterations_ = 1000;  // 求解器最大迭代次数，用户可直接在此修改
 
     // 文件中将会规定dimension、node_coordinates、element_connectivity、
     // int nodes_num_,int elements_num_,int nodes_num_per_element_;
@@ -146,15 +154,15 @@ class Config
     }
 
   public:
-    // 默认构造函数，使用默认参数
-    Config();
-    Config(int max_error_sampling_points, int gauss_error_points, int order_);
+    Config();  // 默认构造函数，使用默认参数
 
     // 访问器
+    const std::string& getMeshFilename() const;
+    void setMeshFilename(const std::string& filename);
     int getDimension() const;
-    int getSamplingPoints() const;
-    int getErrorGaussPoints() const;
-    int getAssembleGaussPoints() const;
+    int getSamplingPointsNum() const;
+    int getErrorGaussPointsNum() const;
+    int getAssembleGaussPointsNum() const;
     int getNodesNum() const;
     int getElementsNum() const;
     int getNodesPerElement() const;
@@ -164,6 +172,12 @@ class Config
     const std::vector<std::vector<int>>& getElementConnectivity() const;
     bool hasExactSolution() const;
     bool hasExactGradients() const;
+
+    // 求解器参数访问器
+    const std::string& getSolverType() const;
+    const std::string& getPreconditionerType() const;
+    double getSolverTolerance() const;
+    int getSolverMaxIterations() const;
 
     // 调用函数
     double coefficient_c(const std::vector<double>& coords) const;

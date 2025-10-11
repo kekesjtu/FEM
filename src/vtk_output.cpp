@@ -184,7 +184,6 @@ void TriangleVTKOutput2D::outputExactSolution(
     const auto& connectivity = config_->getElementConnectivity();
     int nodes_num = config_->getNodesNum();
     int elements_num = config_->getElementsNum();
-    int dimension = config_->getDimension();
 
     // 设置输出精度
     file << std::fixed << std::setprecision(6);
@@ -511,7 +510,7 @@ std::unique_ptr<VTKOutput> VTKOutputFactory::createVTKOutput(std::shared_ptr<Con
     {
         case Config::ElementType::TRIANGLE:
             return std::make_unique<TriangleVTKOutput2D>(config, solution,
-                                                         config->getSamplingPoints());
+                                                         config->getSamplingPointsNum());
         case Config::ElementType::QUADRILATERAL:
             throw std::invalid_argument("Requested ElementType is not implemented in VTKOutput");
         default:

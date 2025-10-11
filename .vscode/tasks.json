@@ -2,41 +2,78 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Build FEM Project",
-      "type": "cppbuild",
-      "command": "E:\\msys64\\ucrt64\\bin\\g++.exe",
+      "label": "CMake Configure",
+      "type": "shell",
+      "command": "cmake",
       "args": [
-        "-fdiagnostics-color=always",
-        "-g",
-        "-std=c++17",
-        "-I${workspaceFolder}/include",
-        "-I${workspaceFolder}/third_party",
-        "${workspaceFolder}/src/main.cpp",
-        "${workspaceFolder}/src/fem_solver.cpp",
-        "${workspaceFolder}/src/shape_functions.cpp",
-        "${workspaceFolder}/src/gauss_quadrature.cpp",
-        "${workspaceFolder}/src/geometry_mapping.cpp",
-        "${workspaceFolder}/src/error_analysis.cpp",
-        "${workspaceFolder}/src/config.cpp",
-        "${workspaceFolder}/src/comsol_mesh_importer.cpp",
-        "${workspaceFolder}/src/vtk_output.cpp",
-        "-o",
-        "${workspaceFolder}/build/FEM_solution.exe"
+        "-B",
+        "${workspaceFolder}/build",
+        "-S",
+        "${workspaceFolder}",
+        "-G",
+        "MinGW Makefiles",
+        "-DCMAKE_BUILD_TYPE=Debug"
       ],
       "group": "build",
-      "problemMatcher": ["$gcc"],
-      "detail": "编译整个有限元求解器项目"
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "detail": "使用CMake配置项目"
     },
     {
-      "label": "Run FEM Solution",
+      "label": "CMake Build",
       "type": "shell",
-      "command": "${workspaceFolder}/build/FEM_solution.exe",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "${workspaceFolder}/build",
+        "--config",
+        "Debug",
+        "--parallel",
+        "1"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": "$gcc",
+      "dependsOn": "CMake Configure",
+      "detail": "使用CMake构建项目"
+    },
+    {
+      "label": "CMake Clean",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--build", "${workspaceFolder}/build", "--target", "clean"],
+      "group": "build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "清理CMake构建文件"
+    },
+    {
+      "label": "Run CMake FEM Solution",
+      "type": "shell",
+      "command": "chcp 65001 && ${workspaceFolder}/build/bin/FEM_solution.exe",
       "group": "test",
       "options": {
         "cwd": "${workspaceFolder}",
         "shell": {
           "executable": "cmd.exe",
-          "args": ["/d", "/c", "chcp 65001 &&"]
+          "args": ["/d", "/c"]
         }
       },
       "presentation": {
@@ -45,8 +82,15 @@
         "focus": false,
         "panel": "new"
       },
-      "dependsOn": "Build FEM Project",
-      "detail": "运行FEM求解器"
+      "dependsOn": "CMake Build",
+      "detail": "运行CMake构建的FEM求解器"
+    },
+    {
+      "label": "Build and Run",
+      "dependsOrder": "sequence",
+      "dependsOn": ["CMake Build", "Run CMake FEM Solution"],
+      "group": "test",
+      "detail": "构建并运行FEM项目（一键完成）"
     },
     {
       "type": "cppbuild",
@@ -64,11 +108,8 @@
         "cwd": "${fileDirname}"
       },
       "problemMatcher": ["$gcc"],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "detail": "调试器生成的任务。"
+      "group": "build",
+      "detail": "用于调试单个文件的g++编译任务"
     }
   ]
 }

@@ -1,0 +1,15 @@
+[
+    {
+        "name": "MinGW GCC",
+        "compilers": {
+            "C": "E:\\msys64\\ucrt64\\bin\\gcc.exe",
+            "CXX": "E:\\msys64\\ucrt64\\bin\\g++.exe"
+        },
+        "preferredGenerator": {
+            "name": "MinGW Makefiles"
+        },
+        "environmentVariables": {
+            "CMAKE_BUILD_TYPE": "Debug"
+        }
+    }
+]

@@ -18,7 +18,7 @@ class GeometryMapping
   protected:
     std::vector<double> element_coords_;             // 单元节点坐标
     int nodes_num_per_element_;                      // 单元节点数量
-    int order_;                                      // 单元的阶数
+    int shape_function_order_;                                      // 单元的阶数
     int dimension_;                                  // 空间维度 (2D/3D)
     double jacobian_det_;                            // 雅可比行列式 (常数)
     std::vector<std::vector<double>> jacobian_inv_;  // 逆雅可比矩阵 (常数)
@@ -36,7 +36,7 @@ class GeometryMapping
     GeometryMapping(const std::vector<double>& element_coords, int nodes, int order, int dim)
         : element_coords_(element_coords),
           nodes_num_per_element_(nodes),
-          order_(order),
+          shape_function_order_(order),
           dimension_(dim)
     {
         if (element_coords_.size() != static_cast<size_t>(nodes * dim))
@@ -84,7 +84,7 @@ class GeometryMapping
     }
     int getOrder() const
     {
-        return order_;
+        return shape_function_order_;
     }
 };
 
