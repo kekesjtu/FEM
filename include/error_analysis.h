@@ -1,15 +1,15 @@
 #ifndef ERROR_ANALYSIS_H
 #define ERROR_ANALYSIS_H
 
-#include "config.h"
 #include <Eigen/Dense>
 #include <memory>
 #include <string>
 #include <vector>
+#include "config.h"
 
 class ErrorAnalysis
 {
-public:
+  public:
     enum class NormType
     {
         L_INFINITY,  // L∞范数误差
@@ -33,7 +33,7 @@ public:
     double computeL2Error() const;
     double computeH1SeminormError() const;
 
-private:
+  private:
     // 内部辅助函数，检查Config中是否定义了精确解
     bool hasExactSolution() const;
     bool hasExactGradients() const;
@@ -41,9 +41,10 @@ private:
     double calculateNumericalSolution(int element_idx, const std::vector<double>& coords) const;
     std::vector<double> calculateNumericalGradient(int element_idx,
                                                    const std::vector<double>& coords) const;
-protected:
+
+  protected:
     std::shared_ptr<Config> config_;
     const Eigen::VectorXd& solution_;
 };
 
-#endif // ERROR_ANALYSIS_H
+#endif  // ERROR_ANALYSIS_H

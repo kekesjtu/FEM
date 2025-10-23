@@ -138,7 +138,10 @@ CMakeFiles/FEM_solution.dir/src/main.cpp.obj: E:\code\FEM\src\main.cpp \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/ostream.tcc \
  E:/msys64/ucrt64/include/c++/15.2.0/istream \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/istream.tcc \
- E:/code/FEM/include/error_analysis.h E:/code/FEM/include/config.h \
+ E:/code/FEM/include/error_analysis.h E:/code/FEM/third_party/Eigen/Dense \
+ E:/code/FEM/third_party/Eigen/Core \
+ E:/code/FEM/third_party/Eigen/src/Core/util/DisableStupidWarnings.h \
+ E:/code/FEM/third_party/Eigen/src/Core/util/Macros.h \
  E:/msys64/ucrt64/include/c++/15.2.0/cmath \
  E:/msys64/ucrt64/include/math.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/specfun.h \
@@ -155,6 +158,18 @@ CMakeFiles/FEM_solution.dir/src/main.cpp.obj: E:\code\FEM\src\main.cpp \
  E:/msys64/ucrt64/include/c++/15.2.0/tr1/poly_hermite.tcc \
  E:/msys64/ucrt64/include/c++/15.2.0/tr1/poly_laguerre.tcc \
  E:/msys64/ucrt64/include/c++/15.2.0/tr1/riemann_zeta.tcc \
+ E:/code/FEM/third_party/Eigen/src/Core/util/ConfigureVectorization.h \
+ E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mmintrin.h \
+ E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/emmintrin.h \
+ E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/xmmintrin.h \
+ E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/pmmintrin.h \
+ E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mwaitintrin.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/complex \
+ E:/msys64/ucrt64/include/c++/15.2.0/sstream \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/sstream.tcc \
+ E:/code/FEM/third_party/Eigen/src/Core/util/MKL_support.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/cassert \
+ E:/msys64/ucrt64/include/assert.h \
  E:/msys64/ucrt64/include/c++/15.2.0/functional \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/std_function.h \
  E:/msys64/ucrt64/include/c++/15.2.0/unordered_map \
@@ -172,21 +187,6 @@ CMakeFiles/FEM_solution.dir/src/main.cpp.obj: E:\code\FEM\src\main.cpp \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/vector.tcc \
  E:/msys64/ucrt64/include/c++/15.2.0/array \
  E:/msys64/ucrt64/include/c++/15.2.0/compare \
- E:/code/FEM/third_party/Eigen/Dense E:/code/FEM/third_party/Eigen/Core \
- E:/code/FEM/third_party/Eigen/src/Core/util/DisableStupidWarnings.h \
- E:/code/FEM/third_party/Eigen/src/Core/util/Macros.h \
- E:/code/FEM/third_party/Eigen/src/Core/util/ConfigureVectorization.h \
- E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mmintrin.h \
- E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/emmintrin.h \
- E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/xmmintrin.h \
- E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/pmmintrin.h \
- E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mwaitintrin.h \
- E:/msys64/ucrt64/include/c++/15.2.0/complex \
- E:/msys64/ucrt64/include/c++/15.2.0/sstream \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/sstream.tcc \
- E:/code/FEM/third_party/Eigen/src/Core/util/MKL_support.h \
- E:/msys64/ucrt64/include/c++/15.2.0/cassert \
- E:/msys64/ucrt64/include/assert.h \
  E:/msys64/ucrt64/include/c++/15.2.0/cstring \
  E:/msys64/ucrt64/include/string.h \
  E:/msys64/ucrt64/include/sec_api/string_s.h \
@@ -400,7 +400,8 @@ CMakeFiles/FEM_solution.dir/src/main.cpp.obj: E:\code\FEM\src\main.cpp \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/shared_ptr_atomic.h \
  E:/msys64/ucrt64/include/c++/15.2.0/backward/auto_ptr.h \
  E:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_memory_defs.h \
- E:/code/FEM/include/fem_solver.h E:/code/FEM/third_party/Eigen/Sparse \
+ E:/code/FEM/include/config.h E:/code/FEM/include/fem_solver.h \
+ E:/code/FEM/third_party/Eigen/Sparse \
  E:/code/FEM/third_party/Eigen/SparseCore \
  E:/msys64/ucrt64/include/c++/15.2.0/map \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_tree.h \

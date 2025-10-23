@@ -49,6 +49,7 @@ class ComsolMeshImporter
     int getDimension() const;
     const std::vector<std::pair<double, double>>& getNodes() const;
     const std::vector<std::vector<int>>& getTriangularElements() const;
+    const std::vector<std::vector<int>>& getEdgeElements() const;
     int getNodesNum() const;
     int getElementsNum() const;
     int getNodesPerElement() const;

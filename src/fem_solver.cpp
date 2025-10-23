@@ -2,9 +2,7 @@
 #include <Eigen/IterativeLinearSolvers>
 #include <Eigen/Sparse>
 #include <Eigen/SparseLU>
-#include <cmath>
 #include <ctime>
-#include <iomanip>
 #include <iostream>
 #include "error_analysis.h"
 #include "gauss_quadrature.h"
@@ -22,8 +20,10 @@ Eigen::VectorXd u;
 std::shared_ptr<Config> config = std::make_shared<Config>();  // 配置对象，包含网格和问题定义
 
 // --- 内部辅助函数声明 ---
-double calculateStiffnessEntry(int e, int alpha, int beta, int gaussPointsNum);
-double calculateLoadEntry(int e, int beta, int gaussPointsNum);
+double calculateStiffnessEntry(int e, int alpha, int beta);
+double calculateLoadEntry(int e, int beta);
+double calculateBoundaryStiffness(const Config::Boundary& boundary, int local_i, int local_j);
+double calculateBoundaryLoad(const Config::Boundary& boundary, int local_i);
 
 // --- FEM 函数实现 ---
 
@@ -63,16 +63,13 @@ void assemble()
 
     const auto& connectivity = config->getElementConnectivity();
 
-    // 使用config中设置的高斯积分点数
-    int gaussPointsNum = config->getAssembleGaussPointsNum();
-
     for (int e = 0; e < M; ++e)
     {
         for (int alpha = 0; alpha < n; ++alpha)
         {
             for (int beta = 0; beta < n; ++beta)
             {
-                double K_e_val = calculateStiffnessEntry(e, alpha, beta, gaussPointsNum);
+                double K_e_val = calculateStiffnessEntry(e, alpha, beta);
                 int global_row = connectivity[e][beta];
                 int global_col = connectivity[e][alpha];
                 tripletList.push_back(T_entry(global_row, global_col, K_e_val));
@@ -80,7 +77,7 @@ void assemble()
         }
         for (int beta = 0; beta < n; ++beta)
         {
-            double b_e_val = calculateLoadEntry(e, beta, gaussPointsNum);
+            double b_e_val = calculateLoadEntry(e, beta);
             int global_row = connectivity[e][beta];
             b(global_row) += b_e_val;
         }
@@ -94,39 +91,111 @@ void assemble()
 void applyBoundaryConditions()
 {
     // 支持通用边界条件形式：K * (c * du/dn) + L * u = q
-    // 应用默认狄利克雷边界条件（u=0）到所有边界节点
-    // 注意：实际的边界条件信息需要从COMSOL网格中提取或手动指定
-    std::vector<bool> is_boundary_node(N, false);
+    // 三种类型：
+    // 1. Dirichlet (K=0, L≠0): u = q/L
+    // 2. Neumann (K≠0, L=0): c*du/dn = q/K
+    // 3. Robin (K≠0, L≠0): c*du/dn + (L/K)*u = q/K
 
-    // 目前简化处理：将所有边界节点设为齐次狄利克雷条件
-    const auto& coords = config->getNodeCoordinates();
-    int dimension = config->getDimension();
+    const auto& boundarys = config->getBoundary();
+    std::cout << "处理边界条件，共 " << boundarys.size() << " 条边界边" << std::endl;
+
+    // 统计不同类型的边界条件
+    int dirichlet_count = 0;
+    int neumann_count = 0;
+    int robin_count = 0;
+
+    // 标记 Dirichlet 边界节点
+    std::vector<bool> is_dirichlet_node(N, false);
+    std::vector<double> dirichlet_values(N, 0.0);
+
+    // 首先处理 Neumann 和 Robin 边界条件（修改刚度矩阵和载荷向量）
+    for (const auto& boundary : boundarys)
+    {
+        const auto& bc = boundary.bc;
+
+        // 判断边界条件类型
+        if (bc.K_bc == 0)
+        {
+            // Dirichlet 边界条件：稍后处理
+            dirichlet_count++;
+            for (int node_idx : boundary.global_node_indices_in_element)
+            {
+                if (node_idx >= 0 && node_idx < N)
+                {
+                    is_dirichlet_node[node_idx] = true;
+                    dirichlet_values[node_idx] = bc.q_bc / bc.L_bc;
+                }
+            }
+        }
+        else if (bc.L_bc == 0.0)
+        {
+            // Neumann 边界条件：只修改载荷向量
+            neumann_count++;
+            const auto& edge_nodes = boundary.global_node_indices_in_element;
+
+            for (size_t local_i = 0; local_i < edge_nodes.size(); ++local_i)
+            {
+                int global_i = edge_nodes[local_i];
+                double load_contribution = calculateBoundaryLoad(boundary, local_i);
+                b(global_i) += load_contribution;
+            }
+        }
+        else
+        {
+            // Robin 边界条件：修改刚度矩阵和载荷向量
+            robin_count++;
+            const auto& edge_nodes = boundary.global_node_indices_in_element;
+
+            // 修改刚度矩阵
+            for (size_t local_i = 0; local_i < edge_nodes.size(); ++local_i)
+            {
+                int global_i = edge_nodes[local_i];
+
+                for (size_t local_j = 0; local_j < edge_nodes.size(); ++local_j)
+                {
+                    int global_j = edge_nodes[local_j];
+                    double stiffness_contribution =
+                        calculateBoundaryStiffness(boundary, local_i, local_j);
+                    K_global.coeffRef(global_i, global_j) += stiffness_contribution;
+                }
+
+                // 修改载荷向量
+                double load_contribution = calculateBoundaryLoad(boundary, local_i);
+                b(global_i) += load_contribution;
+            }
+        }
+    }
+
+    std::cout << "边界条件统计：" << std::endl;
+    std::cout << "  Dirichlet 边界边数: " << dirichlet_count << std::endl;
+    std::cout << "  Neumann 边界边数: " << neumann_count << std::endl;
+    std::cout << "  Robin 边界边数: " << robin_count << std::endl;
 
     // 确保矩阵已压缩
     K_global.makeCompressed();
 
-    // 应用齐次狄利克雷边界条件 u = 0
-    std::vector<int> dirichlet_nodes;  // 存放所有狄利克雷边界节点的全局索引
+    // 最后处理 Dirichlet 边界条件（强加条件，修改矩阵结构）
+    std::vector<int> dirichlet_nodes;
     for (int i = 0; i < N; ++i)
     {
-        if (is_boundary_node[i])
+        if (is_dirichlet_node[i])
         {
             dirichlet_nodes.push_back(i);
         }
     }
 
-    std::cout << "狄利克雷边界条件节点数量: " << dirichlet_nodes.size() << std::endl;
+    std::cout << "  Dirichlet 边界节点数: " << dirichlet_nodes.size() << std::endl;
 
-    // 批量处理狄利克雷边界条件
+    // 批量处理 Dirichlet 边界条件
     for (int i : dirichlet_nodes)
     {
-        double boundary_value = 0.0;  // 齐次边界条件
+        double boundary_value = dirichlet_values[i];
 
         // 遍历第i列的非0元素
         for (Eigen::SparseMatrix<double>::InnerIterator it(K_global, i); it; ++it)
         {
             int j = it.row();  // 取当前遍历到的行号
-            if (j != i)                 
+            if (j != i)
             {
                 K_global.coeffRef(j, i) = 0.0;
                 b(j) -= it.value() * boundary_value;
@@ -267,7 +336,7 @@ void postprocess()
 
 // --- 内部辅助函数定义 ---
 
-double calculateStiffnessEntry(int e, int alpha, int beta, int gaussPointsNum)
+double calculateStiffnessEntry(int e, int alpha, int beta)
 {
     // 从Config获取单元节点坐标
     const auto& connectivity = config->getElementConnectivity();
@@ -287,9 +356,10 @@ double calculateStiffnessEntry(int e, int alpha, int beta, int gaussPointsNum)
     // 创建几何映射对象
     auto mapping = GeometryMappingFactory::createMapping(element_coords, config);
 
-    // 使用新的高斯点类
-    auto gaussPoint = GaussPointFactory::createGaussPoint(GaussPointFactory::ElementType::Triangle,
-                                                          gaussPointsNum);
+    // 使用工厂创建体单元的高斯积分对象
+    auto gaussPoint = GaussPointFactory::createGaussPoint(
+        static_cast<Config::ElementType>(config->getElementType()),
+        config->getAssembleGaussPointsNum());
 
     // 获取积分点坐标和权重向量
     const auto& points = gaussPoint->getPoints();
@@ -328,7 +398,7 @@ double calculateStiffnessEntry(int e, int alpha, int beta, int gaussPointsNum)
     return entryValue;
 }
 
-double calculateLoadEntry(int e, int beta, int gaussPointsNum)
+double calculateLoadEntry(int e, int beta)
 {
     // 从Config获取单元节点坐标
     const auto& connectivity = config->getElementConnectivity();
@@ -348,9 +418,10 @@ double calculateLoadEntry(int e, int beta, int gaussPointsNum)
     // 创建几何映射对象
     auto mapping = GeometryMappingFactory::createMapping(element_coords, config);
 
-    // 使用新的高斯点类
-    auto gaussPoint = GaussPointFactory::createGaussPoint(GaussPointFactory::ElementType::Triangle,
-                                                          gaussPointsNum);
+    // 使用工厂创建体单元的高斯积分对象
+    auto gaussPoint = GaussPointFactory::createGaussPoint(
+        static_cast<Config::ElementType>(config->getElementType()),
+        config->getAssembleGaussPointsNum());
 
     // 获取积分点坐标和权重向量
     const auto& points = gaussPoint->getPoints();
@@ -378,5 +449,142 @@ double calculateLoadEntry(int e, int beta, int gaussPointsNum)
         double integrand = f_xy * N_test_beta;
         entryValue += integrand * mapping->getJacobianDet(pointsRef) * weights[gpIndex];
     }
+    return entryValue;
+}
+
+// 计算边界边上的刚度矩阵贡献（用于 Robin 条件）
+double calculateBoundaryStiffness(const Config::Boundary& boundary, int local_i, int local_j)
+{
+    // 获取边界边的节点索引
+    const auto& edge_nodes = boundary.global_node_indices_in_element;
+    int boundary_nodes_num = config->getBoundaryNodesPerElement();
+    if (static_cast<int>(edge_nodes.size()) != boundary_nodes_num)
+    {
+        throw std::runtime_error("边界节点数不匹配");
+    }
+
+    // 获取节点坐标
+    const auto& coordinates = config->getNodeCoordinates();
+    int embed_dim = config->getDimension();
+
+    // 构造边界边的坐标数组
+    std::vector<double> edge_coords(boundary_nodes_num * embed_dim);
+    for (int i = 0; i < boundary_nodes_num; ++i)
+    {
+        int node_idx = edge_nodes[i];
+        for (int d = 0; d < embed_dim; ++d)
+        {
+            edge_coords[i * embed_dim + d] = coordinates[node_idx * embed_dim + d];
+        }
+    }
+
+    // 使用工厂创建边界单元的几何映射对象
+    auto mapping = GeometryMappingFactory::createMapping(edge_coords, config, true);
+
+    // 使用工厂创建边界单元的形函数对象
+    auto shapeFunction = ShapeFunctionFactory::createShapeFunction(config, true);
+
+    // 使用工厂创建边界单元的高斯积分对象
+    auto gaussPoint = GaussPointFactory::createGaussPoint(
+        static_cast<Config::ElementType>(config->getBoundaryElementType()),
+        config->getBoundaryGaussPointsNum());
+    const auto& points = gaussPoint->getPoints();
+    const auto& weights = gaussPoint->getWeights();
+
+    // 边界条件系数
+    double L_over_K = boundary.bc.L_bc / boundary.bc.K_bc;
+
+    // 边界参考坐标维度 = 体维度 - 1
+    int boundary_dim = config->getDimension() - 1;
+
+    double entryValue = 0.0;
+    for (int gpIndex = 0; gpIndex < gaussPoint->getNumPoints(); ++gpIndex)
+    {
+        // 动态构造边界参考坐标
+        std::vector<double> coord_ref(boundary_dim);
+        for (int d = 0; d < boundary_dim; ++d)
+        {
+            coord_ref[d] = points[gpIndex * boundary_dim + d];
+        }
+
+        // 使用形函数类计算形函数值
+        double N_i = shapeFunction->computeTestFunction(local_i, coord_ref);
+        double N_j = shapeFunction->computeTrialFunction(local_j, coord_ref);
+
+        // 使用几何映射获取雅可比
+        double jacobian = mapping->getJacobianDet(coord_ref);
+
+        // 累加积分
+        entryValue += L_over_K * N_i * N_j * jacobian * weights[gpIndex];
+    }
+
+    return entryValue;
+}
+
+// 计算边界边上的载荷向量贡献（用于 Neumann 和 Robin 条件）
+double calculateBoundaryLoad(const Config::Boundary& boundary, int local_i)
+{
+    // 获取边界边的节点索引
+    const auto& edge_nodes = boundary.global_node_indices_in_element;
+    int boundary_nodes = config->getBoundaryNodesPerElement();
+    if (static_cast<int>(edge_nodes.size()) != boundary_nodes)
+    {
+        throw std::runtime_error("边界节点数不匹配");
+    }
+
+    // 获取节点坐标
+    const auto& coordinates = config->getNodeCoordinates();
+    int embed_dim = config->getDimension();
+
+    // 构造边界边的坐标数组
+    std::vector<double> edge_coords(boundary_nodes * embed_dim);
+    for (int i = 0; i < boundary_nodes; ++i)
+    {
+        int node_idx = edge_nodes[i];
+        for (int d = 0; d < embed_dim; ++d)
+        {
+            edge_coords[i * embed_dim + d] = coordinates[node_idx * embed_dim + d];
+        }
+    }
+
+    // 使用工厂创建边界单元的几何映射对象
+    auto mapping = GeometryMappingFactory::createMapping(edge_coords, config, true);
+
+    // 使用工厂创建边界单元的形函数对象
+    auto shapeFunction = ShapeFunctionFactory::createShapeFunction(config, true);
+
+    // 使用工厂创建边界单元的高斯积分对象
+    auto gaussPoint = GaussPointFactory::createGaussPoint(
+        static_cast<Config::ElementType>(config->getBoundaryElementType()),
+        config->getBoundaryGaussPointsNum());
+    const auto& points = gaussPoint->getPoints();
+    const auto& weights = gaussPoint->getWeights();
+
+    // 边界条件系数
+    double q_over_K = boundary.bc.q_bc / boundary.bc.K_bc;
+
+    // 边界参考坐标维度 = 体维度 - 1
+    int boundary_dim = config->getDimension() - 1;
+
+    double entryValue = 0.0;
+    for (int gpIndex = 0; gpIndex < gaussPoint->getNumPoints(); ++gpIndex)
+    {
+        // 动态构造边界参考坐标
+        std::vector<double> coord_ref(boundary_dim);
+        for (int d = 0; d < boundary_dim; ++d)
+        {
+            coord_ref[d] = points[gpIndex * boundary_dim + d];
+        }
+
+        // 使用形函数类计算形函数值
+        double N_i = shapeFunction->computeTrialFunction(local_i, coord_ref);
+
+        // 使用几何映射获取雅可比
+        double jacobian = mapping->getJacobianDet(coord_ref);
+
+        // 累加积分
+        entryValue += q_over_K * N_i * jacobian * weights[gpIndex];
+    }
+
     return entryValue;
 }

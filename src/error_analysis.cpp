@@ -4,7 +4,6 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
-#include <numeric>
 #include <vector>
 #include "config.h"
 #include "gauss_quadrature.h"
@@ -158,20 +157,93 @@ std::vector<double> ErrorAnalysis::calculateNumericalGradient(
 double ErrorAnalysis::computeLInfinityError() const
 {
     double max_error = 0.0;
-    const int num_nodes = config_->getNodesNum();
+    const int num_elements = config_->getElementsNum();
     const int sdim = config_->getDimension();
-    const auto& nodes = config_->getNodeCoordinates();
+    const int nodes_per_element = config_->getNodesPerElement();
+    const auto& elements = config_->getElementConnectivity();
+    const auto& all_nodes = config_->getNodeCoordinates();
 
-    for (int i = 0; i < num_nodes; ++i)
+    // 获取采样点数配置
+    int num_points_per_side = config_->getSamplingPointsNum();
+
+    // 遍历每个单元进行采样
+    for (int element_index = 0; element_index < num_elements; ++element_index)
     {
-        std::vector<double> coords(sdim);
-        for (int d = 0; d < sdim; ++d)
+        // 获取单元节点坐标
+        std::vector<double> element_coords;
+        element_coords.reserve(nodes_per_element * sdim);
+        for (int j = 0; j < nodes_per_element; ++j)
         {
-            coords[d] = nodes[i * sdim + d];
+            int global_node_idx = elements[element_index][j];
+            for (int d = 0; d < sdim; ++d)
+            {
+                element_coords.push_back(all_nodes[global_node_idx * sdim + d]);
+            }
         }
-        double numerical = solution_(i);
-        double exact = config_->exact_solution_u(coords);
-        max_error = std::max(max_error, std::abs(exact - numerical));
+
+        // 创建几何映射对象
+        auto mapping = GeometryMappingFactory::createMapping(element_coords, config_);
+
+        // 在单元内进行采样
+        std::vector<int> indices(sdim, 0);
+        bool done = false;
+
+        while (!done)
+        {
+            std::vector<double> coord_ref(sdim);
+
+            // 生成参考坐标
+            for (int d = 0; d < sdim; ++d)
+            {
+                coord_ref[d] = double(indices[d]) / (num_points_per_side - 1);
+            }
+
+            // 检查点是否在单元内（对于三角形：所有坐标之和 <= 1）
+            double sum = 0.0;
+            for (int d = 0; d < sdim; ++d)
+            {
+                sum += coord_ref[d];
+            }
+
+            if (sum <= 1.0)
+            {
+                std::vector<double> coord_phys;
+
+                // 将参考坐标转换为物理坐标
+                mapping->mapToPhysical(coord_ref, coord_phys);
+
+                // 计算该点的数值解
+                double numerical_val = calculateNumericalSolution(element_index, coord_ref);
+
+                // 计算该点的精确解
+                double exact_val = config_->exact_solution_u(coord_phys);
+
+                // 计算误差
+                double error = std::abs(exact_val - numerical_val);
+                max_error = std::max(max_error, error);
+            }
+
+            // 更新索引，用于进位法生成采样点
+            int carry = 1;
+            for (int d = sdim - 1; d >= 0 && carry > 0; --d)
+            {
+                indices[d] += carry;
+                if (indices[d] >= num_points_per_side)
+                {
+                    indices[d] = 0;
+                    carry = 1;
+                }
+                else
+                {
+                    carry = 0;
+                }
+            }
+
+            if (carry > 0)
+            {
+                done = true;
+            }
+        }
     }
     return max_error;
 }
@@ -186,7 +258,7 @@ double ErrorAnalysis::computeL2Error() const
     const auto& all_nodes = config_->getNodeCoordinates();
 
     auto gauss_points = GaussPointFactory::createGaussPoint(
-        static_cast<GaussPointFactory::ElementType>(config_->getElementType()),
+        static_cast<Config::ElementType>(config_->getElementType()),
         config_->getErrorGaussPointsNum());
 
     for (int i = 0; i < num_elements; ++i)
@@ -237,7 +309,7 @@ double ErrorAnalysis::computeH1SeminormError() const
     const auto& all_nodes = config_->getNodeCoordinates();
 
     auto gauss_points = GaussPointFactory::createGaussPoint(
-        static_cast<GaussPointFactory::ElementType>(config_->getElementType()),
+        static_cast<Config::ElementType>(config_->getElementType()),
         config_->getErrorGaussPointsNum());
 
     for (int i = 0; i < num_elements; ++i)

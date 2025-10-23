@@ -1,6 +1,9 @@
 CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.obj: \
  E:\code\FEM\src\error_analysis.cpp E:/code/FEM/include/error_analysis.h \
- E:/code/FEM/include/config.h E:/msys64/ucrt64/include/c++/15.2.0/cmath \
+ E:/code/FEM/third_party/Eigen/Dense E:/code/FEM/third_party/Eigen/Core \
+ E:/code/FEM/third_party/Eigen/src/Core/util/DisableStupidWarnings.h \
+ E:/code/FEM/third_party/Eigen/src/Core/util/Macros.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/cmath \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/requires_hosted.h \
  E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++config.h \
  E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/os_defines.h \
@@ -58,54 +61,21 @@ CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/tr1/poly_hermite.tcc \
  E:/msys64/ucrt64/include/c++/15.2.0/tr1/poly_laguerre.tcc \
  E:/msys64/ucrt64/include/c++/15.2.0/tr1/riemann_zeta.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/functional \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_function.h \
- E:/msys64/ucrt64/include/c++/15.2.0/backward/binders.h \
- E:/msys64/ucrt64/include/c++/15.2.0/tuple \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/uses_allocator.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/invoke.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/functional_hash.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/hash_bytes.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/refwrap.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/std_function.h \
+ E:/code/FEM/third_party/Eigen/src/Core/util/ConfigureVectorization.h \
+ E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mmintrin.h \
+ E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/emmintrin.h \
+ E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/xmmintrin.h \
+ E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/pmmintrin.h \
+ E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mwaitintrin.h \
  E:/msys64/ucrt64/include/c++/15.2.0/new \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/exception.h \
- E:/msys64/ucrt64/include/c++/15.2.0/typeinfo \
- E:/msys64/ucrt64/include/c++/15.2.0/unordered_map \
- E:/msys64/ucrt64/include/c++/15.2.0/initializer_list \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/unordered_map.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/hashtable.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/hashtable_policy.h \
- E:/msys64/ucrt64/include/c++/15.2.0/ext/aligned_buffer.h \
- E:/msys64/ucrt64/include/c++/15.2.0/ext/alloc_traits.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/alloc_traits.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_construct.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/memoryfwd.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/allocator.h \
- E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++allocator.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/new_allocator.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/enable_special_members.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/node_handle.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/range_access.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/erase_if.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/memory_resource.h \
- E:/msys64/ucrt64/include/c++/15.2.0/cstddef \
- E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stddef.h \
- E:/msys64/ucrt64/include/stddef.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/uses_allocator_args.h \
- E:/msys64/ucrt64/include/c++/15.2.0/vector \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_uninitialized.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_vector.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_bvector.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/vector.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/array \
- E:/msys64/ucrt64/include/c++/15.2.0/compare \
- E:/msys64/ucrt64/include/c++/15.2.0/iostream \
- E:/msys64/ucrt64/include/c++/15.2.0/ostream \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/ostream.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/complex \
+ E:/msys64/ucrt64/include/c++/15.2.0/sstream \
+ E:/msys64/ucrt64/include/c++/15.2.0/istream \
  E:/msys64/ucrt64/include/c++/15.2.0/ios \
  E:/msys64/ucrt64/include/c++/15.2.0/iosfwd \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/stringfwd.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/memoryfwd.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/postypes.h \
  E:/msys64/ucrt64/include/c++/15.2.0/cwchar \
  E:/msys64/ucrt64/include/wchar.h \
@@ -118,6 +88,10 @@ CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/exception \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/exception_ptr.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/cxxabi_init_exception.h \
+ E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/stddef.h \
+ E:/msys64/ucrt64/include/stddef.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/typeinfo \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/hash_bytes.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/nested_exception.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/char_traits.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/localefwd.h \
@@ -146,10 +120,23 @@ CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/atomic_word.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_classes.h \
  E:/msys64/ucrt64/include/c++/15.2.0/string \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/allocator.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++allocator.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/new_allocator.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/ostream_insert.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/cxxabi_forced.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_function.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/backward/binders.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/refwrap.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/invoke.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/range_access.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/initializer_list \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/basic_string.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/ext/alloc_traits.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/alloc_traits.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_construct.h \
  E:/msys64/ucrt64/include/c++/15.2.0/string_view \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/functional_hash.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/string_view.tcc \
  E:/msys64/ucrt64/include/c++/15.2.0/ext/string_conversions.h \
  E:/msys64/ucrt64/include/c++/15.2.0/cstdlib \
@@ -157,6 +144,11 @@ CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/cerrno \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/charconv.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/basic_string.tcc \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/memory_resource.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/cstddef \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/uses_allocator.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/uses_allocator_args.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/tuple \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_classes.tcc \
  E:/msys64/ucrt64/include/c++/15.2.0/system_error \
  E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/error_constants.h \
@@ -172,24 +164,31 @@ CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/ctype_inline.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_facets.tcc \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/basic_ios.tcc \
+ E:/msys64/ucrt64/include/c++/15.2.0/ostream \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/ostream.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/ostream.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/istream \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/istream.tcc \
- E:/code/FEM/third_party/Eigen/Dense E:/code/FEM/third_party/Eigen/Core \
- E:/code/FEM/third_party/Eigen/src/Core/util/DisableStupidWarnings.h \
- E:/code/FEM/third_party/Eigen/src/Core/util/Macros.h \
- E:/code/FEM/third_party/Eigen/src/Core/util/ConfigureVectorization.h \
- E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mmintrin.h \
- E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/emmintrin.h \
- E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/xmmintrin.h \
- E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/pmmintrin.h \
- E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mwaitintrin.h \
- E:/msys64/ucrt64/include/c++/15.2.0/complex \
- E:/msys64/ucrt64/include/c++/15.2.0/sstream \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/sstream.tcc \
  E:/code/FEM/third_party/Eigen/src/Core/util/MKL_support.h \
  E:/msys64/ucrt64/include/c++/15.2.0/cassert \
  E:/msys64/ucrt64/include/assert.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/functional \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/std_function.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/unordered_map \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/unordered_map.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/hashtable.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/hashtable_policy.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/ext/aligned_buffer.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/enable_special_members.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/node_handle.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/erase_if.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/vector \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_uninitialized.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_vector.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_bvector.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/vector.tcc \
+ E:/msys64/ucrt64/include/c++/15.2.0/array \
+ E:/msys64/ucrt64/include/c++/15.2.0/compare \
  E:/msys64/ucrt64/include/c++/15.2.0/cstring \
  E:/msys64/ucrt64/include/string.h \
  E:/msys64/ucrt64/include/sec_api/string_s.h \
@@ -403,10 +402,7 @@ CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/shared_ptr_atomic.h \
  E:/msys64/ucrt64/include/c++/15.2.0/backward/auto_ptr.h \
  E:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_memory_defs.h \
- E:/code/FEM/include/config.h E:/code/FEM/include/gauss_quadrature.h \
- E:/code/FEM/include/geometry_mapping.h \
- E:/code/FEM/include/shape_functions.h \
- E:/msys64/ucrt64/include/c++/15.2.0/iomanip \
+ E:/code/FEM/include/config.h E:/msys64/ucrt64/include/c++/15.2.0/iomanip \
  E:/msys64/ucrt64/include/c++/15.2.0/locale \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_facets_nonio.h \
  E:/msys64/ucrt64/include/c++/15.2.0/ctime \
@@ -416,6 +412,10 @@ CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_facets_nonio.tcc \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_conv.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/quoted_string.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/iostream \
  E:/msys64/ucrt64/include/c++/15.2.0/numeric \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_numeric.h \
- E:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_numeric_defs.h
+ E:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_numeric_defs.h \
+ E:/code/FEM/include/config.h E:/code/FEM/include/gauss_quadrature.h \
+ E:/code/FEM/include/geometry_mapping.h \
+ E:/code/FEM/include/shape_functions.h

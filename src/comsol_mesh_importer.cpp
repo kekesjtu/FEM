@@ -1,6 +1,5 @@
 #include "comsol_mesh_importer.h"
 #include <algorithm>
-#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -417,6 +416,11 @@ const std::vector<std::pair<double, double>>& ComsolMeshImporter::getNodes() con
 const std::vector<std::vector<int>>& ComsolMeshImporter::getTriangularElements() const
 {
     return triangular_elements_;
+}
+
+const std::vector<std::vector<int>>& ComsolMeshImporter::getEdgeElements() const
+{
+    return edge_elements_;
 }
 
 int ComsolMeshImporter::getNodesNum() const

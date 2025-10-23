@@ -1,9 +1,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <cmath>
 #include <functional>
-#include <iostream>
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 // 简单的配置类，用于统一管理与误差分析/积分相关的计算参数。
@@ -13,8 +13,9 @@ class Config
   public:
     enum ElementType
     {
-        TRIANGLE,
-        QUADRILATERAL,
+        LINE,           // 线段单元（一维，用于边界）
+        TRIANGLE,       // 三角形单元（二维）
+        QUADRILATERAL,  // 四边形单元（二维）
         // 三维还没有实现
     };
 
@@ -81,7 +82,7 @@ class Config
     std::string solver_type_ = "CG";  // 求解器类型："SparseLU"或"CG"，用户可直接在此修改
     std::string preconditioner_type_ =
         "DiagonalPreconditioner";       // 预条件子类型，用户可直接在此修改
-    double solver_tolerance_ = 1e-6;    // 求解器收敛容差，用户可直接在此修改
+    double solver_tolerance_ = 1e-8;    // 求解器收敛容差，用户可直接在此修改
     int solver_max_iterations_ = 1000;  // 求解器最大迭代次数，用户可直接在此修改
 
     // 文件中将会规定dimension、node_coordinates、element_connectivity、
@@ -90,6 +91,12 @@ class Config
 
     // 这里要根据维度和单元类型设置gauss_assemble_points_.n个高斯点能精确积分2n+1阶多项式
     void setGaussAssemblePoints();
+
+    // 初始化边界边信息
+    void initializeBoundarys(const std::vector<std::vector<int>>& edge_elements);
+
+    // 查找包含指定边的单元
+    int findElementContainingEdge(const std::vector<int>& edge_nodes) const;
 
     // 使用std::function，更灵活
     std::function<double(const std::vector<double>&)> coefficient_c_func;
@@ -170,8 +177,14 @@ class Config
     int getElementType() const;
     const std::vector<double>& getNodeCoordinates() const;
     const std::vector<std::vector<int>>& getElementConnectivity() const;
+    const std::vector<Boundary>& getBoundary() const;
     bool hasExactSolution() const;
     bool hasExactGradients() const;
+
+    // 边界单元相关访问器
+    int getBoundaryElementType() const;      // 返回边界单元类型（LINE）
+    int getBoundaryNodesPerElement() const;  // 返回边界单元节点数（2）
+    int getBoundaryGaussPointsNum() const;   // 返回边界积分使用的高斯点数
 
     // 求解器参数访问器
     const std::string& getSolverType() const;

@@ -1,10 +1,65 @@
 #include "gauss_quadrature.h"
+#include <cmath>
 #include <stdexcept>
+
+// ============================================================================
+// 具体线段高斯点类实现
+// ============================================================================
+
+// LineGauss2Point 实现
+LineGauss2Point::LineGauss2Point() : LineGaussPoint(2)
+{
+    initializeGaussPoints();
+}
+
+void LineGauss2Point::initializeGaussPoints()
+{
+    // 二点高斯积分：标准区间 [-1, 1]
+    points_.resize(2);
+    weights_.resize(2);
+
+    // 高斯点位置
+    double a = 1.0 / std::sqrt(3.0);  // 约 0.577350269
+
+    // 点1: t = -a
+    points_[0] = -a;
+    weights_[0] = 1.0;
+
+    // 点2: t = a
+    points_[1] = a;
+    weights_[1] = 1.0;
+}
+
+// LineGauss3Point 实现
+LineGauss3Point::LineGauss3Point() : LineGaussPoint(3)
+{
+    initializeGaussPoints();
+}
+
+void LineGauss3Point::initializeGaussPoints()
+{
+    // 三点高斯积分：标准区间 [-1, 1]
+    points_.resize(3);
+    weights_.resize(3);
+
+    double a = std::sqrt(3.0 / 5.0);  // 约 0.774596669
+
+    // 点1: t = -a
+    points_[0] = -a;
+    weights_[0] = 5.0 / 9.0;
+
+    // 点2: t = 0
+    points_[1] = 0.0;
+    weights_[1] = 8.0 / 9.0;
+
+    // 点3: t = a
+    points_[2] = a;
+    weights_[2] = 5.0 / 9.0;
+}
 
 // ============================================================================
 // 具体三角形高斯点类实现
 // ============================================================================
-
 
 // TriangleGauss1Point 实现
 TriangleGauss1Point::TriangleGauss1Point() : TriangleGaussPoint(1)
@@ -95,12 +150,23 @@ void TriangleGauss4Point::initializeGaussPoints()
 // GaussPointFactory 实现
 // ============================================================================
 
-std::unique_ptr<GaussPoint> GaussPointFactory::createGaussPoint(ElementType elementType,
+std::unique_ptr<GaussPoint> GaussPointFactory::createGaussPoint(Config::ElementType elementType,
                                                                 int numPoints)
 {
     switch (elementType)
     {
-        case ElementType::Triangle:
+        case Config::ElementType::LINE:
+            switch (numPoints)
+            {
+                case 2:
+                    return std::make_unique<LineGauss2Point>();
+                case 3:
+                    return std::make_unique<LineGauss3Point>();
+                default:
+                    throw std::invalid_argument("Unsupported number of Gauss points for Line");
+            }
+
+        case Config::ElementType::TRIANGLE:
             switch (numPoints)
             {
                 case 1:
@@ -113,9 +179,7 @@ std::unique_ptr<GaussPoint> GaussPointFactory::createGaussPoint(ElementType elem
                     throw std::invalid_argument("Unsupported number of Gauss points for Triangle");
             }
 
-        case ElementType::Quadrilateral:
-        case ElementType::Tetrahedron:
-        case ElementType::Hexahedron:
+        case Config::ElementType::QUADRILATERAL:
             // 目前未实现其他单元类型的高斯点
             throw std::invalid_argument(
                 "Requested ElementType is not implemented in GaussPointFactory");

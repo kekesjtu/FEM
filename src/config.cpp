@@ -1,4 +1,5 @@
 #include "config.h"
+#include <iostream>
 #include "comsol_mesh_importer.h"
 
 // 构造函数实现
@@ -13,8 +14,8 @@ Config::Config()
 void Config::setGaussAssemblePoints()
 {
     // 对于形函数阶数order_的单元，刚度矩阵积分涉及2*order_阶多项式
-    // n个高斯点能精确积分2n-1阶多项式，所以需要至少(2*shape_function_order_+1+1)/2 = shape_function_order_+1个点
-    // 但实际中通常取稍多一些以保证精度
+    // n个高斯点能精确积分2n-1阶多项式，所以需要至少(2*shape_function_order_+1+1)/2 =
+    // shape_function_order_+1个点 但实际中通常取稍多一些以保证精度
 
     if (dimension_ == 2)
     {
@@ -46,7 +47,8 @@ void Config::setGaussAssemblePoints()
     }
 
     std::cout << "设置高斯积分点数: " << gauss_assemble_points_num_ << " (维度=" << dimension_
-              << ", 单元类型=" << element_type_ << ", 阶数=" << shape_function_order_ << ")" << std::endl;
+              << ", 单元类型=" << element_type_ << ", 阶数=" << shape_function_order_ << ")"
+              << std::endl;
 }
 
 // Setter方法实现
@@ -141,6 +143,11 @@ const std::vector<std::vector<int>>& Config::getElementConnectivity() const
     return element_connectivity_;
 }
 
+const std::vector<Config::Boundary>& Config::getBoundary() const
+{
+    return boundarys;
+}
+
 bool Config::hasExactSolution() const
 {
     return exact_solution_u_func != nullptr;
@@ -149,6 +156,60 @@ bool Config::hasExactSolution() const
 bool Config::hasExactGradients() const
 {
     return exact_solution_gradients_func != nullptr;
+}
+
+// 边界单元相关访问器实现
+int Config::getBoundaryElementType() const
+{
+    // 对于2D问题，边界是一维线段
+    // 对于3D问题（未来），边界是二维面
+    if (dimension_ == 2)
+    {
+        return LINE;
+    }
+    else
+    {
+        throw std::runtime_error("Boundary element type for dimension > 2 not implemented");
+    }
+}
+
+int Config::getBoundaryNodesPerElement() const
+{
+    // 对于线性边界单元
+    if (shape_function_order_ == 1)
+    {
+        if (dimension_ == 2)
+        {
+            return 2;  // 线段有2个节点
+        }
+        else
+        {
+            throw std::runtime_error(
+                "Boundary nodes per element for dimension > 2 not implemented");
+        }
+    }
+    else
+    {
+        throw std::runtime_error("Higher order boundary elements not implemented");
+    }
+}
+
+int Config::getBoundaryGaussPointsNum() const
+{
+    // 对于线性边界单元，使用2点或3点高斯积分
+    // 根据形函数阶数选择合适的积分点数
+    if (shape_function_order_ == 1)
+    {
+        return 2;  // 线性边界单元用2点高斯积分
+    }
+    else if (shape_function_order_ == 2)
+    {
+        return 3;  // 二次边界单元用3点高斯积分
+    }
+    else
+    {
+        throw std::runtime_error("Higher order boundary elements not implemented");
+    }
 }
 
 // 求解器参数访问器实现
@@ -238,10 +299,91 @@ void Config::loadMeshFromFile(const std::string& filename)
         {
             element_type_ = TRIANGLE;
         }
+
+        // 初始化边界边信息
+        initializeBoundarys(importer.getEdgeElements());
     }
     else
     {
         std::cerr << "在 Config 中加载网格失败: " << filename << std::endl;
         throw std::runtime_error("无法加载网格文件");
     }
+}
+
+void Config::initializeBoundarys(const std::vector<std::vector<int>>& edge_elements)
+{
+    boundarys.clear();
+    boundarys.reserve(edge_elements.size());
+
+    for (const auto& edge : edge_elements)
+    {
+        Boundary boundary;
+
+        // ============================================================
+        // 用户可在此处自定义边界条件
+        // ============================================================
+
+        // 选项 1: 齐次 Dirichlet 边界条件（默认）
+        boundary.bc = BoundaryCondition::Dirichlet(0.0);
+
+        // 选项 2: 非齐次 Dirichlet 边界条件
+        // boundary.bc = BoundaryCondition::Dirichlet(1.0);  // u = 1.0
+
+        // 选项 3: Neumann 边界条件
+        // boundary.bc = BoundaryCondition::Neumann(2.0);  // c*du/dn = 2.0
+
+        // 选项 4: Robin 边界条件
+        // boundary.bc = BoundaryCondition::Robin(2.0, 3.0);  // c*du/dn + 2.0*u = 3.0
+
+        // ============================================================
+
+        // 找到包含这条边的单元
+        boundary.element_index = findElementContainingEdge(edge);
+
+        // 设置边界边的全局节点索引
+        boundary.global_node_indices_in_element = edge;
+
+        boundarys.push_back(boundary);
+    }
+
+    std::cout << "初始化边界边信息: " << boundarys.size() << " 条边界边" << std::endl;
+    std::cout << "提示：可在 config.cpp 的 initializeBoundarys() 函数中自定义边界条件类型"
+              << std::endl;
+}
+
+int Config::findElementContainingEdge(const std::vector<int>& edge_nodes) const
+{
+    // 简化实现：返回第一个包含所有边界节点的单元
+    // 实际应用中可能需要更复杂的逻辑
+    for (int i = 0; i < elements_num_; ++i)
+    {
+        const auto& element = element_connectivity_[i];
+        bool contains_all_nodes = true;
+
+        for (int edge_node : edge_nodes)
+        {
+            bool found = false;
+            for (int elem_node : element)
+            {
+                if (elem_node == edge_node)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                contains_all_nodes = false;
+                break;
+            }
+        }
+
+        if (contains_all_nodes)
+        {
+            return i;
+        }
+    }
+
+    // 如果找不到，返回-1表示错误
+    return -1;
 }

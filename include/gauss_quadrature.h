@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include "config.h"  // 使用 Config 的 ElementType
 
 /**
  * @brief 高斯点基类，负责生成和存储高斯点信息
@@ -56,6 +57,28 @@ class GaussPoint
 };
 
 /**
+ * @brief 一维高斯点基类
+ * 为一维高斯积分（线段）添加特定的接口
+ */
+class GaussPoint1D : public GaussPoint
+{
+  public:
+    GaussPoint1D(int numPoints) : GaussPoint(numPoints)
+    {
+    }
+    virtual ~GaussPoint1D() = default;
+
+    /**
+     * @brief 获取维度 (固定为1D)
+     * @return 1
+     */
+    int getDimension() const override final
+    {
+        return 1;
+    }
+};
+
+/**
  * @brief 二维高斯点基类
  * 为二维高斯积分添加特定的接口，并提供积分点存储
  */
@@ -78,6 +101,25 @@ class GaussPoint2D : public GaussPoint
 };
 
 /**
+ * @brief 线段单元高斯点基类
+ * 提供线段单元高斯积分的通用实现
+ */
+class LineGaussPoint : public GaussPoint1D
+{
+  public:
+    LineGaussPoint(int numPoints) : GaussPoint1D(numPoints)
+    {
+    }
+    virtual ~LineGaussPoint() = default;
+
+  protected:
+    /**
+     * @brief 初始化高斯点和权重 - 由派生类实现
+     */
+    virtual void initializeGaussPoints() = 0;
+};
+
+/**
  * @brief 三角形单元高斯点基类
  * 提供三角形单元高斯积分的通用实现
  */
@@ -94,6 +136,30 @@ class TriangleGaussPoint : public GaussPoint2D
      * @brief 初始化高斯点和权重 - 由派生类实现
      */
     virtual void initializeGaussPoints() = 0;
+};
+
+/**
+ * @brief 线段单元二点积分
+ */
+class LineGauss2Point : public LineGaussPoint
+{
+  public:
+    LineGauss2Point();
+
+  protected:
+    void initializeGaussPoints() override;
+};
+
+/**
+ * @brief 线段单元三点积分
+ */
+class LineGauss3Point : public LineGaussPoint
+{
+  public:
+    LineGauss3Point();
+
+  protected:
+    void initializeGaussPoints() override;
 };
 
 /**
@@ -139,23 +205,13 @@ class GaussPointFactory
 {
   public:
     /**
-     * @brief 单元类型枚举
-     */
-    enum class ElementType
-    {
-        Triangle,       // 三角形单元
-        Quadrilateral,  // 四边形单元 (预留)
-        Tetrahedron,    // 四面体单元 (预留)
-        Hexahedron      // 六面体单元 (预留)
-    };
-
-    /**
-     * @brief 创建高斯积分对象 (通用接口)
-     * @param elementType 单元类型
+     * @brief 根据单元类型和积分点数创建高斯积分对象
+     * @param elementType 单元类型（使用 Config::ElementType）
      * @param numPoints 积分点数量
      * @return 高斯积分对象的智能指针
      */
-    static std::unique_ptr<GaussPoint> createGaussPoint(ElementType elementType, int numPoints);
+    static std::unique_ptr<GaussPoint> createGaussPoint(Config::ElementType elementType,
+                                                        int numPoints);
 };
 
 #endif  // GAUSS_QUADRATURE_2D_H

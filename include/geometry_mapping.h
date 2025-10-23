@@ -18,7 +18,7 @@ class GeometryMapping
   protected:
     std::vector<double> element_coords_;             // 单元节点坐标
     int nodes_num_per_element_;                      // 单元节点数量
-    int shape_function_order_;                                      // 单元的阶数
+    int shape_function_order_;                       // 单元的阶数
     int dimension_;                                  // 空间维度 (2D/3D)
     double jacobian_det_;                            // 雅可比行列式 (常数)
     std::vector<std::vector<double>> jacobian_inv_;  // 逆雅可比矩阵 (常数)
@@ -89,6 +89,31 @@ class GeometryMapping
 };
 
 /**
+ * @brief 一维几何映射的中间抽象基类
+ *
+ * 继承自通用的 GeometryMapping，并为所有 1D 单元（线段）添加通用接口，如计算长度。
+ */
+class GeometryMapping1D : public GeometryMapping
+{
+  public:
+    /**
+     * @brief 构造函数
+     * @param coords 单元节点坐标（可以是嵌入在2D或3D空间中的线段）
+     * @param order 插值阶数
+     * @param nodes 节点数量
+     */
+    GeometryMapping1D(const std::vector<double>& element_coords, int order, int nodes)
+        : GeometryMapping(element_coords, nodes, order, 1)  // 参考维度固定为 1
+    {
+    }
+
+    /**
+     * @brief 获取单元的长度
+     */
+    virtual double getElementLength() const = 0;
+};
+
+/**
  * @brief 二维几何映射的中间抽象基类
  *
  * 继承自通用的 GeometryMapping，并为所有 2D 单元添加通用接口，如计算面积。
@@ -111,6 +136,42 @@ class GeometryMapping2D : public GeometryMapping
      * @note 这通常通过对雅可比行列式在参考单元上积分得到。
      */
     virtual double getElementArea() const = 0;
+};
+
+// =========================================================================
+// ==              1D 单元的具体实现 (Concrete Implementations)         ==
+// =========================================================================
+
+/**
+ * @brief 一维线性线段单元的几何映射类 (Line Linear)
+ *
+ * 对于线性线段，雅可比（即边长的一半）在整个单元内是常数。
+ * 线段可以嵌入在2D或3D空间中。
+ */
+class LineLinearMapping : public GeometryMapping1D
+{
+  private:
+    int embedding_dimension_;  // 嵌入空间的维度（2D或3D）
+    void computeJacobian() override;
+
+  public:
+    /**
+     * @brief 构造函数 - 创建1D线性线段映射
+     * @param coords 两个端点的坐标，例如2D空间中: [x0, y0, x1, y1]
+     * @param embed_dim 嵌入空间的维度（2或3）
+     */
+    LineLinearMapping(const std::vector<double>& element_coords, int embed_dim);
+
+    void mapToPhysical(const std::vector<double>& coord_ref,
+                       std::vector<double>& coord_phys) const override;
+
+    double getJacobianDet(const std::vector<double>& coord_ref) const override;
+
+    void transformGradient(const std::vector<double>& gradient_ref,
+                           std::vector<double>& gradient_phys,
+                           const std::vector<double>& coord_ref) const override;
+
+    double getElementLength() const override;
 };
 
 // =========================================================================
@@ -162,20 +223,18 @@ class TriangleLinearMapping : public GeometryMapping2D
  */
 class GeometryMappingFactory
 {
-  protected:
-    std::shared_ptr<Config> config_;
-
   public:
     /**
-     * @brief 创建几何映射对象
+     * @brief 统一的几何映射创建接口，所有信息从 Config 获取
      *
-     * @param type 单元的几何类型 (e.g., Triangle)
-     * @param order 单元的插值阶次 (e.g., Linear)
-     * @param coords 该单元所有节点的坐标
-     * @return 指向创建的几何映射对象的 unique_ptr。返回基类指针以支持多态。
+     * @param element_coords 单元节点的坐标
+     * @param config_ 配置对象，包含单元类型、阶数和维度信息
+     * @param is_boundary 是否创建边界单元的几何映射（默认 false，创建体单元）
+     * @return 指向创建的几何映射对象的 unique_ptr
      */
     static std::unique_ptr<GeometryMapping> createMapping(const std::vector<double>& element_coords,
-                                                          std::shared_ptr<Config> config_);
+                                                          std::shared_ptr<Config> config_,
+                                                          bool is_boundary = false);
 };
 
 #endif  // GEOMETRY_MAPPING_H

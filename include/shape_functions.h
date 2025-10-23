@@ -56,6 +56,23 @@ class ShapeFunction
 };
 
 /**
+ * @brief 一维形函数基类
+ */
+class ShapeFunction1D : public ShapeFunction
+{
+  public:
+    virtual ~ShapeFunction1D() = default;
+
+    /**
+     * @brief 获取参考坐标维度（一维）
+     */
+    int getDimension() const
+    {
+        return 1;
+    }
+};
+
+/**
  * @brief 二维形函数基类
  */
 class ShapeFunction2D : public ShapeFunction
@@ -70,6 +87,31 @@ class ShapeFunction2D : public ShapeFunction
     {
         return 2;
     }
+};
+
+/**
+ * @brief 线性线段单元形函数类（一维）
+ * 用于边界积分计算
+ */
+class LineLinearShapeFunction : public ShapeFunction1D
+{
+  public:
+    LineLinearShapeFunction() = default;
+    virtual ~LineLinearShapeFunction() = default;
+
+    int getNumNodesPerElement() const override
+    {
+        return 2;
+    }
+
+    double computeTrialFunction(int element_node_index,
+                                const std::vector<double>& coords) const override;
+    double computeTestFunction(int element_node_index,
+                               const std::vector<double>& coords) const override;
+    std::vector<double> computeTrialGradients(int element_node_index,
+                                              const std::vector<double>& coords) const override;
+    std::vector<double> computeTestGradients(int element_node_index,
+                                             const std::vector<double>& coords) const override;
 };
 
 /**
@@ -101,17 +143,15 @@ class TriangleLinearShapeFunction : public ShapeFunction2D
  */
 class ShapeFunctionFactory
 {
-  protected:
-    std::shared_ptr<Config> config_;
-
   public:
     /**
-     * @brief 统一的形函数创建接口 - 用户只需调用这一个函数
-     * @param elementType 单元类型
-     * @param order 形函数阶数
+     * @brief 统一的形函数创建接口，所有信息从 Config 获取
+     * @param config_ 配置对象，包含单元类型和阶数信息
+     * @param is_boundary 是否创建边界单元的形函数（默认 false，创建体单元）
      * @return 形函数对象的智能指针，自动返回对应的具体类型
      */
-    static std::unique_ptr<ShapeFunction> createShapeFunction(std::shared_ptr<Config> config_);
+    static std::unique_ptr<ShapeFunction> createShapeFunction(std::shared_ptr<Config> config_,
+                                                              bool is_boundary = false);
 };
 
 #endif  // SHAPE_FUNCTIONS_2D_H

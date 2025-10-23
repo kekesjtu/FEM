@@ -112,28 +112,7 @@ CMakeFiles/FEM_solution.dir/src/shape_functions.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/memory_resource.h \
  E:/msys64/ucrt64/include/c++/15.2.0/cstddef \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/uses_allocator_args.h \
- E:/code/FEM/include/config.h E:/msys64/ucrt64/include/c++/15.2.0/cmath \
- E:/msys64/ucrt64/include/math.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/std_abs.h \
- E:/msys64/ucrt64/include/stdlib.h \
- E:/msys64/ucrt64/include/sec_api/stdlib_s.h \
- E:/msys64/ucrt64/include/c++/15.2.0/stdlib.h \
- E:/msys64/ucrt64/include/malloc.h \
- E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mm_malloc.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/specfun.h \
- E:/msys64/ucrt64/include/c++/15.2.0/limits \
- E:/msys64/ucrt64/include/c++/15.2.0/tr1/gamma.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/tr1/special_function_util.h \
- E:/msys64/ucrt64/include/c++/15.2.0/tr1/bessel_function.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/tr1/beta_function.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/tr1/ell_integral.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/tr1/exp_integral.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/tr1/hypergeometric.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/tr1/legendre_function.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/tr1/modified_bessel_func.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/tr1/poly_hermite.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/tr1/poly_laguerre.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/tr1/riemann_zeta.tcc \
+ E:/code/FEM/include/config.h \
  E:/msys64/ucrt64/include/c++/15.2.0/functional \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/std_function.h \
  E:/msys64/ucrt64/include/c++/15.2.0/unordered_map \
@@ -145,10 +124,8 @@ CMakeFiles/FEM_solution.dir/src/shape_functions.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/erase_if.h \
  E:/msys64/ucrt64/include/c++/15.2.0/array \
  E:/msys64/ucrt64/include/c++/15.2.0/compare \
- E:/msys64/ucrt64/include/c++/15.2.0/iostream \
- E:/msys64/ucrt64/include/c++/15.2.0/ostream \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/ostream.h \
- E:/msys64/ucrt64/include/c++/15.2.0/ios \
+ E:/msys64/ucrt64/include/c++/15.2.0/stdexcept \
+ E:/msys64/ucrt64/include/c++/15.2.0/string \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/char_traits.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/localefwd.h \
  E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++locale.h \
@@ -157,9 +134,6 @@ CMakeFiles/FEM_solution.dir/src/shape_functions.cpp.obj: \
  E:/msys64/ucrt64/include/sec_api/stdio_s.h \
  E:/msys64/ucrt64/include/c++/15.2.0/cctype \
  E:/msys64/ucrt64/include/ctype.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/ios_base.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_classes.h \
- E:/msys64/ucrt64/include/c++/15.2.0/string \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/ostream_insert.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/cxxabi_forced.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/basic_string.h \
@@ -167,26 +141,14 @@ CMakeFiles/FEM_solution.dir/src/shape_functions.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/string_view.tcc \
  E:/msys64/ucrt64/include/c++/15.2.0/ext/string_conversions.h \
  E:/msys64/ucrt64/include/c++/15.2.0/cstdlib \
+ E:/msys64/ucrt64/include/stdlib.h \
+ E:/msys64/ucrt64/include/sec_api/stdlib_s.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/stdlib.h \
+ E:/msys64/ucrt64/include/malloc.h \
+ E:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/mm_malloc.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/std_abs.h \
  E:/msys64/ucrt64/include/c++/15.2.0/cstdio \
  E:/msys64/ucrt64/include/c++/15.2.0/cerrno \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/charconv.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/basic_string.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_classes.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/system_error \
- E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/error_constants.h \
- E:/msys64/ucrt64/include/c++/15.2.0/stdexcept \
- E:/msys64/ucrt64/include/c++/15.2.0/streambuf \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/streambuf.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/basic_ios.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_facets.h \
- E:/msys64/ucrt64/include/c++/15.2.0/cwctype \
- E:/msys64/ucrt64/include/wctype.h \
- E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/ctype_base.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/streambuf_iterator.h \
- E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/ctype_inline.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_facets.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/basic_ios.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/ostream.tcc \
- E:/msys64/ucrt64/include/c++/15.2.0/istream \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/istream.tcc \
  E:/code/FEM/include/config.h
