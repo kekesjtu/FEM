@@ -240,6 +240,33 @@ src/config.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/config.cpp.s
 .PHONY : src/config.cpp.s
 
+src/electrothermal_solver.obj: src/electrothermal_solver.cpp.obj
+.PHONY : src/electrothermal_solver.obj
+
+# target to build an object file
+src/electrothermal_solver.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/electrothermal_solver.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.obj
+.PHONY : src/electrothermal_solver.cpp.obj
+
+src/electrothermal_solver.i: src/electrothermal_solver.cpp.i
+.PHONY : src/electrothermal_solver.i
+
+# target to preprocess a source file
+src/electrothermal_solver.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/electrothermal_solver.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.i
+.PHONY : src/electrothermal_solver.cpp.i
+
+src/electrothermal_solver.s: src/electrothermal_solver.cpp.s
+.PHONY : src/electrothermal_solver.s
+
+# target to generate assembly for a file
+src/electrothermal_solver.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/electrothermal_solver.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.s
+.PHONY : src/electrothermal_solver.cpp.s
+
 src/error_analysis.obj: src/error_analysis.cpp.obj
 .PHONY : src/error_analysis.obj
 
@@ -372,6 +399,33 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/problem_setup.obj: src/problem_setup.cpp.obj
+.PHONY : src/problem_setup.obj
+
+# target to build an object file
+src/problem_setup.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/problem_setup.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.obj
+.PHONY : src/problem_setup.cpp.obj
+
+src/problem_setup.i: src/problem_setup.cpp.i
+.PHONY : src/problem_setup.i
+
+# target to preprocess a source file
+src/problem_setup.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/problem_setup.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.i
+.PHONY : src/problem_setup.cpp.i
+
+src/problem_setup.s: src/problem_setup.cpp.s
+.PHONY : src/problem_setup.s
+
+# target to generate assembly for a file
+src/problem_setup.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/problem_setup.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.s
+.PHONY : src/problem_setup.cpp.s
+
 src/shape_functions.obj: src/shape_functions.cpp.obj
 .PHONY : src/shape_functions.obj
 
@@ -446,6 +500,9 @@ help:
 	@echo ... src/config.obj
 	@echo ... src/config.i
 	@echo ... src/config.s
+	@echo ... src/electrothermal_solver.obj
+	@echo ... src/electrothermal_solver.i
+	@echo ... src/electrothermal_solver.s
 	@echo ... src/error_analysis.obj
 	@echo ... src/error_analysis.i
 	@echo ... src/error_analysis.s
@@ -461,6 +518,9 @@ help:
 	@echo ... src/main.obj
 	@echo ... src/main.i
 	@echo ... src/main.s
+	@echo ... src/problem_setup.obj
+	@echo ... src/problem_setup.i
+	@echo ... src/problem_setup.s
 	@echo ... src/shape_functions.obj
 	@echo ... src/shape_functions.i
 	@echo ... src/shape_functions.s

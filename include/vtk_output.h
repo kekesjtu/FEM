@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include "config.h"
+#include "problem_setup.h"
 
 /**
  * @brief VTK输出基类
@@ -55,10 +56,12 @@ class VTKOutput
     /**
      * @brief 输出加密采样的误差VTK文件
      * @param filename 输出文件名 (不含.vtu)
-     * @param config 配置对象，用于访问工厂和问题定义
+     * @param config 配置对象，用于访问工厂
+     * @param problem 问题设置对象，用于获取精确解
      */
     virtual void outputDenseSamplingError(const std::string& filename,
-                                          std::shared_ptr<Config> config) = 0;
+                                          std::shared_ptr<Config> config,
+                                          std::shared_ptr<ProblemSetup> problem) = 0;
 
   protected:
     bool ensureDirectoryExists(const std::string& directory);
@@ -95,8 +98,8 @@ class TriangleVTKOutput2D : public VTKOutput2D
         const std::string& filename,
         const std::function<double(const std::vector<double>&)>& exact_func) override;
 
-    void outputDenseSamplingError(const std::string& filename,
-                                  std::shared_ptr<Config> config) override;
+    void outputDenseSamplingError(const std::string& filename, std::shared_ptr<Config> config,
+                                  std::shared_ptr<ProblemSetup> problem) override;
 
   private:
     // 辅助函数，计算单元内任意参考坐标点的数值解

@@ -421,7 +421,7 @@ CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/shared_ptr_atomic.h \
  E:/msys64/ucrt64/include/c++/15.2.0/backward/auto_ptr.h \
  E:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_memory_defs.h \
- E:/code/FEM/include/config.h \
+ E:/code/FEM/include/config.h E:/code/FEM/include/problem_setup.h \
  E:/code/FEM/third_party/Eigen/IterativeLinearSolvers \
  E:/code/FEM/third_party/Eigen/SparseLU \
  E:/msys64/ucrt64/include/c++/15.2.0/ctime \

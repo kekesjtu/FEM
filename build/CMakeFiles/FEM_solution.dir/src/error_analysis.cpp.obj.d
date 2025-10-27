@@ -402,7 +402,8 @@ CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/shared_ptr_atomic.h \
  E:/msys64/ucrt64/include/c++/15.2.0/backward/auto_ptr.h \
  E:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_memory_defs.h \
- E:/code/FEM/include/config.h E:/msys64/ucrt64/include/c++/15.2.0/iomanip \
+ E:/code/FEM/include/config.h E:/code/FEM/include/problem_setup.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/iomanip \
  E:/msys64/ucrt64/include/c++/15.2.0/locale \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_facets_nonio.h \
  E:/msys64/ucrt64/include/c++/15.2.0/ctime \
@@ -413,9 +414,6 @@ CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_conv.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/quoted_string.h \
  E:/msys64/ucrt64/include/c++/15.2.0/iostream \
- E:/msys64/ucrt64/include/c++/15.2.0/numeric \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_numeric.h \
- E:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_numeric_defs.h \
  E:/code/FEM/include/config.h E:/code/FEM/include/gauss_quadrature.h \
  E:/code/FEM/include/geometry_mapping.h \
  E:/code/FEM/include/shape_functions.h

@@ -13,6 +13,12 @@
 },
 {
   "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\electrothermal_solver.cpp.obj -c E:\\code\\FEM\\src\\electrothermal_solver.cpp",
+  "file": "E:/code/FEM/src/electrothermal_solver.cpp",
+  "output": "CMakeFiles/FEM_solution.dir/src/electrothermal_solver.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
   "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\error_analysis.cpp.obj -c E:\\code\\FEM\\src\\error_analysis.cpp",
   "file": "E:/code/FEM/src/error_analysis.cpp",
   "output": "CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.obj"
@@ -43,6 +49,12 @@
 },
 {
   "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\problem_setup.cpp.obj -c E:\\code\\FEM\\src\\problem_setup.cpp",
+  "file": "E:/code/FEM/src/problem_setup.cpp",
+  "output": "CMakeFiles/FEM_solution.dir/src/problem_setup.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
   "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\shape_functions.cpp.obj -c E:\\code\\FEM\\src\\shape_functions.cpp",
   "file": "E:/code/FEM/src/shape_functions.cpp",
   "output": "CMakeFiles/FEM_solution.dir/src/shape_functions.cpp.obj"
@@ -67,6 +79,12 @@
 },
 {
   "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\electrothermal_solver.cpp.obj -c E:\\code\\FEM\\src\\electrothermal_solver.cpp",
+  "file": "E:/code/FEM/src/electrothermal_solver.cpp",
+  "output": "CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
   "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\error_analysis.cpp.obj -c E:\\code\\FEM\\src\\error_analysis.cpp",
   "file": "E:/code/FEM/src/error_analysis.cpp",
   "output": "CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj"
@@ -88,6 +106,12 @@
   "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\geometry_mapping.cpp.obj -c E:\\code\\FEM\\src\\geometry_mapping.cpp",
   "file": "E:/code/FEM/src/geometry_mapping.cpp",
   "output": "CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj"
+},
+{
+  "directory": "E:/code/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\problem_setup.cpp.obj -c E:\\code\\FEM\\src\\problem_setup.cpp",
+  "file": "E:/code/FEM/src/problem_setup.cpp",
+  "output": "CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.obj"
 },
 {
   "directory": "E:/code/FEM/build",

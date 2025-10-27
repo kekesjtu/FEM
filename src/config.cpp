@@ -7,7 +7,6 @@ Config::Config()
 {
     loadMeshFromFile(mesh_filename_);  // 网格相关变量初始化完毕
     setGaussAssemblePoints();          // 矩阵组装计算参数初始化完毕
-    setProblem();                      // 问题定义初始化完毕
 }
 
 // 高斯积分点数设置
@@ -49,28 +48,6 @@ void Config::setGaussAssemblePoints()
     std::cout << "设置高斯积分点数: " << gauss_assemble_points_num_ << " (维度=" << dimension_
               << ", 单元类型=" << element_type_ << ", 阶数=" << shape_function_order_ << ")"
               << std::endl;
-}
-
-// Setter方法实现
-void Config::setCoefficientC(std::function<double(const std::vector<double>&)> func)
-{
-    coefficient_c_func = func;
-}
-
-void Config::setSourceTermF(std::function<double(const std::vector<double>&)> func)
-{
-    source_term_f_func = func;
-}
-
-void Config::setExactSolutionU(std::function<double(const std::vector<double>&)> func)
-{
-    exact_solution_u_func = func;
-}
-
-void Config::setExactSolutionGradients(
-    std::function<double(const std::vector<double>&, std::vector<double>&)> func)
-{
-    exact_solution_gradients_func = func;
 }
 
 // 访问器实现
@@ -148,14 +125,9 @@ const std::vector<Config::Boundary>& Config::getBoundary() const
     return boundarys;
 }
 
-bool Config::hasExactSolution() const
+std::vector<Config::Boundary>& Config::getBoundaryMutable()
 {
-    return exact_solution_u_func != nullptr;
-}
-
-bool Config::hasExactGradients() const
-{
-    return exact_solution_gradients_func != nullptr;
+    return boundarys;
 }
 
 // 边界单元相关访问器实现
@@ -233,44 +205,6 @@ int Config::getSolverMaxIterations() const
     return solver_max_iterations_;
 }
 
-// 调用函数实现
-double Config::coefficient_c(const std::vector<double>& coords) const
-{
-    if (coefficient_c_func)
-    {
-        return coefficient_c_func(coords);
-    }
-    throw std::runtime_error("coefficient_c function not set");
-}
-
-double Config::source_term_f(const std::vector<double>& coords) const
-{
-    if (source_term_f_func)
-    {
-        return source_term_f_func(coords);
-    }
-    throw std::runtime_error("source_term_f function not set");
-}
-
-double Config::exact_solution_u(const std::vector<double>& coords) const
-{
-    if (exact_solution_u_func)
-    {
-        return exact_solution_u_func(coords);
-    }
-    throw std::runtime_error("exact_solution_u function not set");
-}
-
-double Config::exact_solution_gradients(const std::vector<double>& coords,
-                                        std::vector<double>& gradients) const
-{
-    if (exact_solution_gradients_func)
-    {
-        return exact_solution_gradients_func(coords, gradients);
-    }
-    throw std::runtime_error("exact_solution_gradients function not set");
-}
-
 // 网格加载实现
 
 void Config::loadMeshFromFile(const std::string& filename)
@@ -319,24 +253,6 @@ void Config::initializeBoundarys(const std::vector<std::vector<int>>& edge_eleme
     {
         Boundary boundary;
 
-        // ============================================================
-        // 用户可在此处自定义边界条件
-        // ============================================================
-
-        // 选项 1: 齐次 Dirichlet 边界条件（默认）
-        boundary.bc = BoundaryCondition::Dirichlet(0.0);
-
-        // 选项 2: 非齐次 Dirichlet 边界条件
-        // boundary.bc = BoundaryCondition::Dirichlet(1.0);  // u = 1.0
-
-        // 选项 3: Neumann 边界条件
-        // boundary.bc = BoundaryCondition::Neumann(2.0);  // c*du/dn = 2.0
-
-        // 选项 4: Robin 边界条件
-        // boundary.bc = BoundaryCondition::Robin(2.0, 3.0);  // c*du/dn + 2.0*u = 3.0
-
-        // ============================================================
-
         // 找到包含这条边的单元
         boundary.element_index = findElementContainingEdge(edge);
 
@@ -347,8 +263,7 @@ void Config::initializeBoundarys(const std::vector<std::vector<int>>& edge_eleme
     }
 
     std::cout << "初始化边界边信息: " << boundarys.size() << " 条边界边" << std::endl;
-    std::cout << "提示：可在 config.cpp 的 initializeBoundarys() 函数中自定义边界条件类型"
-              << std::endl;
+    std::cout << "提示：边界条件将由 ProblemSetup 在求解时动态设置" << std::endl;
 }
 
 int Config::findElementContainingEdge(const std::vector<int>& edge_nodes) const

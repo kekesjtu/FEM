@@ -138,8 +138,8 @@ CMakeFiles/FEM_solution.dir/src/main.cpp.obj: E:\code\FEM\src\main.cpp \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/ostream.tcc \
  E:/msys64/ucrt64/include/c++/15.2.0/istream \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/istream.tcc \
- E:/code/FEM/include/error_analysis.h E:/code/FEM/third_party/Eigen/Dense \
- E:/code/FEM/third_party/Eigen/Core \
+ E:/code/FEM/include/electrothermal_solver.h \
+ E:/code/FEM/third_party/Eigen/Dense E:/code/FEM/third_party/Eigen/Core \
  E:/code/FEM/third_party/Eigen/src/Core/util/DisableStupidWarnings.h \
  E:/code/FEM/third_party/Eigen/src/Core/util/Macros.h \
  E:/msys64/ucrt64/include/c++/15.2.0/cmath \
@@ -480,4 +480,8 @@ CMakeFiles/FEM_solution.dir/src/main.cpp.obj: E:\code\FEM\src\main.cpp \
  E:/code/FEM/third_party/Eigen/src/IterativeLinearSolvers/IncompleteCholesky.h \
  E:/msys64/ucrt64/include/c++/15.2.0/list \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_list.h \
- E:/msys64/ucrt64/include/c++/15.2.0/bits/list.tcc
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/list.tcc \
+ E:/code/FEM/include/problem_setup.h \
+ E:/code/FEM/include/problem_definitions.h \
+ E:/code/FEM/include/fem_solver.h \
+ E:/code/FEM/include/problem_definitions.h

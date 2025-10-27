@@ -19,7 +19,8 @@ class GeometryMapping
     std::vector<double> element_coords_;             // 单元节点坐标
     int nodes_num_per_element_;                      // 单元节点数量
     int shape_function_order_;                       // 单元的阶数
-    int dimension_;                                  // 空间维度 (2D/3D)
+    int dimension_;                                  // 参考坐标维度 (1D/2D/3D)
+    int embedding_dimension_;                        // 嵌入空间维度 (1D/2D/3D)
     double jacobian_det_;                            // 雅可比行列式 (常数)
     std::vector<std::vector<double>> jacobian_inv_;  // 逆雅可比矩阵 (常数)
 
@@ -29,20 +30,25 @@ class GeometryMapping
   public:
     /**
      * @brief 构造函数 - 通过节点坐标创建几何映射
-     * @param coords 单元节点坐标 (e.g., 2D: [x0,y0,x1,y1,...])
+     * @param element_coords 单元节点坐标 (e.g., 2D空间中的线段: [x0,y0,x1,y1])
      * @param nodes 节点数量
-     * @param dim 空间维度
+     * @param order 单元阶数
+     * @param ref_dim 参考坐标维度 (线段=1, 三角形=2, 四面体=3)
+     * @param embed_dim 嵌入空间维度 (坐标数组使用此维度验证)
      */
-    GeometryMapping(const std::vector<double>& element_coords, int nodes, int order, int dim)
+    GeometryMapping(const std::vector<double>& element_coords, int nodes, int order, int ref_dim,
+                    int embed_dim)
         : element_coords_(element_coords),
           nodes_num_per_element_(nodes),
           shape_function_order_(order),
-          dimension_(dim)
+          dimension_(ref_dim),
+          embedding_dimension_(embed_dim)
     {
-        if (element_coords_.size() != static_cast<size_t>(nodes * dim))
+        // 坐标数组大小验证：节点数 × 嵌入维度
+        if (element_coords_.size() != static_cast<size_t>(nodes * embed_dim))
         {
             throw std::invalid_argument(
-                "Coordinate vector size does not match nodes and dimension.");
+                "Coordinate vector size does not match nodes and embedding dimension.");
         }
     }
 
@@ -78,10 +84,25 @@ class GeometryMapping
     {
         return nodes_num_per_element_;
     }
+
+    /**
+     * @brief 获取参考坐标维度
+     * @return 参考坐标系的维度 (线段=1, 三角形=2, 四面体=3)
+     */
     int getDimension() const
     {
         return dimension_;
     }
+
+    /**
+     * @brief 获取嵌入空间维度
+     * @return 单元所在物理空间的维度 (1D/2D/3D)
+     */
+    int getEmbeddingDimension() const
+    {
+        return embedding_dimension_;
+    }
+
     int getOrder() const
     {
         return shape_function_order_;
@@ -92,18 +113,23 @@ class GeometryMapping
  * @brief 一维几何映射的中间抽象基类
  *
  * 继承自通用的 GeometryMapping，并为所有 1D 单元（线段）添加通用接口，如计算长度。
+ * 线段单元可以嵌入在1D、2D或3D空间中（例如2D问题的边界或3D问题的边）。
  */
 class GeometryMapping1D : public GeometryMapping
 {
   public:
     /**
      * @brief 构造函数
-     * @param coords 单元节点坐标（可以是嵌入在2D或3D空间中的线段）
+     * @param element_coords 单元节点坐标（嵌入在embed_dim维空间中）
      * @param order 插值阶数
      * @param nodes 节点数量
+     * @param embed_dim 嵌入空间维度（1/2/3）
      */
-    GeometryMapping1D(const std::vector<double>& element_coords, int order, int nodes)
-        : GeometryMapping(element_coords, nodes, order, 1)  // 参考维度固定为 1
+    GeometryMapping1D(const std::vector<double>& element_coords, int order, int nodes,
+                      int embed_dim)
+        : GeometryMapping(element_coords, nodes, order,
+                          1,          // ref_dim: 1D参考单元
+                          embed_dim)  // embed_dim: 嵌入空间维度
     {
     }
 
@@ -117,17 +143,23 @@ class GeometryMapping1D : public GeometryMapping
  * @brief 二维几何映射的中间抽象基类
  *
  * 继承自通用的 GeometryMapping，并为所有 2D 单元添加通用接口，如计算面积。
+ * 二维单元可以嵌入在2D或3D空间中（例如3D问题中的曲面边界）。
  */
 class GeometryMapping2D : public GeometryMapping
 {
   public:
     /**
      * @brief 构造函数
-     * @param coords 单元节点坐标
+     * @param element_coords 单元节点坐标
+     * @param order 插值阶数
      * @param nodes 节点数量
+     * @param embed_dim 嵌入空间维度（默认2，可以是3用于3D中的曲面）
      */
-    GeometryMapping2D(const std::vector<double>& element_coords, int order, int nodes)
-        : GeometryMapping(element_coords, nodes, order, 2)  // 维度固定为 2
+    GeometryMapping2D(const std::vector<double>& element_coords, int order, int nodes,
+                      int embed_dim = 2)
+        : GeometryMapping(element_coords, nodes, order,
+                          2,          // ref_dim: 2D参考单元
+                          embed_dim)  // embed_dim: 嵌入空间维度
     {
     }
 
@@ -146,19 +178,32 @@ class GeometryMapping2D : public GeometryMapping
  * @brief 一维线性线段单元的几何映射类 (Line Linear)
  *
  * 对于线性线段，雅可比（即边长的一半）在整个单元内是常数。
- * 线段可以嵌入在2D或3D空间中。
+ * 线段可以嵌入在1D、2D或3D空间中。
+ *
+ * @par 参考坐标系
+ * - 维度: 1D
+ * - 参数范围: t ∈ [-1, 1]
+ *
+ * @par 物理坐标映射
+ * x(t) = N0(t)*x0 + N1(t)*x1, 其中 N0=(1-t)/2, N1=(1+t)/2
+ *
+ * @par 雅可比
+ * dx/dt 是长度为 embed_dim 的向量
+ * jacobian_det = ||dx/dt|| = edge_length / 2
  */
 class LineLinearMapping : public GeometryMapping1D
 {
   private:
-    int embedding_dimension_;  // 嵌入空间的维度（2D或3D）
     void computeJacobian() override;
 
   public:
     /**
      * @brief 构造函数 - 创建1D线性线段映射
-     * @param coords 两个端点的坐标，例如2D空间中: [x0, y0, x1, y1]
-     * @param embed_dim 嵌入空间的维度（2或3）
+     * @param element_coords 两个端点的坐标
+     *        1D: [x0, x1]
+     *        2D: [x0, y0, x1, y1]
+     *        3D: [x0, y0, z0, x1, y1, z1]
+     * @param embed_dim 嵌入空间的维度（1/2/3）
      */
     LineLinearMapping(const std::vector<double>& element_coords, int embed_dim);
 
@@ -182,6 +227,15 @@ class LineLinearMapping : public GeometryMapping1D
  * @brief 二维线性三角形单元的几何映射类 (Triangle Linear)
  *
  * 对于线性三角形，雅可比矩阵在整个单元内是常数。
+ * 三角形可以嵌入在2D或3D空间中（3D中的三角形可作为四面体的边界）。
+ *
+ * @par 参考坐标系
+ * - 维度: 2D
+ * - 参数范围: ξ,η ≥ 0, ξ+η ≤ 1
+ *
+ * @par 物理坐标映射
+ * x(ξ,η) = N0*x0 + N1*x1 + N2*x2
+ * 其中 N0=1-ξ-η, N1=ξ, N2=η
  */
 class TriangleLinearMapping : public GeometryMapping2D
 {
@@ -191,14 +245,13 @@ class TriangleLinearMapping : public GeometryMapping2D
   public:
     /**
      * @brief 构造函数 - 创建2D线性三角形映射
-     * @param coords 三个顶点的坐标 [x0, y0, x1, y1, x2, y2]
+     * @param element_coords 三个顶点的坐标
+     *        2D: [x0, y0, x1, y1, x2, y2]
+     *        3D: [x0, y0, z0, x1, y1, z1, x2, y2, z2]
+     * @param embed_dim 嵌入空间维度（默认2）
      */
-    /**
-     * @brief 构造函数 - 创建2D线性三角形映射
-     * @param coords 三个顶点的坐标 [x0, y0, x1, y1, x2, y2]
-     */
-    TriangleLinearMapping(const std::vector<double>& element_coords)
-        : GeometryMapping2D(element_coords, 1, 3)  // 调用基类构造函数，order=1, nodes=3
+    TriangleLinearMapping(const std::vector<double>& element_coords, int embed_dim = 2)
+        : GeometryMapping2D(element_coords, 1, 3, embed_dim)  // order=1, nodes=3
     {
         computeJacobian();  // 计算常数雅可比矩阵
     }

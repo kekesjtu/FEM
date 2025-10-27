@@ -341,8 +341,9 @@ CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/shared_ptr_atomic.h \
  E:/msys64/ucrt64/include/c++/15.2.0/backward/auto_ptr.h \
  E:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_memory_defs.h \
- E:/code/FEM/include/config.h E:/msys64/ucrt64/include/direct.h \
- E:/msys64/ucrt64/include/io.h E:/msys64/ucrt64/include/sys/stat.h \
+ E:/code/FEM/include/config.h E:/code/FEM/include/problem_setup.h \
+ E:/msys64/ucrt64/include/direct.h E:/msys64/ucrt64/include/io.h \
+ E:/msys64/ucrt64/include/sys/stat.h \
  E:/msys64/ucrt64/include/c++/15.2.0/fstream \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/codecvt.h \
  E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/basic_file.h \

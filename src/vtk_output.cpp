@@ -271,8 +271,16 @@ void TriangleVTKOutput2D::outputExactSolution(
 }
 
 void TriangleVTKOutput2D::outputDenseSamplingError(const std::string& filename,
-                                                   std::shared_ptr<Config> config)
+                                                   std::shared_ptr<Config> config,
+                                                   std::shared_ptr<ProblemSetup> problem)
 {
+    // 如果没有精确解，直接返回
+    if (!problem || !problem->hasExactSolution())
+    {
+        std::cout << "警告：未设置精确解，跳过误差输出" << std::endl;
+        return;
+    }
+
     // 确保results目录存在
     ensureDirectoryExists("results");
 
@@ -301,8 +309,8 @@ void TriangleVTKOutput2D::outputDenseSamplingError(const std::string& filename,
     std::vector<double> dense_numerical;  // 存储数值解
     std::vector<double> dense_exact;      // 存储精确解
 
-    auto exact_func = [config](const std::vector<double>& coords) -> double
-    { return config->exact_solution_u(coords); };
+    auto exact_func = [problem](const std::vector<double>& coords) -> double
+    { return problem->exactSolutionU(coords); };
 
     // 遍历每个原始单元进行采样
     for (int e = 0; e < elements_num; ++e)

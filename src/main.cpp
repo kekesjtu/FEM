@@ -1,28 +1,105 @@
 #include <iostream>
-#include "error_analysis.h"
+#include "electrothermal_solver.h"
 #include "fem_solver.h"
+#include "problem_definitions.h"
 
 /**
- * @brief 有限元求解器的主函数
+ * @brief 单场求解示例：Robin边界条件验证
+ */
+void solveSingleField()
+{
+    std::cout << "\n================================================" << std::endl;
+    std::cout << "     单场求解" << std::endl;
+    std::cout << "================================================\n" << std::endl;
+
+    // 创建配置对象（只负责网格）
+    auto config = std::make_shared<Config>();
+
+    // 🎯 从问题库中获取 Robin 测试问题定义（包含边界条件、系数、源项、精确解）
+    auto problem = ProblemLibrary::createElectricField();
+
+    // 创建FEM求解器
+    FEMSolver solver(config, problem);
+
+    // 一键求解（边界条件、系数、源项已在 problem 中定义）
+    solver.solveComplete();
+}
+
+/**
+ * @brief 电热耦合求解示例
  *
- * @return int 退出代码 (0 表示成功)
+ * 使用预定义的问题库设置电场和热场的边界条件
+ */
+void solveElectrothermal()
+{
+    std::cout << "\n================================================" << std::endl;
+    std::cout << "        电热耦合仿真" << std::endl;
+    std::cout << "================================================\n" << std::endl;
+
+    // 创建网格配置（共享同一个网格）
+    auto config = std::make_shared<Config>();
+
+    // 🎯 定义物理参数并创建电热耦合问题配置
+    ProblemLibrary::ElectrothermalParams params;
+    params.sigma0 = 1.0;   // 参考电导率 [S/m]
+    params.alpha = 0.003;  // 温度系数 [1/K]
+    params.T0 = 300.0;     // 参考温度 [K]
+    // 热导率使用 createThermalField() 中的默认值（1.0）
+
+    auto et_problem = ProblemLibrary::createElectrothermalProblem(params);
+
+    std::cout << "电场边界条件: " << et_problem.electric_problem->getName() << std::endl;
+    std::cout << "  - 左半圆边界 (x<0): V = 1.0 V (施加电压)" << std::endl;
+    std::cout << "  - 右半圆边界 (x>0): V = 0.0 V (接地)" << std::endl;
+
+    std::cout << "热场边界条件: " << et_problem.thermal_problem->getName() << std::endl;
+    std::cout << "  - 所有边界: ΔT = 0 (保持参考温度 " << params.T0 << " K)" << std::endl;
+
+    // 创建电热耦合求解器
+    ElectrothermalSolver et_solver(config, et_problem,
+                                   1e-6,  // 收敛容差
+                                   100,   // 最大迭代次数
+                                   true,  // 详细输出
+                                   0.7);  // 松弛因子：0.5表示新旧解各占50%（可调整0.3-0.7）
+
+    // 执行耦合求解
+    et_solver.solve();
+
+    // 输出结果
+    et_solver.outputResults("results/electrothermal");
+
+    std::cout << "\n电热耦合求解完成！" << std::endl;
+    std::cout << "请使用ParaView查看以下文件：" << std::endl;
+    std::cout << "  - results/electrothermal_V.vtu (电势场)" << std::endl;
+    std::cout << "  - results/electrothermal_T.vtu (温度场)" << std::endl;
+    std::cout << "  - results/electrothermal_Q.vtu (焦耳热密度)" << std::endl;
+}
+
+/**
+ * @brief 主函数
  */
 int main()
 {
-    preprocess();
-    std::cout << "步骤 1: 网格生成和预处理完成。" << std::endl;
+    // 选择求解模式
+    int mode = 2;  // 1: 单场求解(Robin测试), 2: 电热耦合
 
-    assemble();
-    std::cout << "步骤 2: 全局矩阵组装完成。" << std::endl;
+    std::cout << "================================================" << std::endl;
+    std::cout << "          有限元求解器" << std::endl;
+    std::cout << "================================================" << std::endl;
+    std::cout << "模式: " << (mode == 1 ? "单场求解" : "电热耦合") << std::endl;
 
-    applyBoundaryConditions();
-    std::cout << "步骤 3: 边界条件施加完成。" << std::endl;
+    if (mode == 1)
+    {
+        solveSingleField();
+    }
+    else if (mode == 2)
+    {
+        solveElectrothermal();
+    }
 
-    solveLinearSystem(); 
-    std::cout << "步骤 4: 线性方程组求解完成。" << std::endl;
-
-    postprocess();
-    std::cout << "步骤 5: 后处理完成。" << std::endl;
+    std::cout << "\n================================================" << std::endl;
+    std::cout << "          求解完成" << std::endl;
+    std::cout << "================================================" << std::endl;
 
     return 0;
 }

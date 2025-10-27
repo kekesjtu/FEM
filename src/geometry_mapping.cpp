@@ -7,17 +7,12 @@
 
 /**
  * @brief 构造函数
- * 线段嵌入在 embed_dim 维空间中（通常是2D或3D）
+ * 线段嵌入在 embed_dim 维空间中（1D/2D/3D）
  */
 LineLinearMapping::LineLinearMapping(const std::vector<double>& element_coords, int embed_dim)
-    : GeometryMapping1D(element_coords, 1, 2),  // order=1 (线性), nodes=2
-      embedding_dimension_(embed_dim)
+    : GeometryMapping1D(element_coords, 1, 2, embed_dim)  // order=1 (线性), nodes=2, embedding_dim
 {
-    if (element_coords.size() != static_cast<size_t>(2 * embed_dim))
-    {
-        throw std::invalid_argument(
-            "Line element must have 2 nodes with coordinates in embedding space.");
-    }
+    // 坐标验证已在基类中完成
     computeJacobian();
 }
 
@@ -102,6 +97,7 @@ void LineLinearMapping::transformGradient(const std::vector<double>& gradient_re
         throw std::invalid_argument("Gradient in reference coordinates must have 1 component.");
     }
 
+    // 对于1D边界单元，梯度仍然是1维的（沿着边界的导数）
     gradient_phys.resize(1);
     gradient_phys[0] = gradient_ref[0] * jacobian_inv_[0][0];
 }

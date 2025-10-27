@@ -10,10 +10,12 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "E:/code/FEM/src/comsol_mesh_importer.cpp" "CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.obj.d"
   "E:/code/FEM/src/config.cpp" "CMakeFiles/FEM_lib.dir/src/config.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/config.cpp.obj.d"
+  "E:/code/FEM/src/electrothermal_solver.cpp" "CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.obj.d"
   "E:/code/FEM/src/error_analysis.cpp" "CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj.d"
   "E:/code/FEM/src/fem_solver.cpp" "CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj.d"
   "E:/code/FEM/src/gauss_quadrature.cpp" "CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj.d"
   "E:/code/FEM/src/geometry_mapping.cpp" "CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj.d"
+  "E:/code/FEM/src/problem_setup.cpp" "CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.obj.d"
   "E:/code/FEM/src/shape_functions.cpp" "CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.obj.d"
   "E:/code/FEM/src/vtk_output.cpp" "CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj.d"
   )

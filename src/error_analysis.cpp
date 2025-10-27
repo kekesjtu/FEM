@@ -10,23 +10,31 @@
 #include "geometry_mapping.h"
 #include "shape_functions.h"
 
-ErrorAnalysis::ErrorAnalysis(std::shared_ptr<Config> config, const Eigen::VectorXd& solution)
-    : config_(config), solution_(solution)
+ErrorAnalysis::ErrorAnalysis(std::shared_ptr<Config> config, std::shared_ptr<ProblemSetup> problem,
+                             const Eigen::VectorXd& solution)
+    : config_(config), problem_(problem), solution_(solution)
 {
 }
 
 bool ErrorAnalysis::hasExactSolution() const
 {
-    return config_->hasExactSolution();
+    return problem_ && problem_->hasExactSolution();
 }
 
 bool ErrorAnalysis::hasExactGradients() const
 {
-    return config_->hasExactGradients();
+    // 暂时简单返回 hasExactSolution()，因为 ProblemSetup 总是一起设置 U 和梯度
+    return problem_ && problem_->hasExactSolution();
 }
 
 double ErrorAnalysis::computeNormError(NormType norm) const
 {
+    // 检查是否有解析解
+    if (!hasExactSolution())
+    {
+        return std::nan("");  // 返回 NaN 表示无法计算
+    }
+
     switch (norm)
     {
         case NormType::L_INFINITY:
@@ -45,6 +53,14 @@ void ErrorAnalysis::printErrorSummary() const
     std::cout << "Space Dimension: " << config_->getDimension() << "D" << std::endl;
     std::cout << std::string(50, '-') << std::endl;
 
+    // 检查是否有解析解
+    if (!hasExactSolution())
+    {
+        std::cout << "警告: 该问题没有定义解析解，无法进行误差分析" << std::endl;
+        std::cout << std::flush;
+        return;
+    }
+
     const std::vector<std::pair<NormType, std::string>> norm_names = {
         {NormType::L_INFINITY, "L-infinity norm error"},
         {NormType::L2, "L2 norm error"},
@@ -60,6 +76,14 @@ void ErrorAnalysis::printErrorSummary() const
 
 void ErrorAnalysis::printDetailedNodeErrors(int max_nodes) const
 {
+    // 检查是否有解析解
+    if (!hasExactSolution())
+    {
+        std::cout << "\n=== Detailed Node Errors ===" << std::endl;
+        std::cout << "警告: 该问题没有定义解析解，无法进行详细节点误差分析" << std::endl;
+        return;
+    }
+
     const int sdim = config_->getDimension();
     std::cout << "\n=== Detailed Node Errors ===" << std::endl;
     std::cout << std::left << std::setw(8) << "Node";
@@ -84,7 +108,7 @@ void ErrorAnalysis::printDetailedNodeErrors(int max_nodes) const
         }
 
         double numerical = solution_(i);
-        double exact = config_->exact_solution_u(coords);
+        double exact = problem_->exactSolutionU(coords);
         double error = std::abs(exact - numerical);
 
         std::cout << std::scientific << std::setprecision(6) << std::setw(18) << numerical
@@ -156,6 +180,12 @@ std::vector<double> ErrorAnalysis::calculateNumericalGradient(
 
 double ErrorAnalysis::computeLInfinityError() const
 {
+    // 检查是否有解析解
+    if (!hasExactSolution())
+    {
+        return std::nan("");  // 返回 NaN 表示无法计算
+    }
+
     double max_error = 0.0;
     const int num_elements = config_->getElementsNum();
     const int sdim = config_->getDimension();
@@ -216,7 +246,7 @@ double ErrorAnalysis::computeLInfinityError() const
                 double numerical_val = calculateNumericalSolution(element_index, coord_ref);
 
                 // 计算该点的精确解
-                double exact_val = config_->exact_solution_u(coord_phys);
+                double exact_val = problem_->exactSolutionU(coord_phys);
 
                 // 计算误差
                 double error = std::abs(exact_val - numerical_val);
@@ -250,6 +280,12 @@ double ErrorAnalysis::computeLInfinityError() const
 
 double ErrorAnalysis::computeL2Error() const
 {
+    // 检查是否有解析解
+    if (!hasExactSolution())
+    {
+        return std::nan("");  // 返回 NaN 表示无法计算
+    }
+
     double l2_error_squared = 0.0;
     const int num_elements = config_->getElementsNum();
     const int sdim = config_->getDimension();
@@ -289,7 +325,7 @@ double ErrorAnalysis::computeL2Error() const
             double jacobian = mapping->getJacobianDet(gp_coords_ref);
 
             double numerical = calculateNumericalSolution(i, gp_coords_ref);
-            double exact = config_->exact_solution_u(phys_coords);
+            double exact = problem_->exactSolutionU(phys_coords);
             double error = exact - numerical;
 
             l2_error_squared += error * error * weight * jacobian;
@@ -301,6 +337,12 @@ double ErrorAnalysis::computeL2Error() const
 
 double ErrorAnalysis::computeH1SeminormError() const
 {
+    // 检查是否有解析解
+    if (!hasExactSolution())
+    {
+        return std::nan("");  // 返回 NaN 表示无法计算
+    }
+
     double h1_error_squared = 0.0;
     const int num_elements = config_->getElementsNum();
     const int sdim = config_->getDimension();
@@ -341,7 +383,7 @@ double ErrorAnalysis::computeH1SeminormError() const
 
             auto num_grad = calculateNumericalGradient(i, gp_coords_ref);
             std::vector<double> exact_grad(sdim);
-            config_->exact_solution_gradients(phys_coords, exact_grad);
+            problem_->exactSolutionGradients(phys_coords, exact_grad);
 
             double grad_error_squared = 0;
             for (int d = 0; d < sdim; ++d)

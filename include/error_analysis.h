@@ -3,9 +3,9 @@
 
 #include <Eigen/Dense>
 #include <memory>
-#include <string>
 #include <vector>
 #include "config.h"
+#include "problem_setup.h"
 
 class ErrorAnalysis
 {
@@ -17,8 +17,9 @@ class ErrorAnalysis
         H1_SEMINORM  // H1半范数误差
     };
 
-    // 构造函数，只依赖Config和数值解
-    ErrorAnalysis(std::shared_ptr<Config> config, const Eigen::VectorXd& solution);
+    // 构造函数，依赖Config、ProblemSetup和数值解
+    ErrorAnalysis(std::shared_ptr<Config> config, std::shared_ptr<ProblemSetup> problem,
+                  const Eigen::VectorXd& solution);
 
     ~ErrorAnalysis() = default;
 
@@ -34,7 +35,7 @@ class ErrorAnalysis
     double computeH1SeminormError() const;
 
   private:
-    // 内部辅助函数，检查Config中是否定义了精确解
+    // 内部辅助函数，检查ProblemSetup中是否定义了精确解
     bool hasExactSolution() const;
     bool hasExactGradients() const;
 
@@ -44,6 +45,7 @@ class ErrorAnalysis
 
   protected:
     std::shared_ptr<Config> config_;
+    std::shared_ptr<ProblemSetup> problem_;
     const Eigen::VectorXd& solution_;
 };
 

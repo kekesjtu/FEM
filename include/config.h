@@ -1,8 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <functional>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -57,7 +55,7 @@ class Config
 
   private:
     // 网格相关
-    std::string mesh_filename_ = "circle_mesh2.mphtxt";  // 网格文件名，用户可直接在此修改
+    std::string mesh_filename_ = "circle_mesh3.mphtxt";  // 网格文件名，用户可直接在此修改
     int dimension_;
     int nodes_num_;
     int elements_num_;
@@ -98,68 +96,6 @@ class Config
     // 查找包含指定边的单元
     int findElementContainingEdge(const std::vector<int>& edge_nodes) const;
 
-    // 使用std::function，更灵活
-    std::function<double(const std::vector<double>&)> coefficient_c_func;
-    std::function<double(const std::vector<double>&)> source_term_f_func;
-    std::function<double(const std::vector<double>&)> exact_solution_u_func;
-    std::function<double(const std::vector<double>&, std::vector<double>&)>
-        exact_solution_gradients_func;
-
-    void setCoefficientC(std::function<double(const std::vector<double>&)> func);
-    void setSourceTermF(std::function<double(const std::vector<double>&)> func);
-    void setExactSolutionU(std::function<double(const std::vector<double>&)> func);
-    void setExactSolutionGradients(
-        std::function<double(const std::vector<double>&, std::vector<double>&)> func);
-
-    // 用户手动配置问题的函数 - 在这里定义具体问题
-    void setProblem()
-    {
-        int dimension = dimension_;
-        // 示例1：泊松方程
-        setCoefficientC([](const std::vector<double>& coords) -> double { return 1.0; });
-
-        setSourceTermF(
-            [dimension](const std::vector<double>& coords) -> double
-            {
-                if (coords.size() != dimension)
-                {
-                    throw std::invalid_argument("坐标维度不匹配");
-                }
-                else
-                {
-                    return 10.0;
-                }
-            });
-
-        setExactSolutionU(
-            [dimension](const std::vector<double>& coords) -> double
-            {
-                if (coords.size() != dimension)
-                {
-                    throw std::invalid_argument("坐标维度不匹配");
-                }
-                else
-                {
-                    return 10.0 / 4 * (1 * 1 - coords[0] * coords[0] - coords[1] * coords[1]);
-                }
-            });
-
-        setExactSolutionGradients(
-            [dimension](const std::vector<double>& coords, std::vector<double>& gradients) -> double
-            {
-                if (coords.size() != dimension || gradients.size() != dimension)
-                {
-                    throw std::invalid_argument("坐标或梯度维度不匹配");
-                }
-                else
-                {
-                    gradients[0] = -10.0 / 2 * coords[0];  // du/dx
-                    gradients[1] = -10.0 / 2 * coords[1];  // du/dy
-                    return 0.0;                            // 返回值未使用
-                }
-            });
-    }
-
   public:
     Config();  // 默认构造函数，使用默认参数
 
@@ -178,8 +114,7 @@ class Config
     const std::vector<double>& getNodeCoordinates() const;
     const std::vector<std::vector<int>>& getElementConnectivity() const;
     const std::vector<Boundary>& getBoundary() const;
-    bool hasExactSolution() const;
-    bool hasExactGradients() const;
+    std::vector<Boundary>& getBoundaryMutable();  // 允许修改边界条件
 
     // 边界单元相关访问器
     int getBoundaryElementType() const;      // 返回边界单元类型（LINE）
@@ -191,13 +126,6 @@ class Config
     const std::string& getPreconditionerType() const;
     double getSolverTolerance() const;
     int getSolverMaxIterations() const;
-
-    // 调用函数
-    double coefficient_c(const std::vector<double>& coords) const;
-    double source_term_f(const std::vector<double>& coords) const;
-    double exact_solution_u(const std::vector<double>& coords) const;
-    double exact_solution_gradients(const std::vector<double>& coords,
-                                    std::vector<double>& gradients) const;
 };
 
 #endif  // CONFIG_H
