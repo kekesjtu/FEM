@@ -33,8 +33,10 @@ class FEMSolver
     // 内部辅助函数
     double calculateStiffnessEntry(int e, int alpha, int beta);
     double calculateLoadEntry(int e, int beta);
-    double calculateBoundaryStiffness(const Config::Boundary& boundary, int local_i, int local_j);
-    double calculateBoundaryLoad(const Config::Boundary& boundary, int local_i);
+    double calculateBoundaryStiffness(const Config::Boundary& boundary, int local_i, int local_j,
+                                      size_t boundary_idx);
+    double calculateBoundaryLoad(const Config::Boundary& boundary, int local_i,
+                                 size_t boundary_idx);
 
   public:
     /**

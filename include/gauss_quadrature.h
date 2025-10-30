@@ -101,6 +101,28 @@ class GaussPoint2D : public GaussPoint
 };
 
 /**
+ * @brief 三维高斯点基类
+ * 为三维高斯积分添加特定的接口
+ */
+class GaussPoint3D : public GaussPoint
+{
+  public:
+    GaussPoint3D(int numPoints) : GaussPoint(numPoints)
+    {
+    }
+    virtual ~GaussPoint3D() = default;
+
+    /**
+     * @brief 获取维度 (固定为3D)
+     * @return 3
+     */
+    int getDimension() const override final
+    {
+        return 3;
+    }
+};
+
+/**
  * @brief 线段单元高斯点基类
  * 提供线段单元高斯积分的通用实现
  */
@@ -111,12 +133,6 @@ class LineGaussPoint : public GaussPoint1D
     {
     }
     virtual ~LineGaussPoint() = default;
-
-  protected:
-    /**
-     * @brief 初始化高斯点和权重 - 由派生类实现
-     */
-    virtual void initializeGaussPoints() = 0;
 };
 
 /**
@@ -130,12 +146,19 @@ class TriangleGaussPoint : public GaussPoint2D
     {
     }
     virtual ~TriangleGaussPoint() = default;
+};
 
-  protected:
-    /**
-     * @brief 初始化高斯点和权重 - 由派生类实现
-     */
-    virtual void initializeGaussPoints() = 0;
+/**
+ * @brief 四面体单元高斯点基类
+ * 提供四面体单元高斯积分的通用实现
+ */
+class TetrahedronGaussPoint : public GaussPoint3D
+{
+  public:
+    TetrahedronGaussPoint(int numPoints) : GaussPoint3D(numPoints)
+    {
+    }
+    virtual ~TetrahedronGaussPoint() = default;
 };
 
 /**
@@ -145,9 +168,6 @@ class LineGauss2Point : public LineGaussPoint
 {
   public:
     LineGauss2Point();
-
-  protected:
-    void initializeGaussPoints() override;
 };
 
 /**
@@ -157,9 +177,6 @@ class LineGauss3Point : public LineGaussPoint
 {
   public:
     LineGauss3Point();
-
-  protected:
-    void initializeGaussPoints() override;
 };
 
 /**
@@ -169,9 +186,6 @@ class TriangleGauss1Point : public TriangleGaussPoint
 {
   public:
     TriangleGauss1Point();
-
-  protected:
-    void initializeGaussPoints() override;
 };
 
 /**
@@ -181,9 +195,6 @@ class TriangleGauss3Point : public TriangleGaussPoint
 {
   public:
     TriangleGauss3Point();
-
-  protected:
-    void initializeGaussPoints() override;
 };
 
 /**
@@ -193,9 +204,26 @@ class TriangleGauss4Point : public TriangleGaussPoint
 {
   public:
     TriangleGauss4Point();
+};
 
-  protected:
-    void initializeGaussPoints() override;
+/**
+ * @brief 四面体单元一点积分
+ * 对应于四面体的中心点，精度为一阶
+ */
+class TetrahedronGauss1Point : public TetrahedronGaussPoint
+{
+  public:
+    TetrahedronGauss1Point();
+};
+
+/**
+ * @brief 四面体单元四点积分
+ * 对应于四面体的四个顶点，精度为二阶
+ */
+class TetrahedronGauss4Point : public TetrahedronGaussPoint
+{
+  public:
+    TetrahedronGauss4Point();
 };
 
 /**

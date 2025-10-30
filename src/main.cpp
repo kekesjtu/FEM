@@ -15,8 +15,12 @@ void solveSingleField()
     // 创建配置对象（只负责网格）
     auto config = std::make_shared<Config>();
 
-    // 🎯 从问题库中获取 Robin 测试问题定义（包含边界条件、系数、源项、精确解）
-    auto problem = ProblemLibrary::createElectricField();
+    std::string problem_type =
+        "CubeUniformCharge";  // 可选: "RobinTest", "ElectricField", "ThermalField",
+                              // "CubeUniformCharge", "Custom"
+    auto problem = ProblemLibrary::ProblemFactory::create(problem_type);
+
+    std::cout << "求解问题: " << problem->getName() << std::endl;
 
     // 创建FEM求解器
     FEMSolver solver(config, problem);
@@ -46,7 +50,8 @@ void solveElectrothermal()
     params.T0 = 300.0;     // 参考温度 [K]
     // 热导率使用 createThermalField() 中的默认值（1.0）
 
-    auto et_problem = ProblemLibrary::createElectrothermalProblem(params);
+    // 🎯 使用工厂模式创建电热耦合问题
+    auto et_problem = ProblemLibrary::ProblemFactory::createElectrothermal(params);
 
     std::cout << "电场边界条件: " << et_problem.electric_problem->getName() << std::endl;
     std::cout << "  - 左半圆边界 (x<0): V = 1.0 V (施加电压)" << std::endl;
@@ -81,12 +86,12 @@ void solveElectrothermal()
 int main()
 {
     // 选择求解模式
-    int mode = 2;  // 1: 单场求解(Robin测试), 2: 电热耦合
+    int mode = 1;  // 1: 单场求解(3D正方体均匀电荷), 2: 电热耦合
 
     std::cout << "================================================" << std::endl;
     std::cout << "          有限元求解器" << std::endl;
     std::cout << "================================================" << std::endl;
-    std::cout << "模式: " << (mode == 1 ? "单场求解" : "电热耦合") << std::endl;
+    std::cout << "模式: " << (mode == 1 ? "单场求解(3D)" : "电热耦合") << std::endl;
 
     if (mode == 1)
     {

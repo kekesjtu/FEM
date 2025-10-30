@@ -81,6 +81,19 @@ class VTKOutput2D : public VTKOutput
 };
 
 /**
+ * @brief 三维VTK输出类
+ */
+class VTKOutput3D : public VTKOutput
+{
+  public:
+    VTKOutput3D(std::shared_ptr<Config> config, const Eigen::VectorXd& solution,
+                int num_points_per_side)
+        : VTKOutput(std::move(config), solution, num_points_per_side)
+    {
+    }
+};
+
+/**
  * @brief 二维三角形单元VTK输出类
  */
 class TriangleVTKOutput2D : public VTKOutput2D
@@ -89,6 +102,33 @@ class TriangleVTKOutput2D : public VTKOutput2D
     TriangleVTKOutput2D(std::shared_ptr<Config> config, const Eigen::VectorXd& solution,
                         int num_points_per_side)
         : VTKOutput2D(std::move(config), solution, num_points_per_side)
+    {
+    }
+
+    void outputNumericalSolution(const std::string& filename) override;
+
+    void outputExactSolution(
+        const std::string& filename,
+        const std::function<double(const std::vector<double>&)>& exact_func) override;
+
+    void outputDenseSamplingError(const std::string& filename, std::shared_ptr<Config> config,
+                                  std::shared_ptr<ProblemSetup> problem) override;
+
+  private:
+    // 辅助函数，计算单元内任意参考坐标点的数值解
+    double evaluateNumericalSolutionAt(int element_index, const std::vector<double>& coords_ref,
+                                       std::shared_ptr<Config> config) const;
+};
+
+/**
+ * @brief 三维四面体单元VTK输出类
+ */
+class TetrahedronVTKOutput3D : public VTKOutput3D
+{
+  public:
+    TetrahedronVTKOutput3D(std::shared_ptr<Config> config, const Eigen::VectorXd& solution,
+                           int num_points_per_side)
+        : VTKOutput3D(std::move(config), solution, num_points_per_side)
     {
     }
 

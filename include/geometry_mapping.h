@@ -18,7 +18,7 @@ class GeometryMapping
   protected:
     std::vector<double> element_coords_;             // 单元节点坐标
     int nodes_num_per_element_;                      // 单元节点数量
-    int shape_function_order_;                       // 单元的阶数
+    int order_;                                      // 单元的阶数
     int dimension_;                                  // 参考坐标维度 (1D/2D/3D)
     int embedding_dimension_;                        // 嵌入空间维度 (1D/2D/3D)
     double jacobian_det_;                            // 雅可比行列式 (常数)
@@ -40,7 +40,7 @@ class GeometryMapping
                     int embed_dim)
         : element_coords_(element_coords),
           nodes_num_per_element_(nodes),
-          shape_function_order_(order),
+          order_(order),
           dimension_(ref_dim),
           embedding_dimension_(embed_dim)
     {
@@ -78,35 +78,6 @@ class GeometryMapping
     virtual void transformGradient(const std::vector<double>& gradient_ref,
                                    std::vector<double>& gradient_phys,
                                    const std::vector<double>& coord_ref) const = 0;
-
-    // 获取基本信息
-    int getNumNodesPerElement() const
-    {
-        return nodes_num_per_element_;
-    }
-
-    /**
-     * @brief 获取参考坐标维度
-     * @return 参考坐标系的维度 (线段=1, 三角形=2, 四面体=3)
-     */
-    int getDimension() const
-    {
-        return dimension_;
-    }
-
-    /**
-     * @brief 获取嵌入空间维度
-     * @return 单元所在物理空间的维度 (1D/2D/3D)
-     */
-    int getEmbeddingDimension() const
-    {
-        return embedding_dimension_;
-    }
-
-    int getOrder() const
-    {
-        return shape_function_order_;
-    }
 };
 
 /**
@@ -168,6 +139,37 @@ class GeometryMapping2D : public GeometryMapping
      * @note 这通常通过对雅可比行列式在参考单元上积分得到。
      */
     virtual double getElementArea() const = 0;
+};
+
+/**
+ * @brief 三维几何映射的中间抽象基类
+ *
+ * 继承自通用的 GeometryMapping，并为所有 3D 单元添加通用接口，如计算体积。
+ * 三维单元通常嵌入在3D空间中。
+ */
+class GeometryMapping3D : public GeometryMapping
+{
+  public:
+    /**
+     * @brief 构造函数
+     * @param element_coords 单元节点坐标
+     * @param order 插值阶数
+     * @param nodes 节点数量
+     * @param embed_dim 嵌入空间维度（通常为3）
+     */
+    GeometryMapping3D(const std::vector<double>& element_coords, int order, int nodes,
+                      int embed_dim = 3)
+        : GeometryMapping(element_coords, nodes, order,
+                          3,          // ref_dim: 3D参考单元
+                          embed_dim)  // embed_dim: 嵌入空间维度
+    {
+    }
+
+    /**
+     * @brief 获取单元的体积
+     * @note 这通常通过对雅可比行列式在参考单元上积分得到。
+     */
+    virtual double getElementVolume() const = 0;
 };
 
 // =========================================================================
@@ -266,6 +268,57 @@ class TriangleLinearMapping : public GeometryMapping2D
                            const std::vector<double>& coord_ref) const override;
 
     double getElementArea() const override;
+};
+
+// =========================================================================
+// ==              3D 单元的具体实现 (Concrete Implementations)         ==
+// =========================================================================
+
+/**
+ * @brief 三维线性四面体单元的几何映射类 (Tetrahedron Linear)
+ *
+ * 对于线性四面体，雅可比矩阵在整个单元内是常数。
+ * 四面体嵌入在3D空间中。
+ *
+ * @par 参考坐标系
+ * - 维度: 3D
+ * - 参数范围: ξ,η,ζ ≥ 0, ξ+η+ζ ≤ 1
+ *
+ * @par 物理坐标映射
+ * x(ξ,η,ζ) = N0*x0 + N1*x1 + N2*x2 + N3*x3
+ * 其中 N0=1-ξ-η-ζ, N1=ξ, N2=η, N3=ζ
+ *
+ * @par 雅可比矩阵
+ * J = [dx/dξ, dx/dη, dx/dζ] 是3×3矩阵
+ * J = [x1-x0, x2-x0, x3-x0]
+ */
+class TetrahedronLinearMapping : public GeometryMapping3D
+{
+  private:
+    void computeJacobian() override;
+
+  public:
+    /**
+     * @brief 构造函数 - 创建3D线性四面体映射
+     * @param element_coords 四个顶点的坐标 [x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3]
+     * @param embed_dim 嵌入空间维度（默认3）
+     */
+    TetrahedronLinearMapping(const std::vector<double>& element_coords, int embed_dim = 3)
+        : GeometryMapping3D(element_coords, 1, 4, embed_dim)  // order=1, nodes=4
+    {
+        computeJacobian();  // 计算常数雅可比矩阵
+    }
+
+    void mapToPhysical(const std::vector<double>& coord_ref,
+                       std::vector<double>& coord_phys) const override;
+
+    double getJacobianDet(const std::vector<double>& coord_ref) const override;
+
+    void transformGradient(const std::vector<double>& gradient_ref,
+                           std::vector<double>& gradient_phys,
+                           const std::vector<double>& coord_ref) const override;
+
+    double getElementVolume() const override;
 };
 
 /**

@@ -7,10 +7,11 @@ set(CMAKE_DEPENDS_GENERATOR "MinGW Makefiles")
 # The top level Makefile was generated from the following files:
 set(CMAKE_MAKEFILE_DEPENDS
   "CMakeCache.txt"
-  "E:/code/FEM/CMakeLists.txt"
+  "E:/code/C++/FEM/CMakeLists.txt"
   "CMakeFiles/4.1.0/CMakeCXXCompiler.cmake"
   "CMakeFiles/4.1.0/CMakeRCCompiler.cmake"
   "CMakeFiles/4.1.0/CMakeSystem.cmake"
+  "E:/code/C++/FEM/tests/CMakeLists.txt"
   "E:/msys64/ucrt64/share/cmake/Modules/CMakeCXXInformation.cmake"
   "E:/msys64/ucrt64/share/cmake/Modules/CMakeCommonLanguageInclude.cmake"
   "E:/msys64/ucrt64/share/cmake/Modules/CMakeGenericSystem.cmake"
@@ -47,10 +48,14 @@ set(CMAKE_MAKEFILE_OUTPUTS
 # Byproducts of CMake generate step:
 set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/CMakeDirectoryInformation.cmake"
+  "tests/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/FEM_solution.dir/DependInfo.cmake"
   "CMakeFiles/FEM_lib.dir/DependInfo.cmake"
+  "tests/CMakeFiles/test_3d_integration.dir/DependInfo.cmake"
+  "tests/CMakeFiles/test_3d_mesh_import.dir/DependInfo.cmake"
+  "tests/CMakeFiles/test_simple_3d_poisson.dir/DependInfo.cmake"
   )

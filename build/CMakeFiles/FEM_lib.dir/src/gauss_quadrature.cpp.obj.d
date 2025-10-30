@@ -1,6 +1,6 @@
 CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj: \
- E:\code\FEM\src\gauss_quadrature.cpp \
- E:/code/FEM/include/gauss_quadrature.h \
+ E:\code\C++\FEM\src\gauss_quadrature.cpp \
+ E:/code/C++/FEM/include/gauss_quadrature.h \
  E:/msys64/ucrt64/include/c++/15.2.0/memory \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/memoryfwd.h \
  E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++config.h \
@@ -112,7 +112,8 @@ CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/memory_resource.h \
  E:/msys64/ucrt64/include/c++/15.2.0/cstddef \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/uses_allocator_args.h \
- E:/code/FEM/include/config.h E:/msys64/ucrt64/include/c++/15.2.0/string \
+ E:/code/C++/FEM/include/config.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/string \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/char_traits.h \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/localefwd.h \
  E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++locale.h \

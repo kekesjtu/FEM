@@ -52,10 +52,10 @@ RM = E:\msys64\ucrt64\bin\cmake.exe -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = E:\code\FEM
+CMAKE_SOURCE_DIR = E:\code\C++\FEM
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = E:\code\FEM\build
+CMAKE_BINARY_DIR = E:\code\C++\FEM\build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/FEM_lib.dir/depend.make
@@ -71,190 +71,377 @@ include CMakeFiles/FEM_lib.dir/flags.make
 CMakeFiles/FEM_lib.dir/codegen:
 .PHONY : CMakeFiles/FEM_lib.dir/codegen
 
-CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
-CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
-CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.obj: E:/code/FEM/src/comsol_mesh_importer.cpp
-CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.obj"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\comsol_mesh_importer.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\comsol_mesh_importer.cpp.obj -c E:\code\FEM\src\comsol_mesh_importer.cpp
+CMakeFiles/FEM_lib.dir/src/core/config.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/core/config.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/core/config.cpp.obj: E:/code/C++/FEM/src/core/config.cpp
+CMakeFiles/FEM_lib.dir/src/core/config.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/FEM_lib.dir/src/core/config.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/core/config.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\core\config.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\core\config.cpp.obj -c E:\code\C++\FEM\src\core\config.cpp
 
-CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.i"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\FEM\src\comsol_mesh_importer.cpp > CMakeFiles\FEM_lib.dir\src\comsol_mesh_importer.cpp.i
+CMakeFiles/FEM_lib.dir/src/core/config.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/core/config.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\core\config.cpp > CMakeFiles\FEM_lib.dir\src\core\config.cpp.i
 
-CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.s"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\FEM\src\comsol_mesh_importer.cpp -o CMakeFiles\FEM_lib.dir\src\comsol_mesh_importer.cpp.s
+CMakeFiles/FEM_lib.dir/src/core/config.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/core/config.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\core\config.cpp -o CMakeFiles\FEM_lib.dir\src\core\config.cpp.s
 
-CMakeFiles/FEM_lib.dir/src/config.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
-CMakeFiles/FEM_lib.dir/src/config.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
-CMakeFiles/FEM_lib.dir/src/config.cpp.obj: E:/code/FEM/src/config.cpp
-CMakeFiles/FEM_lib.dir/src/config.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/FEM_lib.dir/src/config.cpp.obj"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/config.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\config.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\config.cpp.obj -c E:\code\FEM\src\config.cpp
+CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.obj: E:/code/C++/FEM/src/core/comsol_mesh_importer.cpp
+CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\core\comsol_mesh_importer.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\core\comsol_mesh_importer.cpp.obj -c E:\code\C++\FEM\src\core\comsol_mesh_importer.cpp
 
-CMakeFiles/FEM_lib.dir/src/config.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/config.cpp.i"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\FEM\src\config.cpp > CMakeFiles\FEM_lib.dir\src\config.cpp.i
+CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\core\comsol_mesh_importer.cpp > CMakeFiles\FEM_lib.dir\src\core\comsol_mesh_importer.cpp.i
 
-CMakeFiles/FEM_lib.dir/src/config.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/config.cpp.s"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\FEM\src\config.cpp -o CMakeFiles\FEM_lib.dir\src\config.cpp.s
+CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\core\comsol_mesh_importer.cpp -o CMakeFiles\FEM_lib.dir\src\core\comsol_mesh_importer.cpp.s
 
-CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
-CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
-CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.obj: E:/code/FEM/src/electrothermal_solver.cpp
-CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.obj"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\electrothermal_solver.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\electrothermal_solver.cpp.obj -c E:\code\FEM\src\electrothermal_solver.cpp
+CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.obj: E:/code/C++/FEM/src/core/problem_setup.cpp
+CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\core\problem_setup.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\core\problem_setup.cpp.obj -c E:\code\C++\FEM\src\core\problem_setup.cpp
 
-CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.i"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\FEM\src\electrothermal_solver.cpp > CMakeFiles\FEM_lib.dir\src\electrothermal_solver.cpp.i
+CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\core\problem_setup.cpp > CMakeFiles\FEM_lib.dir\src\core\problem_setup.cpp.i
 
-CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.s"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\FEM\src\electrothermal_solver.cpp -o CMakeFiles\FEM_lib.dir\src\electrothermal_solver.cpp.s
+CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\core\problem_setup.cpp -o CMakeFiles\FEM_lib.dir\src\core\problem_setup.cpp.s
 
-CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
-CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
-CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj: E:/code/FEM/src/error_analysis.cpp
-CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\error_analysis.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\error_analysis.cpp.obj -c E:\code\FEM\src\error_analysis.cpp
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.obj: E:/code/C++/FEM/src/shape_functions/shape_functions_1d.cpp
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_1d.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_1d.cpp.obj -c E:\code\C++\FEM\src\shape_functions\shape_functions_1d.cpp
 
-CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.i"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\FEM\src\error_analysis.cpp > CMakeFiles\FEM_lib.dir\src\error_analysis.cpp.i
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\shape_functions\shape_functions_1d.cpp > CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_1d.cpp.i
 
-CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.s"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\FEM\src\error_analysis.cpp -o CMakeFiles\FEM_lib.dir\src\error_analysis.cpp.s
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\shape_functions\shape_functions_1d.cpp -o CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_1d.cpp.s
 
-CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
-CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
-CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj: E:/code/FEM/src/fem_solver.cpp
-CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\fem_solver.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\fem_solver.cpp.obj -c E:\code\FEM\src\fem_solver.cpp
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.obj: E:/code/C++/FEM/src/shape_functions/shape_functions_2d.cpp
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_2d.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_2d.cpp.obj -c E:\code\C++\FEM\src\shape_functions\shape_functions_2d.cpp
 
-CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.i"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\FEM\src\fem_solver.cpp > CMakeFiles\FEM_lib.dir\src\fem_solver.cpp.i
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\shape_functions\shape_functions_2d.cpp > CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_2d.cpp.i
 
-CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.s"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\FEM\src\fem_solver.cpp -o CMakeFiles\FEM_lib.dir\src\fem_solver.cpp.s
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\shape_functions\shape_functions_2d.cpp -o CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_2d.cpp.s
 
-CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
-CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
-CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj: E:/code/FEM/src/gauss_quadrature.cpp
-CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\gauss_quadrature.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\gauss_quadrature.cpp.obj -c E:\code\FEM\src\gauss_quadrature.cpp
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.obj: E:/code/C++/FEM/src/shape_functions/shape_functions_3d.cpp
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_3d.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_3d.cpp.obj -c E:\code\C++\FEM\src\shape_functions\shape_functions_3d.cpp
 
-CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.i"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\FEM\src\gauss_quadrature.cpp > CMakeFiles\FEM_lib.dir\src\gauss_quadrature.cpp.i
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\shape_functions\shape_functions_3d.cpp > CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_3d.cpp.i
 
-CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.s"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\FEM\src\gauss_quadrature.cpp -o CMakeFiles\FEM_lib.dir\src\gauss_quadrature.cpp.s
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\shape_functions\shape_functions_3d.cpp -o CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_3d.cpp.s
 
-CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
-CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
-CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj: E:/code/FEM/src/geometry_mapping.cpp
-CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\geometry_mapping.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\geometry_mapping.cpp.obj -c E:\code\FEM\src\geometry_mapping.cpp
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.obj: E:/code/C++/FEM/src/shape_functions/shape_functions_factory.cpp
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_factory.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_factory.cpp.obj -c E:\code\C++\FEM\src\shape_functions\shape_functions_factory.cpp
 
-CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.i"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\FEM\src\geometry_mapping.cpp > CMakeFiles\FEM_lib.dir\src\geometry_mapping.cpp.i
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\shape_functions\shape_functions_factory.cpp > CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_factory.cpp.i
 
-CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.s"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\FEM\src\geometry_mapping.cpp -o CMakeFiles\FEM_lib.dir\src\geometry_mapping.cpp.s
+CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\shape_functions\shape_functions_factory.cpp -o CMakeFiles\FEM_lib.dir\src\shape_functions\shape_functions_factory.cpp.s
 
-CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
-CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
-CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.obj: E:/code/FEM/src/problem_setup.cpp
-CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.obj"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\problem_setup.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\problem_setup.cpp.obj -c E:\code\FEM\src\problem_setup.cpp
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.obj: E:/code/C++/FEM/src/geometry_mapping/geometry_mapping_1d.cpp
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_1d.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_1d.cpp.obj -c E:\code\C++\FEM\src\geometry_mapping\geometry_mapping_1d.cpp
 
-CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.i"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\FEM\src\problem_setup.cpp > CMakeFiles\FEM_lib.dir\src\problem_setup.cpp.i
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\geometry_mapping\geometry_mapping_1d.cpp > CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_1d.cpp.i
 
-CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.s"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\FEM\src\problem_setup.cpp -o CMakeFiles\FEM_lib.dir\src\problem_setup.cpp.s
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\geometry_mapping\geometry_mapping_1d.cpp -o CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_1d.cpp.s
 
-CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
-CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
-CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.obj: E:/code/FEM/src/shape_functions.cpp
-CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.obj"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\shape_functions.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\shape_functions.cpp.obj -c E:\code\FEM\src\shape_functions.cpp
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.obj: E:/code/C++/FEM/src/geometry_mapping/geometry_mapping_2d.cpp
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_2d.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_2d.cpp.obj -c E:\code\C++\FEM\src\geometry_mapping\geometry_mapping_2d.cpp
 
-CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.i"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\FEM\src\shape_functions.cpp > CMakeFiles\FEM_lib.dir\src\shape_functions.cpp.i
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\geometry_mapping\geometry_mapping_2d.cpp > CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_2d.cpp.i
 
-CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.s"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\FEM\src\shape_functions.cpp -o CMakeFiles\FEM_lib.dir\src\shape_functions.cpp.s
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\geometry_mapping\geometry_mapping_2d.cpp -o CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_2d.cpp.s
 
-CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
-CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
-CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj: E:/code/FEM/src/vtk_output.cpp
-CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\vtk_output.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\vtk_output.cpp.obj -c E:\code\FEM\src\vtk_output.cpp
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.obj: E:/code/C++/FEM/src/geometry_mapping/geometry_mapping_3d.cpp
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_3d.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_3d.cpp.obj -c E:\code\C++\FEM\src\geometry_mapping\geometry_mapping_3d.cpp
 
-CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.i"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\FEM\src\vtk_output.cpp > CMakeFiles\FEM_lib.dir\src\vtk_output.cpp.i
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\geometry_mapping\geometry_mapping_3d.cpp > CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_3d.cpp.i
 
-CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.s"
-	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\FEM\src\vtk_output.cpp -o CMakeFiles\FEM_lib.dir\src\vtk_output.cpp.s
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\geometry_mapping\geometry_mapping_3d.cpp -o CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_3d.cpp.s
+
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.obj: E:/code/C++/FEM/src/geometry_mapping/geometry_mapping_factory.cpp
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_factory.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_factory.cpp.obj -c E:\code\C++\FEM\src\geometry_mapping\geometry_mapping_factory.cpp
+
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\geometry_mapping\geometry_mapping_factory.cpp > CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_factory.cpp.i
+
+CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\geometry_mapping\geometry_mapping_factory.cpp -o CMakeFiles\FEM_lib.dir\src\geometry_mapping\geometry_mapping_factory.cpp.s
+
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.obj: E:/code/C++/FEM/src/gauss_quadrature/gauss_quadrature_1d.cpp
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_1d.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_1d.cpp.obj -c E:\code\C++\FEM\src\gauss_quadrature\gauss_quadrature_1d.cpp
+
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\gauss_quadrature\gauss_quadrature_1d.cpp > CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_1d.cpp.i
+
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\gauss_quadrature\gauss_quadrature_1d.cpp -o CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_1d.cpp.s
+
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.obj: E:/code/C++/FEM/src/gauss_quadrature/gauss_quadrature_2d.cpp
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_2d.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_2d.cpp.obj -c E:\code\C++\FEM\src\gauss_quadrature\gauss_quadrature_2d.cpp
+
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\gauss_quadrature\gauss_quadrature_2d.cpp > CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_2d.cpp.i
+
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\gauss_quadrature\gauss_quadrature_2d.cpp -o CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_2d.cpp.s
+
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.obj: E:/code/C++/FEM/src/gauss_quadrature/gauss_quadrature_3d.cpp
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_3d.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_3d.cpp.obj -c E:\code\C++\FEM\src\gauss_quadrature\gauss_quadrature_3d.cpp
+
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\gauss_quadrature\gauss_quadrature_3d.cpp > CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_3d.cpp.i
+
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\gauss_quadrature\gauss_quadrature_3d.cpp -o CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_3d.cpp.s
+
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.obj: E:/code/C++/FEM/src/gauss_quadrature/gauss_quadrature_factory.cpp
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_factory.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_factory.cpp.obj -c E:\code\C++\FEM\src\gauss_quadrature\gauss_quadrature_factory.cpp
+
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\gauss_quadrature\gauss_quadrature_factory.cpp > CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_factory.cpp.i
+
+CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\gauss_quadrature\gauss_quadrature_factory.cpp -o CMakeFiles\FEM_lib.dir\src\gauss_quadrature\gauss_quadrature_factory.cpp.s
+
+CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.obj: E:/code/C++/FEM/src/solvers/fem_solver.cpp
+CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\solvers\fem_solver.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\solvers\fem_solver.cpp.obj -c E:\code\C++\FEM\src\solvers\fem_solver.cpp
+
+CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\solvers\fem_solver.cpp > CMakeFiles\FEM_lib.dir\src\solvers\fem_solver.cpp.i
+
+CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\solvers\fem_solver.cpp -o CMakeFiles\FEM_lib.dir\src\solvers\fem_solver.cpp.s
+
+CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.obj: E:/code/C++/FEM/src/solvers/electrothermal_solver.cpp
+CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\solvers\electrothermal_solver.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\solvers\electrothermal_solver.cpp.obj -c E:\code\C++\FEM\src\solvers\electrothermal_solver.cpp
+
+CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\solvers\electrothermal_solver.cpp > CMakeFiles\FEM_lib.dir\src\solvers\electrothermal_solver.cpp.i
+
+CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\solvers\electrothermal_solver.cpp -o CMakeFiles\FEM_lib.dir\src\solvers\electrothermal_solver.cpp.s
+
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.obj: E:/code/C++/FEM/src/output/vtk_output/vtk_output_base.cpp
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\output\vtk_output\vtk_output_base.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\output\vtk_output\vtk_output_base.cpp.obj -c E:\code\C++\FEM\src\output\vtk_output\vtk_output_base.cpp
+
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\output\vtk_output\vtk_output_base.cpp > CMakeFiles\FEM_lib.dir\src\output\vtk_output\vtk_output_base.cpp.i
+
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\output\vtk_output\vtk_output_base.cpp -o CMakeFiles\FEM_lib.dir\src\output\vtk_output\vtk_output_base.cpp.s
+
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.obj: E:/code/C++/FEM/src/output/vtk_output/vtk_output_2d.cpp
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\output\vtk_output\vtk_output_2d.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\output\vtk_output\vtk_output_2d.cpp.obj -c E:\code\C++\FEM\src\output\vtk_output\vtk_output_2d.cpp
+
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\output\vtk_output\vtk_output_2d.cpp > CMakeFiles\FEM_lib.dir\src\output\vtk_output\vtk_output_2d.cpp.i
+
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\output\vtk_output\vtk_output_2d.cpp -o CMakeFiles\FEM_lib.dir\src\output\vtk_output\vtk_output_2d.cpp.s
+
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.obj: E:/code/C++/FEM/src/output/vtk_output/vtk_output_3d.cpp
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\output\vtk_output\vtk_output_3d.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\output\vtk_output\vtk_output_3d.cpp.obj -c E:\code\C++\FEM\src\output\vtk_output\vtk_output_3d.cpp
+
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\output\vtk_output\vtk_output_3d.cpp > CMakeFiles\FEM_lib.dir\src\output\vtk_output\vtk_output_3d.cpp.i
+
+CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\output\vtk_output\vtk_output_3d.cpp -o CMakeFiles\FEM_lib.dir\src\output\vtk_output\vtk_output_3d.cpp.s
+
+CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.obj: CMakeFiles/FEM_lib.dir/flags.make
+CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.obj: CMakeFiles/FEM_lib.dir/includes_CXX.rsp
+CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.obj: E:/code/C++/FEM/src/output/error_analysis.cpp
+CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.obj: CMakeFiles/FEM_lib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.obj"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.obj -MF CMakeFiles\FEM_lib.dir\src\output\error_analysis.cpp.obj.d -o CMakeFiles\FEM_lib.dir\src\output\error_analysis.cpp.obj -c E:\code\C++\FEM\src\output\error_analysis.cpp
+
+CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.i"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E E:\code\C++\FEM\src\output\error_analysis.cpp > CMakeFiles\FEM_lib.dir\src\output\error_analysis.cpp.i
+
+CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.s"
+	E:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S E:\code\C++\FEM\src\output\error_analysis.cpp -o CMakeFiles\FEM_lib.dir\src\output\error_analysis.cpp.s
 
 # Object files for target FEM_lib
 FEM_lib_OBJECTS = \
-"CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.obj" \
-"CMakeFiles/FEM_lib.dir/src/config.cpp.obj" \
-"CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.obj" \
-"CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj" \
-"CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj" \
-"CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj" \
-"CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj" \
-"CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.obj" \
-"CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.obj" \
-"CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj"
+"CMakeFiles/FEM_lib.dir/src/core/config.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.obj" \
+"CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.obj"
 
 # External object files for target FEM_lib
 FEM_lib_EXTERNAL_OBJECTS =
 
-lib/libFEM_lib.a: CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.obj
-lib/libFEM_lib.a: CMakeFiles/FEM_lib.dir/src/config.cpp.obj
-lib/libFEM_lib.a: CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.obj
-lib/libFEM_lib.a: CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj
-lib/libFEM_lib.a: CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj
-lib/libFEM_lib.a: CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj
-lib/libFEM_lib.a: CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj
-lib/libFEM_lib.a: CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.obj
-lib/libFEM_lib.a: CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.obj
-lib/libFEM_lib.a: CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj
-lib/libFEM_lib.a: CMakeFiles/FEM_lib.dir/build.make
-lib/libFEM_lib.a: CMakeFiles/FEM_lib.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=E:\code\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX static library lib\libFEM_lib.a"
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/core/config.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.obj
+lib/libfem.a: CMakeFiles/FEM_lib.dir/build.make
+lib/libfem.a: CMakeFiles/FEM_lib.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=E:\code\C++\FEM\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Linking CXX static library lib\libfem.a"
 	$(CMAKE_COMMAND) -P CMakeFiles\FEM_lib.dir\cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\FEM_lib.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
-CMakeFiles/FEM_lib.dir/build: lib/libFEM_lib.a
+CMakeFiles/FEM_lib.dir/build: lib/libfem.a
 .PHONY : CMakeFiles/FEM_lib.dir/build
 
 CMakeFiles/FEM_lib.dir/clean:
@@ -262,6 +449,6 @@ CMakeFiles/FEM_lib.dir/clean:
 .PHONY : CMakeFiles/FEM_lib.dir/clean
 
 CMakeFiles/FEM_lib.dir/depend:
-	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" E:\code\FEM E:\code\FEM E:\code\FEM\build E:\code\FEM\build E:\code\FEM\build\CMakeFiles\FEM_lib.dir\DependInfo.cmake "--color=$(COLOR)"
+	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" E:\code\C++\FEM E:\code\C++\FEM E:\code\C++\FEM\build E:\code\C++\FEM\build E:\code\C++\FEM\build\CMakeFiles\FEM_lib.dir\DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/FEM_lib.dir/depend
 

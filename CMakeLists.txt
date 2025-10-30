@@ -46,9 +46,69 @@ include_directories(
 # 查找Eigen库（如果使用find_package方式）
 # find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
-# 收集源文件
-file(GLOB_RECURSE FEM_SOURCES
-    "${CMAKE_SOURCE_DIR}/src/*.cpp"
+# 按模块收集源文件 - 更清晰的组织结构
+set(CORE_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/core/config.cpp"
+    "${CMAKE_SOURCE_DIR}/src/core/comsol_mesh_importer.cpp"
+    "${CMAKE_SOURCE_DIR}/src/core/problem_setup.cpp"
+)
+
+set(SHAPE_FUNCTION_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/shape_functions/shape_functions_1d.cpp"
+    "${CMAKE_SOURCE_DIR}/src/shape_functions/shape_functions_2d.cpp"
+    "${CMAKE_SOURCE_DIR}/src/shape_functions/shape_functions_3d.cpp"
+    "${CMAKE_SOURCE_DIR}/src/shape_functions/shape_functions_factory.cpp"
+)
+
+set(GEOMETRY_MAPPING_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/geometry_mapping/geometry_mapping_1d.cpp"
+    "${CMAKE_SOURCE_DIR}/src/geometry_mapping/geometry_mapping_2d.cpp"
+    "${CMAKE_SOURCE_DIR}/src/geometry_mapping/geometry_mapping_3d.cpp"
+    "${CMAKE_SOURCE_DIR}/src/geometry_mapping/geometry_mapping_factory.cpp"
+)
+
+set(GAUSS_QUADRATURE_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/gauss_quadrature/gauss_quadrature_1d.cpp"
+    "${CMAKE_SOURCE_DIR}/src/gauss_quadrature/gauss_quadrature_2d.cpp"
+    "${CMAKE_SOURCE_DIR}/src/gauss_quadrature/gauss_quadrature_3d.cpp"
+    "${CMAKE_SOURCE_DIR}/src/gauss_quadrature/gauss_quadrature_factory.cpp"
+)
+
+set(SOLVER_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/solvers/fem_solver.cpp"
+    "${CMAKE_SOURCE_DIR}/src/solvers/electrothermal_solver.cpp"
+)
+
+set(VTK_OUTPUT_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/output/vtk_output/vtk_output_base.cpp"
+    "${CMAKE_SOURCE_DIR}/src/output/vtk_output/vtk_output_2d.cpp"
+    "${CMAKE_SOURCE_DIR}/src/output/vtk_output/vtk_output_3d.cpp"
+)
+
+set(OUTPUT_SOURCES
+    ${VTK_OUTPUT_SOURCES}
+    "${CMAKE_SOURCE_DIR}/src/output/error_analysis.cpp"
+)
+
+# 主程序源文件
+set(MAIN_SOURCE
+    "${CMAKE_SOURCE_DIR}/src/main.cpp"
+)
+
+# 组合所有库源文件
+set(FEM_LIB_SOURCES
+    ${CORE_SOURCES}
+    ${SHAPE_FUNCTION_SOURCES}
+    ${GEOMETRY_MAPPING_SOURCES}
+    ${GAUSS_QUADRATURE_SOURCES}
+    ${SOLVER_SOURCES}
+    ${OUTPUT_SOURCES}
+)
+
+# 可执行文件源文件 = 库源文件 + main
+set(FEM_SOURCES
+    ${FEM_LIB_SOURCES}
+    ${MAIN_SOURCE}
 )
 
 # 收集头文件
@@ -82,17 +142,21 @@ install(TARGETS FEM_solution
 )
 
 # 可选：创建一个库版本（如果您想将FEM求解器作为库使用）
-set(FEM_LIB_SOURCES ${FEM_SOURCES})
-list(REMOVE_ITEM FEM_LIB_SOURCES "${CMAKE_SOURCE_DIR}/src/main.cpp")
-
+# 注意：FEM_LIB_SOURCES 已经在上面定义，不包含 main.cpp
 add_library(FEM_lib STATIC ${FEM_LIB_SOURCES})
 target_include_directories(FEM_lib PUBLIC 
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/third_party
 )
 
+# 为库设置输出名称
+set_target_properties(FEM_lib PROPERTIES
+    OUTPUT_NAME "fem"
+    # ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+)
+
 # 如果您有测试
-option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_TESTS "Build tests" ON)
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)

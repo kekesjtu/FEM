@@ -14,48 +14,30 @@ class Config
         LINE,           // 线段单元（一维，用于边界）
         TRIANGLE,       // 三角形单元（二维）
         QUADRILATERAL,  // 四边形单元（二维）
-        // 三维还没有实现
+        TETRAHEDRON,    // 四面体单元（三维）
+        // 其他3D单元类型可以在这里添加
     };
 
-    // 问题定义相关结构体
-    struct BoundaryCondition
-    {
-        int K_bc;     // 导数项的系数
-        double L_bc;  // 值项的系数
-        double q_bc;  // 右侧项
-
-        // 辅助构造函数
-        // 构造狄利克雷边界条件: u = val
-        // 对应 K=0, L=1, q=val
-        static BoundaryCondition Dirichlet(double val)
-        {
-            return {0, 1.0, val};
-        }
-        // 构造罗宾边界条件: c*du/dn + h*u = g
-        // 对应 K=1, L=h, q=g
-        static BoundaryCondition Robin(double h, double g)
-        {
-            return {1, h, g};
-        }
-        // 构造诺曼边界条件: c*du/dn = q_flux
-        // 对应 K=1, L=0, q_flux
-        static BoundaryCondition Neumann(double q_flux)
-        {
-            return {1, 0.0, q_flux};
-        }
-    };
-
-    // 结构体：定义边界边信息
+    /**
+     * @brief 边界几何信息结构体
+     *
+     * 只包含边界的几何信息,不包含物理边界条件
+     * 物理边界条件由 ProblemSetup 管理,以支持多物理场耦合
+     *
+     * 边界单元在不同维度下的含义:
+     * - 1D空间: 边界点 (0维, 1个节点)
+     * - 2D空间: 边界边 (1维, 2个节点)
+     * - 3D空间: 边界面 (2维, 3或4个节点,三角形或四边形)
+     */
     struct Boundary
     {
-        BoundaryCondition bc;                             // 边界条件类型
-        int element_index;                                // 边界边所属单元索引
-        std::vector<int> global_node_indices_in_element;  // 边界边的全局节点索引列表
+        int element_index;  ///< 边界单元所属的体单元索引(用于查找相邻体单元信息)
+        std::vector<int> global_node_indices_in_element;  ///< 边界单元的全局节点索引列表
     };
 
   private:
     // 网格相关
-    std::string mesh_filename_ = "circle_mesh3.mphtxt";  // 网格文件名，用户可直接在此修改
+    std::string mesh_filename_ = "cube_tet_mesh.mphtxt";  // 网格文件名，用户可直接在此修改
     int dimension_;
     int nodes_num_;
     int elements_num_;
@@ -64,13 +46,13 @@ class Config
     std::vector<double> node_coordinates_;  // 节点坐标矩阵 [node_id * dimension + coord_id]
     std::vector<std::vector<int>>
         element_connectivity_;        // 单元连接矩阵 [element_id][local_node_id] = global_node_id
-    std::vector<Boundary> boundarys;  // 边界边信息
+    std::vector<Boundary> boundarys;  // 边界单元信息 (1D:点, 2D:边, 3D:面)
 
     // 矩阵组装相关
     int gauss_assemble_points_num_;
 
     // 形函数阶数
-    int shape_function_order_ = 1;  // 形函数阶数默认为线性，用户可直接在此修改
+    int order_ = 1;  // 形函数阶数默认为线性，用户可直接在此修改
 
     // 误差分析相关
     int max_error_sampling_points_num_ = 5;  // 最大误差采样点数，用户可直接在此修改
@@ -90,8 +72,12 @@ class Config
     // 这里要根据维度和单元类型设置gauss_assemble_points_.n个高斯点能精确积分2n+1阶多项式
     void setGaussAssemblePoints();
 
-    // 初始化边界边信息
-    void initializeBoundarys(const std::vector<std::vector<int>>& edge_elements);
+    /**
+     * @brief 初始化边界单元信息
+     * @param boundary_elements 边界单元连接数组 (来自ComsolMeshImporter)
+     *                          1D: 点(1节点), 2D: 边(2节点), 3D: 面(3或4节点)
+     */
+    void initializeBoundarys(const std::vector<std::vector<int>>& boundary_elements);
 
     // 查找包含指定边的单元
     int findElementContainingEdge(const std::vector<int>& edge_nodes) const;
@@ -108,13 +94,12 @@ class Config
     int getAssembleGaussPointsNum() const;
     int getNodesNum() const;
     int getElementsNum() const;
-    int getNodesPerElement() const;
+    int getNodesNumPerElement() const;
     int getOrder() const;
     int getElementType() const;
     const std::vector<double>& getNodeCoordinates() const;
     const std::vector<std::vector<int>>& getElementConnectivity() const;
     const std::vector<Boundary>& getBoundary() const;
-    std::vector<Boundary>& getBoundaryMutable();  // 允许修改边界条件
 
     // 边界单元相关访问器
     int getBoundaryElementType() const;      // 返回边界单元类型（LINE）

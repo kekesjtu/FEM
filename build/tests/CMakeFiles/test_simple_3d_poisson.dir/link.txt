@@ -1,0 +1,3 @@
+E:\msys64\ucrt64\bin\cmake.exe -E rm -f CMakeFiles\test_simple_3d_poisson.dir/objects.a
+E:\msys64\ucrt64\bin\ar.exe qc CMakeFiles\test_simple_3d_poisson.dir/objects.a @CMakeFiles\test_simple_3d_poisson.dir\objects1.rsp
+E:\msys64\ucrt64\bin\g++.exe -g -Wl,--whole-archive CMakeFiles\test_simple_3d_poisson.dir/objects.a -Wl,--no-whole-archive -o ..\bin\test_simple_3d_poisson.exe -Wl,--out-implib,..\lib\libtest_simple_3d_poisson.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\test_simple_3d_poisson.dir\linkLibs.rsp

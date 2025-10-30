@@ -14,11 +14,6 @@ class ShapeFunction
     virtual ~ShapeFunction() = default;
 
     /**
-     * @brief 获取形函数的节点数量
-     */
-    virtual int getNumNodesPerElement() const = 0;
-
-    /**
      * @brief 计算试探函数值
      * @param node_index 节点索引
      * @param coords 参考坐标
@@ -62,14 +57,6 @@ class ShapeFunction1D : public ShapeFunction
 {
   public:
     virtual ~ShapeFunction1D() = default;
-
-    /**
-     * @brief 获取参考坐标维度（一维）
-     */
-    int getDimension() const
-    {
-        return 1;
-    }
 };
 
 /**
@@ -79,14 +66,15 @@ class ShapeFunction2D : public ShapeFunction
 {
   public:
     virtual ~ShapeFunction2D() = default;
+};
 
-    /**
-     * @brief 获取参考坐标维度（二维）
-     */
-    int getDimension() const
-    {
-        return 2;
-    }
+/**
+ * @brief 三维形函数基类
+ */
+class ShapeFunction3D : public ShapeFunction
+{
+  public:
+    virtual ~ShapeFunction3D() = default;
 };
 
 /**
@@ -98,11 +86,6 @@ class LineLinearShapeFunction : public ShapeFunction1D
   public:
     LineLinearShapeFunction() = default;
     virtual ~LineLinearShapeFunction() = default;
-
-    int getNumNodesPerElement() const override
-    {
-        return 2;
-    }
 
     double computeTrialFunction(int element_node_index,
                                 const std::vector<double>& coords) const override;
@@ -123,10 +106,36 @@ class TriangleLinearShapeFunction : public ShapeFunction2D
     TriangleLinearShapeFunction() = default;
     virtual ~TriangleLinearShapeFunction() = default;
 
-    int getNumNodesPerElement() const override
-    {
-        return 3;
-    }
+    double computeTrialFunction(int element_node_index,
+                                const std::vector<double>& coords) const override;
+    double computeTestFunction(int element_node_index,
+                               const std::vector<double>& coords) const override;
+    std::vector<double> computeTrialGradients(int element_node_index,
+                                              const std::vector<double>& coords) const override;
+    std::vector<double> computeTestGradients(int element_node_index,
+                                             const std::vector<double>& coords) const override;
+};
+
+/**
+ * @brief 线性四面体单元形函数类
+ *
+ * 对于标准参考四面体，四个顶点为：
+ * 节点0: (0, 0, 0)
+ * 节点1: (1, 0, 0)
+ * 节点2: (0, 1, 0)
+ * 节点3: (0, 0, 1)
+ *
+ * 形函数为：
+ * N0(xi, eta, zeta) = 1 - xi - eta - zeta
+ * N1(xi, eta, zeta) = xi
+ * N2(xi, eta, zeta) = eta
+ * N3(xi, eta, zeta) = zeta
+ */
+class TetrahedronLinearShapeFunction : public ShapeFunction3D
+{
+  public:
+    TetrahedronLinearShapeFunction() = default;
+    virtual ~TetrahedronLinearShapeFunction() = default;
 
     double computeTrialFunction(int element_node_index,
                                 const std::vector<double>& coords) const override;

@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = @CMakeFiles/FEM_lib.dir/includes_CXX.rsp
 
-CXX_FLAGS = -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g
+CXX_FLAGS = -g -std=c++17 -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g
 

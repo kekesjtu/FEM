@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "boundary_condition.h"
 
 // 前向声明以避免循环包含
 class Config;
@@ -26,23 +27,27 @@ class ProblemSetup
 
     /**
      * @brief 设置边界条件（应该在求解前调用）
-     * @param config 配置对象，用于访问和修改边界条件
+     * @param config 配置对象，用于访问边界几何信息
      *
-     * 此方法调用存储的边界条件设置函数，直接操作 config 的 boundarys 数组
+     * 子类必须实现此方法，根据边界几何信息设置物理边界条件
+     * 边界条件将存储在 boundary_conditions_ 中，索引对应 config->getBoundary()
      */
-    void setupBoundaryConditions(std::shared_ptr<Config> config);
+    virtual void setupBoundaryConditions(std::shared_ptr<Config> config) = 0;
 
     /**
-     * @brief 设置边界条件设置函数
-     * @param func 边界条件设置函数，接收 Config 对象，直接操作其 boundarys 数组
+     * @brief 设置边界条件设置函数（Lambda方式，供便捷使用）
+     * @param func 边界条件设置函数，接收 Config 对象
      *
      * 示例：
      * problem->setBoundarySetupFunction([](std::shared_ptr<Config> config) {
-     *     auto& boundarys = config->getBoundaryMutable();
+     *     auto& boundary_conditions = problem->getBoundaryConditionsMutable();
+     *     const auto& boundaries = config->getBoundary();
      *     const auto& coords = config->getNodeCoordinates();
      *     int dim = config->getDimension();
      *
-     *     for (auto& boundary : boundarys) {
+     *     boundary_conditions.resize(boundaries.size());
+     *     for (size_t i = 0; i < boundaries.size(); ++i) {
+     *         const auto& boundary = boundaries[i];
      *         // 计算边界中点
      *         double x = 0.0, y = 0.0;
      *         for (int node_idx : boundary.global_node_indices_in_element) {
@@ -51,11 +56,10 @@ class ProblemSetup
      *         }
      *         x /= boundary.global_node_indices_in_element.size();
      *         y /= boundary.global_node_indices_in_element.size();
-     *         double r = std::sqrt(x*x + y*y);
      *
      *         // 根据位置设置边界条件
-     *         if (r < 0.5) boundary.bc = Config::BoundaryCondition::Dirichlet(0.0);
-     *         else boundary.bc = Config::BoundaryCondition::Dirichlet(1.0);
+     *         if (x < 0) boundary_conditions[i] = BoundaryCondition::Dirichlet(0.0);
+     *         else boundary_conditions[i] = BoundaryCondition::Dirichlet(1.0);
      *     }
      * });
      */
@@ -117,6 +121,25 @@ class ProblemSetup
                                   std::vector<double>& gradients) const;
 
     /**
+     * @brief 获取边界条件列表（供 FEMSolver 使用）
+     * @return 边界条件列表，索引对应 Config::getBoundary()
+     */
+    const std::vector<BoundaryCondition>& getBoundaryConditions() const;
+
+    /**
+     * @brief 获取指定边界的边界条件
+     * @param boundary_index 边界索引（对应 Config::getBoundary() 中的索引）
+     * @return 边界条件
+     */
+    const BoundaryCondition& getBoundaryCondition(size_t boundary_index) const;
+
+    /**
+     * @brief 获取可修改的边界条件列表（供子类使用）
+     * @return 边界条件列表的可修改引用
+     */
+    std::vector<BoundaryCondition>& getBoundaryConditionsMutable();
+
+    /**
      * @brief 检查是否设置了精确解
      */
     bool hasExactSolution() const;
@@ -129,12 +152,21 @@ class ProblemSetup
         return name_;
     }
 
-  private:
-    std::string name_;  // 问题名称
+  protected:
+    std::string name_;  ///< 问题名称
 
-    // 边界条件设置函数（操作 boundarys 数组）
+    /**
+     * @brief 边界条件列表（索引对应 Config 中的 Boundary）
+     *
+     * boundary_conditions_[i] 对应 config->getBoundary()[i]
+     * 由子类在 setupBoundaryConditions() 中设置
+     */
+    std::vector<BoundaryCondition> boundary_conditions_;
+
+    // 边界条件设置函数（Lambda方式，可选）
     std::function<void(std::shared_ptr<Config>)> boundary_setup_func_;
 
+  private:
     // 物理问题函数
     std::function<double(const std::vector<double>&)> coefficient_func_;  // 扩散系数 c(x,y)
     std::function<double(const std::vector<double>&)> source_func_;       // 源项 f(x,y)

@@ -56,13 +56,23 @@ RM = E:\msys64\ucrt64\bin\cmake.exe -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = E:\code\FEM
+CMAKE_SOURCE_DIR = E:\code\C++\FEM
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = E:\code\FEM\build
+CMAKE_BINARY_DIR = E:\code\C++\FEM\build
 
 #=============================================================================
 # Targets provided globally by CMake.
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	E:\msys64\ucrt64\bin\ctest.exe $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -131,9 +141,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start E:\code\FEM\build\CMakeFiles E:\code\FEM\build\\CMakeFiles\progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start E:\code\C++\FEM\build\CMakeFiles E:\code\C++\FEM\build\\CMakeFiles\progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start E:\code\FEM\build\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start E:\code\C++\FEM\build\CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -186,194 +196,341 @@ FEM_lib/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/build
 .PHONY : FEM_lib/fast
 
-src/comsol_mesh_importer.obj: src/comsol_mesh_importer.cpp.obj
-.PHONY : src/comsol_mesh_importer.obj
+#=============================================================================
+# Target rules for targets named test_3d_integration
+
+# Build rule for target.
+test_3d_integration: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 test_3d_integration
+.PHONY : test_3d_integration
+
+# fast build rule for target.
+test_3d_integration/fast:
+	$(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_3d_integration.dir\build.make tests/CMakeFiles/test_3d_integration.dir/build
+.PHONY : test_3d_integration/fast
+
+#=============================================================================
+# Target rules for targets named test_3d_mesh_import
+
+# Build rule for target.
+test_3d_mesh_import: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 test_3d_mesh_import
+.PHONY : test_3d_mesh_import
+
+# fast build rule for target.
+test_3d_mesh_import/fast:
+	$(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_3d_mesh_import.dir\build.make tests/CMakeFiles/test_3d_mesh_import.dir/build
+.PHONY : test_3d_mesh_import/fast
+
+#=============================================================================
+# Target rules for targets named test_simple_3d_poisson
+
+# Build rule for target.
+test_simple_3d_poisson: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 test_simple_3d_poisson
+.PHONY : test_simple_3d_poisson
+
+# fast build rule for target.
+test_simple_3d_poisson/fast:
+	$(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_simple_3d_poisson.dir\build.make tests/CMakeFiles/test_simple_3d_poisson.dir/build
+.PHONY : test_simple_3d_poisson/fast
+
+src/core/comsol_mesh_importer.obj: src/core/comsol_mesh_importer.cpp.obj
+.PHONY : src/core/comsol_mesh_importer.obj
 
 # target to build an object file
-src/comsol_mesh_importer.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/comsol_mesh_importer.cpp.obj
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.obj
-.PHONY : src/comsol_mesh_importer.cpp.obj
+src/core/comsol_mesh_importer.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/core/comsol_mesh_importer.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.obj
+.PHONY : src/core/comsol_mesh_importer.cpp.obj
 
-src/comsol_mesh_importer.i: src/comsol_mesh_importer.cpp.i
-.PHONY : src/comsol_mesh_importer.i
+src/core/comsol_mesh_importer.i: src/core/comsol_mesh_importer.cpp.i
+.PHONY : src/core/comsol_mesh_importer.i
 
 # target to preprocess a source file
-src/comsol_mesh_importer.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/comsol_mesh_importer.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.i
-.PHONY : src/comsol_mesh_importer.cpp.i
+src/core/comsol_mesh_importer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/core/comsol_mesh_importer.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.i
+.PHONY : src/core/comsol_mesh_importer.cpp.i
 
-src/comsol_mesh_importer.s: src/comsol_mesh_importer.cpp.s
-.PHONY : src/comsol_mesh_importer.s
+src/core/comsol_mesh_importer.s: src/core/comsol_mesh_importer.cpp.s
+.PHONY : src/core/comsol_mesh_importer.s
 
 # target to generate assembly for a file
-src/comsol_mesh_importer.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/comsol_mesh_importer.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/comsol_mesh_importer.cpp.s
-.PHONY : src/comsol_mesh_importer.cpp.s
+src/core/comsol_mesh_importer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/core/comsol_mesh_importer.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.s
+.PHONY : src/core/comsol_mesh_importer.cpp.s
 
-src/config.obj: src/config.cpp.obj
-.PHONY : src/config.obj
+src/core/config.obj: src/core/config.cpp.obj
+.PHONY : src/core/config.obj
 
 # target to build an object file
-src/config.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/config.cpp.obj
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/config.cpp.obj
-.PHONY : src/config.cpp.obj
+src/core/config.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/core/config.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/core/config.cpp.obj
+.PHONY : src/core/config.cpp.obj
 
-src/config.i: src/config.cpp.i
-.PHONY : src/config.i
+src/core/config.i: src/core/config.cpp.i
+.PHONY : src/core/config.i
 
 # target to preprocess a source file
-src/config.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/config.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/config.cpp.i
-.PHONY : src/config.cpp.i
+src/core/config.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/core/config.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/core/config.cpp.i
+.PHONY : src/core/config.cpp.i
 
-src/config.s: src/config.cpp.s
-.PHONY : src/config.s
+src/core/config.s: src/core/config.cpp.s
+.PHONY : src/core/config.s
 
 # target to generate assembly for a file
-src/config.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/config.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/config.cpp.s
-.PHONY : src/config.cpp.s
+src/core/config.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/core/config.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/core/config.cpp.s
+.PHONY : src/core/config.cpp.s
 
-src/electrothermal_solver.obj: src/electrothermal_solver.cpp.obj
-.PHONY : src/electrothermal_solver.obj
+src/core/problem_setup.obj: src/core/problem_setup.cpp.obj
+.PHONY : src/core/problem_setup.obj
 
 # target to build an object file
-src/electrothermal_solver.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/electrothermal_solver.cpp.obj
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.obj
-.PHONY : src/electrothermal_solver.cpp.obj
+src/core/problem_setup.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/core/problem_setup.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.obj
+.PHONY : src/core/problem_setup.cpp.obj
 
-src/electrothermal_solver.i: src/electrothermal_solver.cpp.i
-.PHONY : src/electrothermal_solver.i
+src/core/problem_setup.i: src/core/problem_setup.cpp.i
+.PHONY : src/core/problem_setup.i
 
 # target to preprocess a source file
-src/electrothermal_solver.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/electrothermal_solver.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.i
-.PHONY : src/electrothermal_solver.cpp.i
+src/core/problem_setup.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/core/problem_setup.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.i
+.PHONY : src/core/problem_setup.cpp.i
 
-src/electrothermal_solver.s: src/electrothermal_solver.cpp.s
-.PHONY : src/electrothermal_solver.s
+src/core/problem_setup.s: src/core/problem_setup.cpp.s
+.PHONY : src/core/problem_setup.s
 
 # target to generate assembly for a file
-src/electrothermal_solver.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/electrothermal_solver.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/electrothermal_solver.cpp.s
-.PHONY : src/electrothermal_solver.cpp.s
+src/core/problem_setup.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/core/problem_setup.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.s
+.PHONY : src/core/problem_setup.cpp.s
 
-src/error_analysis.obj: src/error_analysis.cpp.obj
-.PHONY : src/error_analysis.obj
+src/gauss_quadrature/gauss_quadrature_1d.obj: src/gauss_quadrature/gauss_quadrature_1d.cpp.obj
+.PHONY : src/gauss_quadrature/gauss_quadrature_1d.obj
 
 # target to build an object file
-src/error_analysis.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.obj
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.obj
-.PHONY : src/error_analysis.cpp.obj
+src/gauss_quadrature/gauss_quadrature_1d.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.obj
+.PHONY : src/gauss_quadrature/gauss_quadrature_1d.cpp.obj
 
-src/error_analysis.i: src/error_analysis.cpp.i
-.PHONY : src/error_analysis.i
+src/gauss_quadrature/gauss_quadrature_1d.i: src/gauss_quadrature/gauss_quadrature_1d.cpp.i
+.PHONY : src/gauss_quadrature/gauss_quadrature_1d.i
 
 # target to preprocess a source file
-src/error_analysis.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.i
-.PHONY : src/error_analysis.cpp.i
+src/gauss_quadrature/gauss_quadrature_1d.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.i
+.PHONY : src/gauss_quadrature/gauss_quadrature_1d.cpp.i
 
-src/error_analysis.s: src/error_analysis.cpp.s
-.PHONY : src/error_analysis.s
+src/gauss_quadrature/gauss_quadrature_1d.s: src/gauss_quadrature/gauss_quadrature_1d.cpp.s
+.PHONY : src/gauss_quadrature/gauss_quadrature_1d.s
 
 # target to generate assembly for a file
-src/error_analysis.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/error_analysis.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/error_analysis.cpp.s
-.PHONY : src/error_analysis.cpp.s
+src/gauss_quadrature/gauss_quadrature_1d.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.s
+.PHONY : src/gauss_quadrature/gauss_quadrature_1d.cpp.s
 
-src/fem_solver.obj: src/fem_solver.cpp.obj
-.PHONY : src/fem_solver.obj
+src/gauss_quadrature/gauss_quadrature_2d.obj: src/gauss_quadrature/gauss_quadrature_2d.cpp.obj
+.PHONY : src/gauss_quadrature/gauss_quadrature_2d.obj
 
 # target to build an object file
-src/fem_solver.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/fem_solver.cpp.obj
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.obj
-.PHONY : src/fem_solver.cpp.obj
+src/gauss_quadrature/gauss_quadrature_2d.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.obj
+.PHONY : src/gauss_quadrature/gauss_quadrature_2d.cpp.obj
 
-src/fem_solver.i: src/fem_solver.cpp.i
-.PHONY : src/fem_solver.i
+src/gauss_quadrature/gauss_quadrature_2d.i: src/gauss_quadrature/gauss_quadrature_2d.cpp.i
+.PHONY : src/gauss_quadrature/gauss_quadrature_2d.i
 
 # target to preprocess a source file
-src/fem_solver.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/fem_solver.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.i
-.PHONY : src/fem_solver.cpp.i
+src/gauss_quadrature/gauss_quadrature_2d.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.i
+.PHONY : src/gauss_quadrature/gauss_quadrature_2d.cpp.i
 
-src/fem_solver.s: src/fem_solver.cpp.s
-.PHONY : src/fem_solver.s
+src/gauss_quadrature/gauss_quadrature_2d.s: src/gauss_quadrature/gauss_quadrature_2d.cpp.s
+.PHONY : src/gauss_quadrature/gauss_quadrature_2d.s
 
 # target to generate assembly for a file
-src/fem_solver.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/fem_solver.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/fem_solver.cpp.s
-.PHONY : src/fem_solver.cpp.s
+src/gauss_quadrature/gauss_quadrature_2d.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.s
+.PHONY : src/gauss_quadrature/gauss_quadrature_2d.cpp.s
 
-src/gauss_quadrature.obj: src/gauss_quadrature.cpp.obj
-.PHONY : src/gauss_quadrature.obj
+src/gauss_quadrature/gauss_quadrature_3d.obj: src/gauss_quadrature/gauss_quadrature_3d.cpp.obj
+.PHONY : src/gauss_quadrature/gauss_quadrature_3d.obj
 
 # target to build an object file
-src/gauss_quadrature.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature.cpp.obj
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.obj
-.PHONY : src/gauss_quadrature.cpp.obj
+src/gauss_quadrature/gauss_quadrature_3d.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.obj
+.PHONY : src/gauss_quadrature/gauss_quadrature_3d.cpp.obj
 
-src/gauss_quadrature.i: src/gauss_quadrature.cpp.i
-.PHONY : src/gauss_quadrature.i
+src/gauss_quadrature/gauss_quadrature_3d.i: src/gauss_quadrature/gauss_quadrature_3d.cpp.i
+.PHONY : src/gauss_quadrature/gauss_quadrature_3d.i
 
 # target to preprocess a source file
-src/gauss_quadrature.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.i
-.PHONY : src/gauss_quadrature.cpp.i
+src/gauss_quadrature/gauss_quadrature_3d.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.i
+.PHONY : src/gauss_quadrature/gauss_quadrature_3d.cpp.i
 
-src/gauss_quadrature.s: src/gauss_quadrature.cpp.s
-.PHONY : src/gauss_quadrature.s
+src/gauss_quadrature/gauss_quadrature_3d.s: src/gauss_quadrature/gauss_quadrature_3d.cpp.s
+.PHONY : src/gauss_quadrature/gauss_quadrature_3d.s
 
 # target to generate assembly for a file
-src/gauss_quadrature.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature.cpp.s
-.PHONY : src/gauss_quadrature.cpp.s
+src/gauss_quadrature/gauss_quadrature_3d.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_3d.cpp.s
+.PHONY : src/gauss_quadrature/gauss_quadrature_3d.cpp.s
 
-src/geometry_mapping.obj: src/geometry_mapping.cpp.obj
-.PHONY : src/geometry_mapping.obj
+src/gauss_quadrature/gauss_quadrature_factory.obj: src/gauss_quadrature/gauss_quadrature_factory.cpp.obj
+.PHONY : src/gauss_quadrature/gauss_quadrature_factory.obj
 
 # target to build an object file
-src/geometry_mapping.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping.cpp.obj
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.obj
-.PHONY : src/geometry_mapping.cpp.obj
+src/gauss_quadrature/gauss_quadrature_factory.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.obj
+.PHONY : src/gauss_quadrature/gauss_quadrature_factory.cpp.obj
 
-src/geometry_mapping.i: src/geometry_mapping.cpp.i
-.PHONY : src/geometry_mapping.i
+src/gauss_quadrature/gauss_quadrature_factory.i: src/gauss_quadrature/gauss_quadrature_factory.cpp.i
+.PHONY : src/gauss_quadrature/gauss_quadrature_factory.i
 
 # target to preprocess a source file
-src/geometry_mapping.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.i
-.PHONY : src/geometry_mapping.cpp.i
+src/gauss_quadrature/gauss_quadrature_factory.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.i
+.PHONY : src/gauss_quadrature/gauss_quadrature_factory.cpp.i
 
-src/geometry_mapping.s: src/geometry_mapping.cpp.s
-.PHONY : src/geometry_mapping.s
+src/gauss_quadrature/gauss_quadrature_factory.s: src/gauss_quadrature/gauss_quadrature_factory.cpp.s
+.PHONY : src/gauss_quadrature/gauss_quadrature_factory.s
 
 # target to generate assembly for a file
-src/geometry_mapping.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping.cpp.s
-.PHONY : src/geometry_mapping.cpp.s
+src/gauss_quadrature/gauss_quadrature_factory.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_factory.cpp.s
+.PHONY : src/gauss_quadrature/gauss_quadrature_factory.cpp.s
+
+src/geometry_mapping/geometry_mapping_1d.obj: src/geometry_mapping/geometry_mapping_1d.cpp.obj
+.PHONY : src/geometry_mapping/geometry_mapping_1d.obj
+
+# target to build an object file
+src/geometry_mapping/geometry_mapping_1d.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping/geometry_mapping_1d.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.obj
+.PHONY : src/geometry_mapping/geometry_mapping_1d.cpp.obj
+
+src/geometry_mapping/geometry_mapping_1d.i: src/geometry_mapping/geometry_mapping_1d.cpp.i
+.PHONY : src/geometry_mapping/geometry_mapping_1d.i
+
+# target to preprocess a source file
+src/geometry_mapping/geometry_mapping_1d.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping/geometry_mapping_1d.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.i
+.PHONY : src/geometry_mapping/geometry_mapping_1d.cpp.i
+
+src/geometry_mapping/geometry_mapping_1d.s: src/geometry_mapping/geometry_mapping_1d.cpp.s
+.PHONY : src/geometry_mapping/geometry_mapping_1d.s
+
+# target to generate assembly for a file
+src/geometry_mapping/geometry_mapping_1d.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping/geometry_mapping_1d.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_1d.cpp.s
+.PHONY : src/geometry_mapping/geometry_mapping_1d.cpp.s
+
+src/geometry_mapping/geometry_mapping_2d.obj: src/geometry_mapping/geometry_mapping_2d.cpp.obj
+.PHONY : src/geometry_mapping/geometry_mapping_2d.obj
+
+# target to build an object file
+src/geometry_mapping/geometry_mapping_2d.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping/geometry_mapping_2d.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.obj
+.PHONY : src/geometry_mapping/geometry_mapping_2d.cpp.obj
+
+src/geometry_mapping/geometry_mapping_2d.i: src/geometry_mapping/geometry_mapping_2d.cpp.i
+.PHONY : src/geometry_mapping/geometry_mapping_2d.i
+
+# target to preprocess a source file
+src/geometry_mapping/geometry_mapping_2d.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping/geometry_mapping_2d.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.i
+.PHONY : src/geometry_mapping/geometry_mapping_2d.cpp.i
+
+src/geometry_mapping/geometry_mapping_2d.s: src/geometry_mapping/geometry_mapping_2d.cpp.s
+.PHONY : src/geometry_mapping/geometry_mapping_2d.s
+
+# target to generate assembly for a file
+src/geometry_mapping/geometry_mapping_2d.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping/geometry_mapping_2d.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_2d.cpp.s
+.PHONY : src/geometry_mapping/geometry_mapping_2d.cpp.s
+
+src/geometry_mapping/geometry_mapping_3d.obj: src/geometry_mapping/geometry_mapping_3d.cpp.obj
+.PHONY : src/geometry_mapping/geometry_mapping_3d.obj
+
+# target to build an object file
+src/geometry_mapping/geometry_mapping_3d.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping/geometry_mapping_3d.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.obj
+.PHONY : src/geometry_mapping/geometry_mapping_3d.cpp.obj
+
+src/geometry_mapping/geometry_mapping_3d.i: src/geometry_mapping/geometry_mapping_3d.cpp.i
+.PHONY : src/geometry_mapping/geometry_mapping_3d.i
+
+# target to preprocess a source file
+src/geometry_mapping/geometry_mapping_3d.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping/geometry_mapping_3d.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.i
+.PHONY : src/geometry_mapping/geometry_mapping_3d.cpp.i
+
+src/geometry_mapping/geometry_mapping_3d.s: src/geometry_mapping/geometry_mapping_3d.cpp.s
+.PHONY : src/geometry_mapping/geometry_mapping_3d.s
+
+# target to generate assembly for a file
+src/geometry_mapping/geometry_mapping_3d.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping/geometry_mapping_3d.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_3d.cpp.s
+.PHONY : src/geometry_mapping/geometry_mapping_3d.cpp.s
+
+src/geometry_mapping/geometry_mapping_factory.obj: src/geometry_mapping/geometry_mapping_factory.cpp.obj
+.PHONY : src/geometry_mapping/geometry_mapping_factory.obj
+
+# target to build an object file
+src/geometry_mapping/geometry_mapping_factory.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping/geometry_mapping_factory.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.obj
+.PHONY : src/geometry_mapping/geometry_mapping_factory.cpp.obj
+
+src/geometry_mapping/geometry_mapping_factory.i: src/geometry_mapping/geometry_mapping_factory.cpp.i
+.PHONY : src/geometry_mapping/geometry_mapping_factory.i
+
+# target to preprocess a source file
+src/geometry_mapping/geometry_mapping_factory.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping/geometry_mapping_factory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.i
+.PHONY : src/geometry_mapping/geometry_mapping_factory.cpp.i
+
+src/geometry_mapping/geometry_mapping_factory.s: src/geometry_mapping/geometry_mapping_factory.cpp.s
+.PHONY : src/geometry_mapping/geometry_mapping_factory.s
+
+# target to generate assembly for a file
+src/geometry_mapping/geometry_mapping_factory.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/geometry_mapping/geometry_mapping_factory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/geometry_mapping/geometry_mapping_factory.cpp.s
+.PHONY : src/geometry_mapping/geometry_mapping_factory.cpp.s
 
 src/main.obj: src/main.cpp.obj
 .PHONY : src/main.obj
@@ -399,86 +556,275 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
-src/problem_setup.obj: src/problem_setup.cpp.obj
-.PHONY : src/problem_setup.obj
+src/output/error_analysis.obj: src/output/error_analysis.cpp.obj
+.PHONY : src/output/error_analysis.obj
 
 # target to build an object file
-src/problem_setup.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/problem_setup.cpp.obj
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.obj
-.PHONY : src/problem_setup.cpp.obj
+src/output/error_analysis.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/output/error_analysis.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.obj
+.PHONY : src/output/error_analysis.cpp.obj
 
-src/problem_setup.i: src/problem_setup.cpp.i
-.PHONY : src/problem_setup.i
+src/output/error_analysis.i: src/output/error_analysis.cpp.i
+.PHONY : src/output/error_analysis.i
 
 # target to preprocess a source file
-src/problem_setup.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/problem_setup.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.i
-.PHONY : src/problem_setup.cpp.i
+src/output/error_analysis.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/output/error_analysis.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.i
+.PHONY : src/output/error_analysis.cpp.i
 
-src/problem_setup.s: src/problem_setup.cpp.s
-.PHONY : src/problem_setup.s
+src/output/error_analysis.s: src/output/error_analysis.cpp.s
+.PHONY : src/output/error_analysis.s
 
 # target to generate assembly for a file
-src/problem_setup.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/problem_setup.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/problem_setup.cpp.s
-.PHONY : src/problem_setup.cpp.s
+src/output/error_analysis.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/output/error_analysis.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.s
+.PHONY : src/output/error_analysis.cpp.s
 
-src/shape_functions.obj: src/shape_functions.cpp.obj
-.PHONY : src/shape_functions.obj
+src/output/vtk_output/vtk_output_2d.obj: src/output/vtk_output/vtk_output_2d.cpp.obj
+.PHONY : src/output/vtk_output/vtk_output_2d.obj
 
 # target to build an object file
-src/shape_functions.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions.cpp.obj
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.obj
-.PHONY : src/shape_functions.cpp.obj
+src/output/vtk_output/vtk_output_2d.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/output/vtk_output/vtk_output_2d.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.obj
+.PHONY : src/output/vtk_output/vtk_output_2d.cpp.obj
 
-src/shape_functions.i: src/shape_functions.cpp.i
-.PHONY : src/shape_functions.i
+src/output/vtk_output/vtk_output_2d.i: src/output/vtk_output/vtk_output_2d.cpp.i
+.PHONY : src/output/vtk_output/vtk_output_2d.i
 
 # target to preprocess a source file
-src/shape_functions.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.i
-.PHONY : src/shape_functions.cpp.i
+src/output/vtk_output/vtk_output_2d.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/output/vtk_output/vtk_output_2d.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.i
+.PHONY : src/output/vtk_output/vtk_output_2d.cpp.i
 
-src/shape_functions.s: src/shape_functions.cpp.s
-.PHONY : src/shape_functions.s
+src/output/vtk_output/vtk_output_2d.s: src/output/vtk_output/vtk_output_2d.cpp.s
+.PHONY : src/output/vtk_output/vtk_output_2d.s
 
 # target to generate assembly for a file
-src/shape_functions.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions.cpp.s
-.PHONY : src/shape_functions.cpp.s
+src/output/vtk_output/vtk_output_2d.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/output/vtk_output/vtk_output_2d.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_2d.cpp.s
+.PHONY : src/output/vtk_output/vtk_output_2d.cpp.s
 
-src/vtk_output.obj: src/vtk_output.cpp.obj
-.PHONY : src/vtk_output.obj
+src/output/vtk_output/vtk_output_3d.obj: src/output/vtk_output/vtk_output_3d.cpp.obj
+.PHONY : src/output/vtk_output/vtk_output_3d.obj
 
 # target to build an object file
-src/vtk_output.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/vtk_output.cpp.obj
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.obj
-.PHONY : src/vtk_output.cpp.obj
+src/output/vtk_output/vtk_output_3d.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/output/vtk_output/vtk_output_3d.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.obj
+.PHONY : src/output/vtk_output/vtk_output_3d.cpp.obj
 
-src/vtk_output.i: src/vtk_output.cpp.i
-.PHONY : src/vtk_output.i
+src/output/vtk_output/vtk_output_3d.i: src/output/vtk_output/vtk_output_3d.cpp.i
+.PHONY : src/output/vtk_output/vtk_output_3d.i
 
 # target to preprocess a source file
-src/vtk_output.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/vtk_output.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.i
-.PHONY : src/vtk_output.cpp.i
+src/output/vtk_output/vtk_output_3d.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/output/vtk_output/vtk_output_3d.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.i
+.PHONY : src/output/vtk_output/vtk_output_3d.cpp.i
 
-src/vtk_output.s: src/vtk_output.cpp.s
-.PHONY : src/vtk_output.s
+src/output/vtk_output/vtk_output_3d.s: src/output/vtk_output/vtk_output_3d.cpp.s
+.PHONY : src/output/vtk_output/vtk_output_3d.s
 
 # target to generate assembly for a file
-src/vtk_output.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/vtk_output.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/vtk_output.cpp.s
-.PHONY : src/vtk_output.cpp.s
+src/output/vtk_output/vtk_output_3d.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/output/vtk_output/vtk_output_3d.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_3d.cpp.s
+.PHONY : src/output/vtk_output/vtk_output_3d.cpp.s
+
+src/output/vtk_output/vtk_output_base.obj: src/output/vtk_output/vtk_output_base.cpp.obj
+.PHONY : src/output/vtk_output/vtk_output_base.obj
+
+# target to build an object file
+src/output/vtk_output/vtk_output_base.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/output/vtk_output/vtk_output_base.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.obj
+.PHONY : src/output/vtk_output/vtk_output_base.cpp.obj
+
+src/output/vtk_output/vtk_output_base.i: src/output/vtk_output/vtk_output_base.cpp.i
+.PHONY : src/output/vtk_output/vtk_output_base.i
+
+# target to preprocess a source file
+src/output/vtk_output/vtk_output_base.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/output/vtk_output/vtk_output_base.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.i
+.PHONY : src/output/vtk_output/vtk_output_base.cpp.i
+
+src/output/vtk_output/vtk_output_base.s: src/output/vtk_output/vtk_output_base.cpp.s
+.PHONY : src/output/vtk_output/vtk_output_base.s
+
+# target to generate assembly for a file
+src/output/vtk_output/vtk_output_base.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/output/vtk_output/vtk_output_base.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/output/vtk_output/vtk_output_base.cpp.s
+.PHONY : src/output/vtk_output/vtk_output_base.cpp.s
+
+src/shape_functions/shape_functions_1d.obj: src/shape_functions/shape_functions_1d.cpp.obj
+.PHONY : src/shape_functions/shape_functions_1d.obj
+
+# target to build an object file
+src/shape_functions/shape_functions_1d.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions/shape_functions_1d.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.obj
+.PHONY : src/shape_functions/shape_functions_1d.cpp.obj
+
+src/shape_functions/shape_functions_1d.i: src/shape_functions/shape_functions_1d.cpp.i
+.PHONY : src/shape_functions/shape_functions_1d.i
+
+# target to preprocess a source file
+src/shape_functions/shape_functions_1d.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions/shape_functions_1d.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.i
+.PHONY : src/shape_functions/shape_functions_1d.cpp.i
+
+src/shape_functions/shape_functions_1d.s: src/shape_functions/shape_functions_1d.cpp.s
+.PHONY : src/shape_functions/shape_functions_1d.s
+
+# target to generate assembly for a file
+src/shape_functions/shape_functions_1d.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions/shape_functions_1d.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.s
+.PHONY : src/shape_functions/shape_functions_1d.cpp.s
+
+src/shape_functions/shape_functions_2d.obj: src/shape_functions/shape_functions_2d.cpp.obj
+.PHONY : src/shape_functions/shape_functions_2d.obj
+
+# target to build an object file
+src/shape_functions/shape_functions_2d.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions/shape_functions_2d.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.obj
+.PHONY : src/shape_functions/shape_functions_2d.cpp.obj
+
+src/shape_functions/shape_functions_2d.i: src/shape_functions/shape_functions_2d.cpp.i
+.PHONY : src/shape_functions/shape_functions_2d.i
+
+# target to preprocess a source file
+src/shape_functions/shape_functions_2d.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions/shape_functions_2d.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.i
+.PHONY : src/shape_functions/shape_functions_2d.cpp.i
+
+src/shape_functions/shape_functions_2d.s: src/shape_functions/shape_functions_2d.cpp.s
+.PHONY : src/shape_functions/shape_functions_2d.s
+
+# target to generate assembly for a file
+src/shape_functions/shape_functions_2d.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions/shape_functions_2d.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_2d.cpp.s
+.PHONY : src/shape_functions/shape_functions_2d.cpp.s
+
+src/shape_functions/shape_functions_3d.obj: src/shape_functions/shape_functions_3d.cpp.obj
+.PHONY : src/shape_functions/shape_functions_3d.obj
+
+# target to build an object file
+src/shape_functions/shape_functions_3d.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions/shape_functions_3d.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.obj
+.PHONY : src/shape_functions/shape_functions_3d.cpp.obj
+
+src/shape_functions/shape_functions_3d.i: src/shape_functions/shape_functions_3d.cpp.i
+.PHONY : src/shape_functions/shape_functions_3d.i
+
+# target to preprocess a source file
+src/shape_functions/shape_functions_3d.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions/shape_functions_3d.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.i
+.PHONY : src/shape_functions/shape_functions_3d.cpp.i
+
+src/shape_functions/shape_functions_3d.s: src/shape_functions/shape_functions_3d.cpp.s
+.PHONY : src/shape_functions/shape_functions_3d.s
+
+# target to generate assembly for a file
+src/shape_functions/shape_functions_3d.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions/shape_functions_3d.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_3d.cpp.s
+.PHONY : src/shape_functions/shape_functions_3d.cpp.s
+
+src/shape_functions/shape_functions_factory.obj: src/shape_functions/shape_functions_factory.cpp.obj
+.PHONY : src/shape_functions/shape_functions_factory.obj
+
+# target to build an object file
+src/shape_functions/shape_functions_factory.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions/shape_functions_factory.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.obj
+.PHONY : src/shape_functions/shape_functions_factory.cpp.obj
+
+src/shape_functions/shape_functions_factory.i: src/shape_functions/shape_functions_factory.cpp.i
+.PHONY : src/shape_functions/shape_functions_factory.i
+
+# target to preprocess a source file
+src/shape_functions/shape_functions_factory.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions/shape_functions_factory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.i
+.PHONY : src/shape_functions/shape_functions_factory.cpp.i
+
+src/shape_functions/shape_functions_factory.s: src/shape_functions/shape_functions_factory.cpp.s
+.PHONY : src/shape_functions/shape_functions_factory.s
+
+# target to generate assembly for a file
+src/shape_functions/shape_functions_factory.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/shape_functions/shape_functions_factory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_factory.cpp.s
+.PHONY : src/shape_functions/shape_functions_factory.cpp.s
+
+src/solvers/electrothermal_solver.obj: src/solvers/electrothermal_solver.cpp.obj
+.PHONY : src/solvers/electrothermal_solver.obj
+
+# target to build an object file
+src/solvers/electrothermal_solver.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/solvers/electrothermal_solver.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.obj
+.PHONY : src/solvers/electrothermal_solver.cpp.obj
+
+src/solvers/electrothermal_solver.i: src/solvers/electrothermal_solver.cpp.i
+.PHONY : src/solvers/electrothermal_solver.i
+
+# target to preprocess a source file
+src/solvers/electrothermal_solver.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/solvers/electrothermal_solver.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.i
+.PHONY : src/solvers/electrothermal_solver.cpp.i
+
+src/solvers/electrothermal_solver.s: src/solvers/electrothermal_solver.cpp.s
+.PHONY : src/solvers/electrothermal_solver.s
+
+# target to generate assembly for a file
+src/solvers/electrothermal_solver.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/solvers/electrothermal_solver.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/solvers/electrothermal_solver.cpp.s
+.PHONY : src/solvers/electrothermal_solver.cpp.s
+
+src/solvers/fem_solver.obj: src/solvers/fem_solver.cpp.obj
+.PHONY : src/solvers/fem_solver.obj
+
+# target to build an object file
+src/solvers/fem_solver.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/solvers/fem_solver.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.obj
+.PHONY : src/solvers/fem_solver.cpp.obj
+
+src/solvers/fem_solver.i: src/solvers/fem_solver.cpp.i
+.PHONY : src/solvers/fem_solver.i
+
+# target to preprocess a source file
+src/solvers/fem_solver.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/solvers/fem_solver.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.i
+.PHONY : src/solvers/fem_solver.cpp.i
+
+src/solvers/fem_solver.s: src/solvers/fem_solver.cpp.s
+.PHONY : src/solvers/fem_solver.s
+
+# target to generate assembly for a file
+src/solvers/fem_solver.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/solvers/fem_solver.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/solvers/fem_solver.cpp.s
+.PHONY : src/solvers/fem_solver.cpp.s
 
 # Help Target
 help:
@@ -492,41 +838,78 @@ help:
 	@echo ... install/strip
 	@echo ... list_install_components
 	@echo ... rebuild_cache
+	@echo ... test
 	@echo ... FEM_lib
 	@echo ... FEM_solution
-	@echo ... src/comsol_mesh_importer.obj
-	@echo ... src/comsol_mesh_importer.i
-	@echo ... src/comsol_mesh_importer.s
-	@echo ... src/config.obj
-	@echo ... src/config.i
-	@echo ... src/config.s
-	@echo ... src/electrothermal_solver.obj
-	@echo ... src/electrothermal_solver.i
-	@echo ... src/electrothermal_solver.s
-	@echo ... src/error_analysis.obj
-	@echo ... src/error_analysis.i
-	@echo ... src/error_analysis.s
-	@echo ... src/fem_solver.obj
-	@echo ... src/fem_solver.i
-	@echo ... src/fem_solver.s
-	@echo ... src/gauss_quadrature.obj
-	@echo ... src/gauss_quadrature.i
-	@echo ... src/gauss_quadrature.s
-	@echo ... src/geometry_mapping.obj
-	@echo ... src/geometry_mapping.i
-	@echo ... src/geometry_mapping.s
+	@echo ... test_3d_integration
+	@echo ... test_3d_mesh_import
+	@echo ... test_simple_3d_poisson
+	@echo ... src/core/comsol_mesh_importer.obj
+	@echo ... src/core/comsol_mesh_importer.i
+	@echo ... src/core/comsol_mesh_importer.s
+	@echo ... src/core/config.obj
+	@echo ... src/core/config.i
+	@echo ... src/core/config.s
+	@echo ... src/core/problem_setup.obj
+	@echo ... src/core/problem_setup.i
+	@echo ... src/core/problem_setup.s
+	@echo ... src/gauss_quadrature/gauss_quadrature_1d.obj
+	@echo ... src/gauss_quadrature/gauss_quadrature_1d.i
+	@echo ... src/gauss_quadrature/gauss_quadrature_1d.s
+	@echo ... src/gauss_quadrature/gauss_quadrature_2d.obj
+	@echo ... src/gauss_quadrature/gauss_quadrature_2d.i
+	@echo ... src/gauss_quadrature/gauss_quadrature_2d.s
+	@echo ... src/gauss_quadrature/gauss_quadrature_3d.obj
+	@echo ... src/gauss_quadrature/gauss_quadrature_3d.i
+	@echo ... src/gauss_quadrature/gauss_quadrature_3d.s
+	@echo ... src/gauss_quadrature/gauss_quadrature_factory.obj
+	@echo ... src/gauss_quadrature/gauss_quadrature_factory.i
+	@echo ... src/gauss_quadrature/gauss_quadrature_factory.s
+	@echo ... src/geometry_mapping/geometry_mapping_1d.obj
+	@echo ... src/geometry_mapping/geometry_mapping_1d.i
+	@echo ... src/geometry_mapping/geometry_mapping_1d.s
+	@echo ... src/geometry_mapping/geometry_mapping_2d.obj
+	@echo ... src/geometry_mapping/geometry_mapping_2d.i
+	@echo ... src/geometry_mapping/geometry_mapping_2d.s
+	@echo ... src/geometry_mapping/geometry_mapping_3d.obj
+	@echo ... src/geometry_mapping/geometry_mapping_3d.i
+	@echo ... src/geometry_mapping/geometry_mapping_3d.s
+	@echo ... src/geometry_mapping/geometry_mapping_factory.obj
+	@echo ... src/geometry_mapping/geometry_mapping_factory.i
+	@echo ... src/geometry_mapping/geometry_mapping_factory.s
 	@echo ... src/main.obj
 	@echo ... src/main.i
 	@echo ... src/main.s
-	@echo ... src/problem_setup.obj
-	@echo ... src/problem_setup.i
-	@echo ... src/problem_setup.s
-	@echo ... src/shape_functions.obj
-	@echo ... src/shape_functions.i
-	@echo ... src/shape_functions.s
-	@echo ... src/vtk_output.obj
-	@echo ... src/vtk_output.i
-	@echo ... src/vtk_output.s
+	@echo ... src/output/error_analysis.obj
+	@echo ... src/output/error_analysis.i
+	@echo ... src/output/error_analysis.s
+	@echo ... src/output/vtk_output/vtk_output_2d.obj
+	@echo ... src/output/vtk_output/vtk_output_2d.i
+	@echo ... src/output/vtk_output/vtk_output_2d.s
+	@echo ... src/output/vtk_output/vtk_output_3d.obj
+	@echo ... src/output/vtk_output/vtk_output_3d.i
+	@echo ... src/output/vtk_output/vtk_output_3d.s
+	@echo ... src/output/vtk_output/vtk_output_base.obj
+	@echo ... src/output/vtk_output/vtk_output_base.i
+	@echo ... src/output/vtk_output/vtk_output_base.s
+	@echo ... src/shape_functions/shape_functions_1d.obj
+	@echo ... src/shape_functions/shape_functions_1d.i
+	@echo ... src/shape_functions/shape_functions_1d.s
+	@echo ... src/shape_functions/shape_functions_2d.obj
+	@echo ... src/shape_functions/shape_functions_2d.i
+	@echo ... src/shape_functions/shape_functions_2d.s
+	@echo ... src/shape_functions/shape_functions_3d.obj
+	@echo ... src/shape_functions/shape_functions_3d.i
+	@echo ... src/shape_functions/shape_functions_3d.s
+	@echo ... src/shape_functions/shape_functions_factory.obj
+	@echo ... src/shape_functions/shape_functions_factory.i
+	@echo ... src/shape_functions/shape_functions_factory.s
+	@echo ... src/solvers/electrothermal_solver.obj
+	@echo ... src/solvers/electrothermal_solver.i
+	@echo ... src/solvers/electrothermal_solver.s
+	@echo ... src/solvers/fem_solver.obj
+	@echo ... src/solvers/fem_solver.i
+	@echo ... src/solvers/fem_solver.s
 .PHONY : help
 
 
