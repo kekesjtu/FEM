@@ -107,11 +107,6 @@ class RobinTestProblem : public ProblemSetup
     }
 };
 
-inline std::shared_ptr<ProblemSetup> createRobinTest()
-{
-    return std::make_shared<RobinTestProblem>();
-}
-
 /**
  * @brief 电热耦合 - 电场设置
  *
@@ -142,50 +137,40 @@ class ElectricFieldProblem : public ProblemSetup
     {
         const auto& boundaries = config->getBoundary();
         const auto& coords = config->getNodeCoordinates();
+        const auto& boundary_entities = config->getBoundaryGeometricEntities();
         int dim = config->getDimension();
 
         boundary_conditions_.resize(boundaries.size());
 
-        const double epsilon = 0.5e-1;  // 容差：约0.1%的半径
+        // 使用几何实体来施加边界条件
+        // 根据网格分析:
+        // Entity 0, 1: X范围[-1.000, 0.000], X中心范围[-0.997, -0.052] → 左半圆 → V = 10.0V
+        // Entity 2, 3: X范围[0.000, 1.000], X中心范围[0.052, 0.997] → 右半圆 → V = 0.0V
+        //
+        // 注意: 所有实体都包含x=0轴上的节点(因为边界单元连接两个节点)
+        //       但边界单元的中心坐标明确区分了左右半圆
+        //       Entity 0,1 的边界单元中心都在 x<0 区域
+        //       Entity 2,3 的边界单元中心都在 x>0 区域
 
         for (size_t i = 0; i < boundaries.size(); ++i)
         {
             const auto& boundary = boundaries[i];
+            int entity_id = boundary_entities[i];
 
-            // 检查这条边的所有节点的x坐标
-            double x_min = 1e10, x_max = -1e10;
-            for (int node_idx : boundary.global_node_indices_in_element)
+            // 使用几何实体直接判断 - 网格已经正确划分了左右半圆
+            if (entity_id == 0 || entity_id == 1)
             {
-                double x = coords[node_idx * dim + 0];
-                x_min = std::min(x_min, x);
-                x_max = std::max(x_max, x);
+                // Entity 0 和 Entity 1 都在左半圆(x<0) → V = 10.0V
+                boundary_conditions_[i] = BoundaryCondition::Dirichlet(10.0);
             }
-
-            // 判断边界边的位置
-            if (x_max < -epsilon)  // 完全在左侧
+            else  // entity_id == 2 或 3
             {
-                boundary_conditions_[i] = BoundaryCondition::Dirichlet(10.0);  // 10V
-            }
-            else if (x_min > epsilon)  // 完全在右侧
-            {
-                boundary_conditions_[i] = BoundaryCondition::Dirichlet(0.0);  // 接地
-            }
-            else  // 跨越交界或在交界处
-            {
-                // 对于跨越交界的边，使用线性插值的Dirichlet
-                double x_center = (x_min + x_max) / 2.0;
-                double V_interp = 5.0 * (1.0 - x_center / epsilon);
-                V_interp = std::max(0.0, std::min(10.0, V_interp));  // 限制在[0,10]
-                boundary_conditions_[i] = BoundaryCondition::Dirichlet(V_interp);
+                // Entity 2 和 Entity 3 都在右半圆(x>0) → V = 0.0V (接地)
+                boundary_conditions_[i] = BoundaryCondition::Dirichlet(0.0);
             }
         }
     }
 };
-
-inline std::shared_ptr<ProblemSetup> createElectricField()
-{
-    return std::make_shared<ElectricFieldProblem>();
-}
 
 /**
  * @brief 电热耦合 - 热场设置
@@ -222,11 +207,6 @@ class ThermalFieldProblem : public ProblemSetup
         }
     }
 };
-
-inline std::shared_ptr<ProblemSetup> createThermalField()
-{
-    return std::make_shared<ThermalFieldProblem>();
-}
 
 /**
  * @brief 3D泊松方程 - 正方体均匀电荷问题
@@ -268,10 +248,67 @@ class CubeUniformChargeProblem : public ProblemSetup
     }
 };
 
-inline std::shared_ptr<ProblemSetup> createCubeUniformCharge()
+/**
+ * @brief 3D泊松方程 - 单位球域均匀源项问题（带解析解）
+ *
+ * 物理背景：
+ * - 控制方程：-∇²u = 10 在单位球域 Ω = {(x,y,z) : x²+y²+z² < 1}
+ * - 边界条件：u = 0 在球面边界 ∂Ω
+ * - 几何：单位球域（半径 R = 1）
+ * 该问题用于验证3D有限元求解器在球域上的精度
+ */
+class UnitSphereUniformSourceProblem : public ProblemSetup
 {
-    return std::make_shared<CubeUniformChargeProblem>();
-}
+  public:
+    UnitSphereUniformSourceProblem() : ProblemSetup("Unit Sphere Uniform Source")
+    {
+        // 设置物理问题：-∇²u = 10
+        setCoefficient([](const std::vector<double>&) -> double { return 1.0; });
+
+        // 均匀源项 f = 10.0
+        setSource([](const std::vector<double>&) -> double { return 10.0; });
+
+        // 设置解析解：u(r) = (5/3)(1 - r²)
+        setExactSolutionU(
+            [](const std::vector<double>& coords) -> double
+            {
+                double x = coords[0];
+                double y = coords[1];
+                double z = coords[2];
+                double r2 = x * x + y * y + z * z;  // r² = x² + y² + z²
+                return (5.0 / 3.0) * (1.0 - r2);    // u = (5/3)(1 - r²)
+            });
+
+        // 设置解析解的梯度：∇u = -(10/3)(x, y, z)
+        setExactSolutionGradients(
+            [](const std::vector<double>& coords, std::vector<double>& gradients) -> double
+            {
+                double x = coords[0];
+                double y = coords[1];
+                double z = coords[2];
+                double r2 = x * x + y * y + z * z;
+
+                // ∇u = du/dr · ∇r = -2(5/3)r · (x,y,z)/r = -(10/3)(x,y,z)
+                gradients[0] = -(10.0 / 3.0) * x;  // ∂u/∂x
+                gradients[1] = -(10.0 / 3.0) * y;  // ∂u/∂y
+                gradients[2] = -(10.0 / 3.0) * z;  // ∂u/∂z
+
+                return 0.0;
+            });
+    }
+
+    void setupBoundaryConditions(std::shared_ptr<Config> config) override
+    {
+        const auto& boundaries = config->getBoundary();
+        boundary_conditions_.resize(boundaries.size());
+
+        // 所有边界面（球面）都设置为零 Dirichlet 边界条件：u = 0
+        for (size_t i = 0; i < boundaries.size(); ++i)
+        {
+            boundary_conditions_[i] = BoundaryCondition::Dirichlet(0.0);
+        }
+    }
+};
 
 /**
  * @brief 自定义问题模板
@@ -283,7 +320,7 @@ class CustomProblem : public ProblemSetup
   public:
     CustomProblem() : ProblemSetup("Custom Problem")
     {
-        // 🎯 2. 定义扩散系数和源项
+        //  定义扩散系数和源项
         setCoefficient(
             [](const std::vector<double>&) -> double
             {
@@ -298,7 +335,7 @@ class CustomProblem : public ProblemSetup
                 return 0.0;
             });
 
-        // 🎯 3. 如果有解析解，用户可以在这里定义（可选，用于误差分析）
+        //  如果有解析解，用户可以在这里定义（可选，用于误差分析）
         setExactSolutionU(
             [](const std::vector<double>&) -> double
             {
@@ -309,7 +346,7 @@ class CustomProblem : public ProblemSetup
 
     void setupBoundaryConditions(std::shared_ptr<Config> config) override
     {
-        // 🎯 1. 定义边界条件
+        // 1. 定义边界条件
         const auto& boundaries = config->getBoundary();
         boundary_conditions_.resize(boundaries.size());
 
@@ -322,11 +359,6 @@ class CustomProblem : public ProblemSetup
     }
 };
 
-inline std::shared_ptr<ProblemSetup> createCustomProblem()
-{
-    return std::make_shared<CustomProblem>();
-}
-
 /**
  * @brief 创建电热耦合问题配置
  *
@@ -337,7 +369,7 @@ inline std::shared_ptr<ProblemSetup> createCustomProblem()
  * - 电场方程：-∇·(σ(T)∇V) = 0，其中 σ(T) = σ0[1 + α(T-T0)]
  * - 热场方程：-∇·(k∇T) = Q(V,T)，其中 Q = σ(T)|∇V|²
  * - 边界条件：复用 createElectricField() 和 createThermalField()
- * - 热导率 k：使用 createThermalField() 中的默认值（1.0）
+ * - 热导率 k：使用 ThermalFieldProblem 中的默认值（1.0）
  */
 inline ElectrothermalProblem createElectrothermalProblem(
     const ElectrothermalParams& params = ElectrothermalParams())
@@ -345,11 +377,11 @@ inline ElectrothermalProblem createElectrothermalProblem(
     ElectrothermalProblem et_problem;
     et_problem.params = params;
 
-    // 🎯 直接复用已定义的电场和热场问题
-    et_problem.electric_problem = createElectricField();
-    et_problem.thermal_problem = createThermalField();
+    // 直接创建电场和热场问题
+    et_problem.electric_problem = std::make_shared<ElectricFieldProblem>();
+    et_problem.thermal_problem = std::make_shared<ThermalFieldProblem>();
 
-    // 热导率使用 createThermalField() 中的默认值
+    // 热导率使用 ThermalFieldProblem 中的默认值
     // 电场的电导率和热场的源项将在 ElectrothermalSolver 中动态处理
 
     return et_problem;
@@ -366,10 +398,10 @@ inline ElectrothermalProblem createElectrothermalProblem(
  *
  * 使用示例:
  * ```cpp
- * auto problem = ProblemFactory::create("RobinTest");
- * auto problem = ProblemFactory::create("ElectricField");
- * auto problem = ProblemFactory::create("ThermalField");
- * auto problem = ProblemFactory::create("Custom");
+ * auto problem = ProblemFactory::createProblem("RobinTest");
+ * auto problem = ProblemFactory::createProblem("ElectricField");
+ * auto problem = ProblemFactory::createProblem("ThermalField");
+ * auto problem = ProblemFactory::createProblem("Custom");
  * ```
  */
 class ProblemFactory
@@ -385,38 +417,44 @@ class ProblemFactory
      * - "RobinTest" 或 "Robin" - Robin边界条件验证算例
      * - "ElectricField" 或 "Electric" - 电场问题
      * - "ThermalField" 或 "Thermal" - 热场问题
+     * - "CubeUniformCharge" 或 "Cube" - 正方体均匀电荷问题
+     * - "UnitSphereUniformSource" 或 "Sphere" - 单位球域均匀源项问题（带解析解）
      * - "Custom" - 自定义问题模板
      */
-    static std::shared_ptr<ProblemSetup> create(const std::string& problem_name)
+    static std::shared_ptr<ProblemSetup> createProblem(const std::string& problem_name)
     {
         // 转换为小写以实现不区分大小写
         std::string name_lower = toLower(problem_name);
 
         if (name_lower == "robintest" || name_lower == "robin")
         {
-            return createRobinTest();
+            return std::make_shared<RobinTestProblem>();
         }
         else if (name_lower == "electricfield" || name_lower == "electric")
         {
-            return createElectricField();
+            return std::make_shared<ElectricFieldProblem>();
         }
         else if (name_lower == "thermalfield" || name_lower == "thermal")
         {
-            return createThermalField();
+            return std::make_shared<ThermalFieldProblem>();
         }
         else if (name_lower == "custom")
         {
-            return createCustomProblem();
+            return std::make_shared<CustomProblem>();
         }
         else if (name_lower == "cubeuniformcharge" || name_lower == "cube")
         {
-            return createCubeUniformCharge();
+            return std::make_shared<CubeUniformChargeProblem>();
+        }
+        else if (name_lower == "unitsphereuniformsource" || name_lower == "sphere")
+        {
+            return std::make_shared<UnitSphereUniformSourceProblem>();
         }
         else
         {
             throw std::invalid_argument("未知的问题类型: " + problem_name +
                                         "\n支持的类型: RobinTest, ElectricField, ThermalField, "
-                                        "CubeUniformCharge, Custom");
+                                        "CubeUniformCharge, UnitSphereUniformSource, Custom");
         }
     }
 
@@ -437,7 +475,8 @@ class ProblemFactory
      */
     static std::vector<std::string> getAvailableProblems()
     {
-        return {"RobinTest", "ElectricField", "ThermalField", "CubeUniformCharge", "Custom"};
+        return {"RobinTest",         "ElectricField",           "ThermalField",
+                "CubeUniformCharge", "UnitSphereUniformSource", "Custom"};
     }
 
   private:

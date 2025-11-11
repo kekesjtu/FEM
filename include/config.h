@@ -37,7 +37,8 @@ class Config
 
   private:
     // 网格相关
-    std::string mesh_filename_ = "cube_tet_mesh.mphtxt";  // 网格文件名，用户可直接在此修改
+    std::string mesh_filename_ =
+        "circle_mesh.mphtxt";  // 网格文件名（只需文件名，自动从mesh_data文件夹加载），用户可直接在此修改
     int dimension_;
     int nodes_num_;
     int elements_num_;
@@ -47,6 +48,11 @@ class Config
     std::vector<std::vector<int>>
         element_connectivity_;        // 单元连接矩阵 [element_id][local_node_id] = global_node_id
     std::vector<Boundary> boundarys;  // 边界单元信息 (1D:点, 2D:边, 3D:面)
+
+    // 几何实体编码 (新增)
+    std::vector<int>
+        boundary_geometric_entities_;  ///< 边界单元几何实体编码 [boundary_id] = entity_id
+    std::vector<int> element_geometric_entities_;  ///< 体单元几何实体编码 [element_id] = entity_id
 
     // 矩阵组装相关
     int gauss_assemble_points_num_;
@@ -100,6 +106,19 @@ class Config
     const std::vector<double>& getNodeCoordinates() const;
     const std::vector<std::vector<int>>& getElementConnectivity() const;
     const std::vector<Boundary>& getBoundary() const;
+
+    // 几何实体编码访问器 (新增)
+    /**
+     * @brief 获取边界单元几何实体编码
+     * @return 边界几何实体向量 [boundary_id] = entity_id
+     */
+    const std::vector<int>& getBoundaryGeometricEntities() const;
+
+    /**
+     * @brief 获取体单元几何实体编码
+     * @return 体单元几何实体向量 [element_id] = entity_id
+     */
+    const std::vector<int>& getElementGeometricEntities() const;
 
     // 边界单元相关访问器
     int getBoundaryElementType() const;      // 返回边界单元类型（LINE）

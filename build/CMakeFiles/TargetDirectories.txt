@@ -7,9 +7,6 @@ E:/code/C++/FEM/build/CMakeFiles/list_install_components.dir
 E:/code/C++/FEM/build/CMakeFiles/install.dir
 E:/code/C++/FEM/build/CMakeFiles/install/local.dir
 E:/code/C++/FEM/build/CMakeFiles/install/strip.dir
-E:/code/C++/FEM/build/tests/CMakeFiles/test_3d_integration.dir
-E:/code/C++/FEM/build/tests/CMakeFiles/test_3d_mesh_import.dir
-E:/code/C++/FEM/build/tests/CMakeFiles/test_simple_3d_poisson.dir
 E:/code/C++/FEM/build/tests/CMakeFiles/test.dir
 E:/code/C++/FEM/build/tests/CMakeFiles/edit_cache.dir
 E:/code/C++/FEM/build/tests/CMakeFiles/rebuild_cache.dir

@@ -19,6 +19,12 @@
 },
 {
   "directory": "E:/code/C++/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\core\\material.cpp.obj -c E:\\code\\C++\\FEM\\src\\core\\material.cpp",
+  "file": "E:/code/C++/FEM/src/core/material.cpp",
+  "output": "CMakeFiles/FEM_solution.dir/src/core/material.cpp.obj"
+},
+{
+  "directory": "E:/code/C++/FEM/build",
   "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_solution.dir/includes_CXX.rsp -g -std=c++17 -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_solution.dir\\src\\shape_functions\\shape_functions_1d.cpp.obj -c E:\\code\\C++\\FEM\\src\\shape_functions\\shape_functions_1d.cpp",
   "file": "E:/code/C++/FEM/src/shape_functions/shape_functions_1d.cpp",
   "output": "CMakeFiles/FEM_solution.dir/src/shape_functions/shape_functions_1d.cpp.obj"
@@ -151,6 +157,12 @@
 },
 {
   "directory": "E:/code/C++/FEM/build",
+  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\core\\material.cpp.obj -c E:\\code\\C++\\FEM\\src\\core\\material.cpp",
+  "file": "E:/code/C++/FEM/src/core/material.cpp",
+  "output": "CMakeFiles/FEM_lib.dir/src/core/material.cpp.obj"
+},
+{
+  "directory": "E:/code/C++/FEM/build",
   "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\shape_functions\\shape_functions_1d.cpp.obj -c E:\\code\\C++\\FEM\\src\\shape_functions\\shape_functions_1d.cpp",
   "file": "E:/code/C++/FEM/src/shape_functions/shape_functions_1d.cpp",
   "output": "CMakeFiles/FEM_lib.dir/src/shape_functions/shape_functions_1d.cpp.obj"
@@ -256,23 +268,5 @@
   "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/FEM_lib.dir/includes_CXX.rsp -g -std=c++17 -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\FEM_lib.dir\\src\\output\\error_analysis.cpp.obj -c E:\\code\\C++\\FEM\\src\\output\\error_analysis.cpp",
   "file": "E:/code/C++/FEM/src/output/error_analysis.cpp",
   "output": "CMakeFiles/FEM_lib.dir/src/output/error_analysis.cpp.obj"
-},
-{
-  "directory": "E:/code/C++/FEM/build/tests",
-  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_3d_integration.dir/includes_CXX.rsp -g -std=c++17 -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\test_3d_integration.dir\\test_3d_integration.cpp.obj -c E:\\code\\C++\\FEM\\tests\\test_3d_integration.cpp",
-  "file": "E:/code/C++/FEM/tests/test_3d_integration.cpp",
-  "output": "tests/CMakeFiles/test_3d_integration.dir/test_3d_integration.cpp.obj"
-},
-{
-  "directory": "E:/code/C++/FEM/build/tests",
-  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_3d_mesh_import.dir/includes_CXX.rsp -g -std=c++17 -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\test_3d_mesh_import.dir\\test_3d_mesh_import.cpp.obj -c E:\\code\\C++\\FEM\\tests\\test_3d_mesh_import.cpp",
-  "file": "E:/code/C++/FEM/tests/test_3d_mesh_import.cpp",
-  "output": "tests/CMakeFiles/test_3d_mesh_import.dir/test_3d_mesh_import.cpp.obj"
-},
-{
-  "directory": "E:/code/C++/FEM/build/tests",
-  "command": "E:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_simple_3d_poisson.dir/includes_CXX.rsp -g -std=c++17 -Wall -Wextra -Wpedantic -fdiagnostics-color=auto -g -o CMakeFiles\\test_simple_3d_poisson.dir\\test_simple_3d_poisson.cpp.obj -c E:\\code\\C++\\FEM\\tests\\test_simple_3d_poisson.cpp",
-  "file": "E:/code/C++/FEM/tests/test_simple_3d_poisson.cpp",
-  "output": "tests/CMakeFiles/test_simple_3d_poisson.dir/test_simple_3d_poisson.cpp.obj"
 }
 ]

@@ -37,6 +37,9 @@ void Config::setGaussAssemblePoints()
             {
                 gauss_assemble_points_num_ = 7;  // 高阶单元用7点高斯积分
             }
+
+            // 误差分析也使用相同的积分点数（2D三角形支持1,3,4点）
+            gauss_error_points_num_ = gauss_assemble_points_num_;
         }
     }
     else if (dimension_ == 3)
@@ -60,15 +63,49 @@ void Config::setGaussAssemblePoints()
             {
                 gauss_assemble_points_num_ = 11;  // 高阶单元用11点高斯积分
             }
+
+            // 误差分析使用支持的积分点数（3D四面体目前只支持1,4点）
+            // 对于线性单元，使用4点已经足够精确
+            if (order_ == 1)
+            {
+                gauss_error_points_num_ = 4;  // 线性单元用4点
+            }
+            else
+            {
+                gauss_error_points_num_ = 4;  // 高阶单元也暂时使用4点
+            }
+        }
+    }
+    else if (dimension_ == 1)
+    {
+        // 一维线单元：
+        // 2点：精确积分3阶多项式
+        // 3点：精确积分5阶多项式
+        if (order_ == 1)
+        {
+            gauss_assemble_points_num_ = 2;  // 线性单元用2点高斯积分
+            gauss_error_points_num_ = 2;
+        }
+        else if (order_ == 2)
+        {
+            gauss_assemble_points_num_ = 3;  // 二次单元用3点高斯积分
+            gauss_error_points_num_ = 3;
+        }
+        else
+        {
+            gauss_assemble_points_num_ = order_ + 1;
+            gauss_error_points_num_ = order_ + 1;
         }
     }
     else
     {
-        // 一维情况或其他未实现的维度
+        // 其他未实现的维度，使用默认值
         gauss_assemble_points_num_ = order_ + 1;
+        gauss_error_points_num_ = gauss_assemble_points_num_;
     }
 
-    std::cout << "设置高斯积分点数: " << gauss_assemble_points_num_ << " (维度=" << dimension_
+    std::cout << "设置高斯积分点数: 组装=" << gauss_assemble_points_num_
+              << ", 误差分析=" << gauss_error_points_num_ << " (维度=" << dimension_
               << ", 单元类型=" << element_type_ << ", 阶数=" << order_ << ")" << std::endl;
 }
 
@@ -145,6 +182,17 @@ const std::vector<std::vector<int>>& Config::getElementConnectivity() const
 const std::vector<Config::Boundary>& Config::getBoundary() const
 {
     return boundarys;
+}
+
+// 几何实体编码访问器实现 (新增)
+const std::vector<int>& Config::getBoundaryGeometricEntities() const
+{
+    return boundary_geometric_entities_;
+}
+
+const std::vector<int>& Config::getElementGeometricEntities() const
+{
+    return element_geometric_entities_;
 }
 
 // 边界单元相关访问器实现
@@ -263,9 +311,12 @@ int Config::getSolverMaxIterations() const
 
 void Config::loadMeshFromFile(const std::string& filename)
 {
+    // 构建完整的网格文件路径（所有网格文件统一放在mesh_data文件夹下）
+    std::string full_path = "mesh_data/" + filename;
+
     // 使用COMSOL网格导入器导入网格
     ComsolMeshImporter importer;
-    if (importer.importMesh(filename))
+    if (importer.importMesh(full_path))
     {
         // 获取网格基本信息
         dimension_ = importer.getDimension();
@@ -276,6 +327,10 @@ void Config::loadMeshFromFile(const std::string& filename)
         // 获取网格数据(已经是Config需要的格式)
         node_coordinates_ = importer.getNodeCoordinates();
         element_connectivity_ = importer.getElementConnectivity();
+
+        // 获取几何实体编码 (新增)
+        boundary_geometric_entities_ = importer.getBoundaryGeometricEntities();
+        element_geometric_entities_ = importer.getElementGeometricEntities();
 
         // 根据节点数判断单元类型
         if (dimension_ == 2 && nodes_num_per_element_ == 3)
@@ -292,7 +347,7 @@ void Config::loadMeshFromFile(const std::string& filename)
     }
     else
     {
-        std::cerr << "在 Config 中加载网格失败: " << filename << std::endl;
+        std::cerr << "在 Config 中加载网格失败: " << full_path << std::endl;
         throw std::runtime_error("无法加载网格文件");
     }
 }

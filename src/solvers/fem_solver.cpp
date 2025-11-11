@@ -49,7 +49,7 @@ void FEMSolver::preprocess()
 
     int dimension = config_->getDimension();
 
-    // 在预处理阶段设置边界条件（直接操作 config 的 boundarys 数组）
+    // 在预处理阶段设置边界条件
     if (problem_)
     {
         problem_->setupBoundaryConditions(config_);
@@ -69,13 +69,13 @@ void FEMSolver::preprocess()
 
 void FEMSolver::assemble()
 {
-    // 使用三元组列表收集所有元素
-    typedef Eigen::Triplet<double> T_entry;
-    std::vector<T_entry> tripletList;
-    tripletList.reserve(n_ * n_ * M_);  // 每个单元贡献n²个矩阵元素
+    // 清空并预留空间
+    triplet_list_.clear();
+    triplet_list_.reserve(n_ * n_ * M_);  // 每个单元贡献n²个矩阵元素
 
     const auto& connectivity = config_->getElementConnectivity();
 
+    // 只收集三元组，不立即构建矩阵
     for (int e = 0; e < M_; ++e)
     {
         for (int alpha = 0; alpha < n_; ++alpha)
@@ -85,7 +85,7 @@ void FEMSolver::assemble()
                 double K_e_val = calculateStiffnessEntry(e, alpha, beta);
                 int global_row = connectivity[e][beta];
                 int global_col = connectivity[e][alpha];
-                tripletList.push_back(T_entry(global_row, global_col, K_e_val));
+                triplet_list_.push_back(T_entry(global_row, global_col, K_e_val));
             }
         }
         for (int beta = 0; beta < n_; ++beta)
@@ -96,9 +96,8 @@ void FEMSolver::assemble()
         }
     }
 
-    // 从三元组列表构建稀疏矩阵
-    K_global_.setFromTriplets(tripletList.begin(), tripletList.end());
-    K_global_.makeCompressed();
+    std::cout << "组装完成：收集了 " << triplet_list_.size() << " 个矩阵元素" << std::endl;
+    // 注意：矩阵构建延迟到 applyBoundaryConditions() 中进行
 }
 
 void FEMSolver::setStiffnessMatrix(const Eigen::SparseMatrix<double>& K_external)
@@ -110,6 +109,11 @@ void FEMSolver::setStiffnessMatrix(const Eigen::SparseMatrix<double>& K_external
 void FEMSolver::setLoadVector(const Eigen::VectorXd& b_external)
 {
     b_ = b_external;
+}
+
+void FEMSolver::setTripletList(const std::vector<T_entry>& triplets)
+{
+    triplet_list_ = triplets;
 }
 
 void FEMSolver::applyBoundaryConditions()
@@ -139,7 +143,7 @@ void FEMSolver::applyBoundaryConditions()
     std::vector<bool> is_dirichlet_node(N_, false);
     std::vector<double> dirichlet_values(N_, 0.0);
 
-    // 首先处理 Neumann 和 Robin 边界条件（修改刚度矩阵和载荷向量）
+    // 第一遍：处理 Neumann 和 Robin 边界条件，直接添加到三元组列表
     for (size_t boundary_idx = 0; boundary_idx < boundarys.size(); ++boundary_idx)
     {
         const auto& boundary = boundarys[boundary_idx];
@@ -148,7 +152,7 @@ void FEMSolver::applyBoundaryConditions()
         // 判断边界条件类型
         if (bc.K_bc == 0)
         {
-            // Dirichlet 边界条件：稍后处理
+            // Dirichlet 边界条件：只标记，稍后处理
             dirichlet_count++;
             for (int node_idx : boundary.global_node_indices_in_element)
             {
@@ -174,11 +178,10 @@ void FEMSolver::applyBoundaryConditions()
         }
         else
         {
-            // Robin 边界条件：修改刚度矩阵和载荷向量
+            // Robin 边界条件：直接添加到三元组列表
             robin_count++;
             const auto& edge_nodes = boundary.global_node_indices_in_element;
 
-            // 修改刚度矩阵
             for (size_t local_i = 0; local_i < edge_nodes.size(); ++local_i)
             {
                 int global_i = edge_nodes[local_i];
@@ -188,10 +191,9 @@ void FEMSolver::applyBoundaryConditions()
                     int global_j = edge_nodes[local_j];
                     double stiffness_contribution =
                         calculateBoundaryStiffness(boundary, local_i, local_j, boundary_idx);
-                    K_global_.coeffRef(global_i, global_j) += stiffness_contribution;
+                    triplet_list_.push_back(T_entry(global_i, global_j, stiffness_contribution));
                 }
 
-                // 修改载荷向量
                 double load_contribution = calculateBoundaryLoad(boundary, local_i, boundary_idx);
                 b_(global_i) += load_contribution;
             }
@@ -203,57 +205,91 @@ void FEMSolver::applyBoundaryConditions()
     std::cout << "  Neumann 边界单元数: " << neumann_count << std::endl;
     std::cout << "  Robin 边界单元数: " << robin_count << std::endl;
 
-    // 确保矩阵已压缩
-    K_global_.makeCompressed();
-
-    // 最后处理 Dirichlet 边界条件（强加条件，修改矩阵结构）
+    // 统计 Dirichlet 节点
     std::vector<int> dirichlet_nodes;
+    double max_dirichlet_val = -1e10;
+    double min_dirichlet_val = 1e10;
     for (int i = 0; i < N_; ++i)
     {
         if (is_dirichlet_node[i])
         {
             dirichlet_nodes.push_back(i);
+            max_dirichlet_val = std::max(max_dirichlet_val, dirichlet_values[i]);
+            min_dirichlet_val = std::min(min_dirichlet_val, dirichlet_values[i]);
         }
     }
-
     std::cout << "  Dirichlet 边界节点数: " << dirichlet_nodes.size() << std::endl;
+    std::cout << "  Dirichlet 值范围: [" << min_dirichlet_val << ", " << max_dirichlet_val << "]"
+              << std::endl;
 
-    // 批量处理 Dirichlet 边界条件
-    for (int i : dirichlet_nodes)
+    // 第二遍：处理 Dirichlet 边界条件，从三元组中过滤
+    if (!dirichlet_nodes.empty())
     {
-        double boundary_value = dirichlet_values[i];
+        std::cout << "  应用 Dirichlet 边界条件，过滤三元组..." << std::endl;
 
-        // 遍历第i列的非0元素
-        for (Eigen::SparseMatrix<double>::InnerIterator it(K_global_, i); it; ++it)
+        // 第一步:先修改右端项(需要用到原始矩阵元素)
+        for (const auto& triplet : triplet_list_)
         {
-            int j = it.row();  // 取当前遍历到的行号
-            if (j != i)
-            {
-                // ⚠️ 重要：必须先保存it.value()的值，再修改矩阵元素
-                // 原因：K_global_.coeffRef(j,i)=0会修改迭代器当前指向的元素
-                //      如果先修改再读取it.value()，可能读到已被修改的值（0）
-                //      这会导致边界条件的贡献无法正确传递到内部节点
-                double contribution = it.value() * boundary_value;
+            int row = triplet.row();
+            int col = triplet.col();
+            double value = triplet.value();
 
-                K_global_.coeffRef(j, i) = 0.0;
-                b_(j) -= contribution;
+            // 如果列是Dirichlet节点但行不是,修改右端项
+            if (is_dirichlet_node[col] && !is_dirichlet_node[row])
+            {
+                b_(row) -= value * dirichlet_values[col];
             }
         }
 
-        // 遍历第i行的非0元素，outerSize()返回列数
-        for (int k = 0; k < K_global_.outerSize(); ++k)
-        {
-            if (k != i)
-            {
-                K_global_.coeffRef(i, k) = 0.0;
-            }
-        }
-        K_global_.prune(0.0);  // 移除所有值为0的元素，保持矩阵稀疏性
+        // 第二步:过滤三元组,只保留内部节点间的耦合和Dirichlet节点的对角元素
+        std::vector<T_entry> filtered_triplets;
+        filtered_triplets.reserve(triplet_list_.size());
 
-        // 设置对角元素和右端项
-        K_global_.coeffRef(i, i) = 1.0;
-        b_(i) = boundary_value;
+        // 标记已经添加过对角元素的Dirichlet节点
+        std::vector<bool> dirichlet_diag_added(N_, false);
+
+        for (const auto& triplet : triplet_list_)
+        {
+            int row = triplet.row();
+            int col = triplet.col();
+
+            // 如果是Dirichlet节点的对角元素,只添加一次并设为1
+            if (row == col && is_dirichlet_node[row])
+            {
+                if (!dirichlet_diag_added[row])
+                {
+                    filtered_triplets.push_back(T_entry(row, col, 1.0));
+                    dirichlet_diag_added[row] = true;
+                }
+                // 否则跳过,避免重复添加
+            }
+            // 如果行和列都不是Dirichlet节点,保留原值
+            else if (!is_dirichlet_node[row] && !is_dirichlet_node[col])
+            {
+                filtered_triplets.push_back(triplet);
+            }
+            // 其他情况(行或列是Dirichlet节点但不是对角元素):删除,保持矩阵对称
+        }
+
+        // 替换三元组列表
+        triplet_list_ = std::move(filtered_triplets);
+
+        // 设置Dirichlet节点的右端项
+        for (int i : dirichlet_nodes)
+        {
+            b_(i) = dirichlet_values[i];
+        }
     }
+
+    // 最后：一次性从三元组构建稀疏矩阵
+    std::cout << "  从 " << triplet_list_.size() << " 个三元组构建稀疏矩阵..." << std::endl;
+    K_global_.setFromTriplets(triplet_list_.begin(), triplet_list_.end());
+    K_global_.makeCompressed();
+    std::cout << "  矩阵构建完成，非零元素数: " << K_global_.nonZeros() << std::endl;
+
+    // 清空三元组列表释放内存
+    triplet_list_.clear();
+    triplet_list_.shrink_to_fit();
 }
 
 void FEMSolver::solve()

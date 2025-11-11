@@ -4,15 +4,48 @@
 #include <stdexcept>
 #include "config.h"
 
+// ============================================================================
+// 构造函数
+// ============================================================================
+
 ProblemSetup::ProblemSetup(const std::string& name) : name_(name)
 {
     // 默认构造函数
 }
 
+// ============================================================================
+// 设置函数（内部使用，用于配置问题）
+// ============================================================================
+
 void ProblemSetup::setBoundarySetupFunction(std::function<void(std::shared_ptr<Config>)> func)
 {
     boundary_setup_func_ = func;
 }
+
+void ProblemSetup::setCoefficient(std::function<double(const std::vector<double>&)> func)
+{
+    coefficient_func_ = func;
+}
+
+void ProblemSetup::setSource(std::function<double(const std::vector<double>&)> func)
+{
+    source_func_ = func;
+}
+
+void ProblemSetup::setExactSolutionU(std::function<double(const std::vector<double>&)> func)
+{
+    exact_solution_u_func_ = func;
+}
+
+void ProblemSetup::setExactSolutionGradients(
+    std::function<double(const std::vector<double>&, std::vector<double>&)> func)
+{
+    exact_solution_gradients_func_ = func;
+}
+
+// ============================================================================
+// 访问器（外部使用，用于获取问题参数）
+// ============================================================================
 
 const std::vector<BoundaryCondition>& ProblemSetup::getBoundaryConditions() const
 {
@@ -34,16 +67,6 @@ std::vector<BoundaryCondition>& ProblemSetup::getBoundaryConditionsMutable()
     return boundary_conditions_;
 }
 
-void ProblemSetup::setCoefficient(std::function<double(const std::vector<double>&)> func)
-{
-    coefficient_func_ = func;
-}
-
-void ProblemSetup::setSource(std::function<double(const std::vector<double>&)> func)
-{
-    source_func_ = func;
-}
-
 double ProblemSetup::coefficient(const std::vector<double>& coords) const
 {
     if (!coefficient_func_)
@@ -62,21 +85,11 @@ double ProblemSetup::source(const std::vector<double>& coords) const
     return source_func_(coords);
 }
 
-void ProblemSetup::setExactSolutionU(std::function<double(const std::vector<double>&)> func)
-{
-    exact_solution_u_func_ = func;
-}
-
-void ProblemSetup::setExactSolutionGradients(
-    std::function<double(const std::vector<double>&, std::vector<double>&)> func)
-{
-    exact_solution_gradients_func_ = func;
-}
-
 bool ProblemSetup::hasExactSolution() const
 {
     return exact_solution_u_func_ != nullptr;
 }
+
 double ProblemSetup::exactSolutionU(const std::vector<double>& coords) const
 {
     if (!exact_solution_u_func_)

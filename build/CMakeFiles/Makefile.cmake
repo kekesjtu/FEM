@@ -55,7 +55,4 @@ set(CMAKE_MAKEFILE_PRODUCTS
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/FEM_solution.dir/DependInfo.cmake"
   "CMakeFiles/FEM_lib.dir/DependInfo.cmake"
-  "tests/CMakeFiles/test_3d_integration.dir/DependInfo.cmake"
-  "tests/CMakeFiles/test_3d_mesh_import.dir/DependInfo.cmake"
-  "tests/CMakeFiles/test_simple_3d_poisson.dir/DependInfo.cmake"
   )

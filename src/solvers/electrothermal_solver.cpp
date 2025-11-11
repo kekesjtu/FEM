@@ -204,7 +204,11 @@ Eigen::SparseMatrix<double> ElectrothermalSolver::assembleElectricFieldCoupled()
         }
     }
 
-    // 构建稀疏矩阵
+    // ✅ 关键修复：直接设置 electric_solver_ 的三元组列表
+    // 这样 applyBoundaryConditions() 就可以正确处理边界条件
+    electric_solver_->setTripletList(tripletList);
+
+    // 仍然构建并返回稀疏矩阵（用于调试/验证）
     Eigen::SparseMatrix<double> K_global(N, N);
     K_global.setFromTriplets(tripletList.begin(), tripletList.end());
     K_global.makeCompressed();
@@ -338,6 +342,8 @@ void ElectrothermalSolver::solve()
             std::cout << "  在每个积分点插值温度，计算σ(T)..." << std::endl;
         }
 
+        // ✅ 组装刚度矩阵并设置三元组列表
+        // 注意：assembleElectricFieldCoupled() 内部会调用 electric_solver_->setTripletList()
         Eigen::SparseMatrix<double> K_electric_coupled = assembleElectricFieldCoupled();
 
         if (verbose_)
@@ -345,21 +351,12 @@ void ElectrothermalSolver::solve()
             std::cout << "  组装完成，非零元素数: " << K_electric_coupled.nonZeros() << std::endl;
         }
 
-        // 注意：我们不使用 FEMSolver 的标准组装，而是自己精确组装
-        // 这里仅需要组装载荷向量 b（源项为0）
-        // 由于我们已经有了精确的刚度矩阵，只需一个空的载荷向量
-        // 可以跳过 assemble()，直接用 setStiffnessMatrix 和手动设置 b=0
-
-        // ✅ 使用我们精确组装的刚度矩阵
-        electric_solver_->setStiffnessMatrix(K_electric_coupled);
-
-        // ⚠️ 关键：重置载荷向量为0（电场方程无源项）
-        // 原因：applyBoundaryConditions()会修改b，如果不重置会累积上次迭代的值
+        // ✅ 重置载荷向量为0（电场方程无源项）
         Eigen::VectorXd b_electric =
             Eigen::VectorXd::Zero(electric_solver_->getConfig()->getNodesNum());
         electric_solver_->setLoadVector(b_electric);
 
-        // 施加边界条件和求解
+        // ✅ 施加边界条件（现在可以从三元组正确处理）
         electric_solver_->applyBoundaryConditions();
         electric_solver_->solve();
 

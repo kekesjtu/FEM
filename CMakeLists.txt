@@ -51,6 +51,7 @@ set(CORE_SOURCES
     "${CMAKE_SOURCE_DIR}/src/core/config.cpp"
     "${CMAKE_SOURCE_DIR}/src/core/comsol_mesh_importer.cpp"
     "${CMAKE_SOURCE_DIR}/src/core/problem_setup.cpp"
+    "${CMAKE_SOURCE_DIR}/src/core/material.cpp"
 )
 
 set(SHAPE_FUNCTION_SOURCES

@@ -30,6 +30,10 @@ class FEMSolver
     Eigen::VectorXd b_;                     // 载荷向量
     Eigen::VectorXd u_;                     // 解向量
 
+    // 三元组列表（用于延迟矩阵构建，优化性能）
+    typedef Eigen::Triplet<double> T_entry;
+    std::vector<T_entry> triplet_list_;
+
     // 内部辅助函数
     double calculateStiffnessEntry(int e, int alpha, int beta);
     double calculateLoadEntry(int e, int beta);
@@ -78,6 +82,15 @@ class FEMSolver
      * @param b_external 外部组装的载荷向量
      */
     void setLoadVector(const Eigen::VectorXd& b_external);
+
+    /**
+     * @brief 设置三元组列表（用于耦合问题的自定义组装）
+     * @param triplets 外部组装的三元组列表
+     *
+     * 此方法允许耦合求解器直接设置三元组列表，
+     * 使得 applyBoundaryConditions() 可以正确处理边界条件
+     */
+    void setTripletList(const std::vector<T_entry>& triplets);
 
     /**
      * @brief 施加边界条件

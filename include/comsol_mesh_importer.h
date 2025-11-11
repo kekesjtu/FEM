@@ -91,6 +91,20 @@ class ComsolMeshImporter
      */
     const std::vector<std::vector<int>>& getBoundaryElements() const;
 
+    /**
+     * @brief 获取边界单元几何实体编码
+     * @return 边界几何实体向量 [boundary_id] = entity_id
+     * @note 对应 Config::boundary_geometric_entities_
+     */
+    const std::vector<int>& getBoundaryGeometricEntities() const;
+
+    /**
+     * @brief 获取体单元几何实体编码
+     * @return 体单元几何实体向量 [element_id] = entity_id
+     * @note 对应 Config::element_geometric_entities_
+     */
+    const std::vector<int>& getElementGeometricEntities() const;
+
   private:
     // 单元分类枚举
     enum class ElementClassification
@@ -117,6 +131,11 @@ class ComsolMeshImporter
     std::vector<std::vector<int>>
         boundary_elements_;  ///< 边界单元连接 [boundary_id][local_node_id]
 
+    // 几何实体编码 (新增)
+    std::vector<int>
+        boundary_geometric_entities_;  ///< 边界单元几何实体编码 [boundary_id] = entity_id
+    std::vector<int> element_geometric_entities_;  ///< 体单元几何实体编码 [element_id] = entity_id
+
     // 主解析方法
     bool parseFile(const std::string& filename);
 
@@ -131,13 +150,12 @@ class ComsolMeshImporter
     bool parseNumElements(std::ifstream& file, int& num_elements);
     bool parseElementConnectivity(std::ifstream& file, int num_elements, int nodes_per_element,
                                   const std::string& element_type);
+    bool parseGeometricEntityIndices(std::ifstream& file, int num_elements,
+                                     std::vector<int>& geometric_entities);
 
     // 单元分类判断模块
     ElementClassification classifyElement(const std::string& element_type,
                                           int nodes_per_element) const;
-    bool isVolumeElement(const std::string& element_type, int nodes_per_element) const;
-    bool isBoundaryElement(const std::string& element_type, int nodes_per_element) const;
-
     // 辅助解析方法
     bool skipToNextSection(std::ifstream& file, std::string& line);
     void skipEmptyLines(std::ifstream& file, std::string& line);  // 工具方法

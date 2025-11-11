@@ -178,7 +178,7 @@ bool ComsolMeshImporter::parseElements(std::ifstream& file)
             if (!parseElementType(file, element_type))
             {
                 // 需要跳过的类型(vtx, 3D中的edg, 未知类型)
-                // 读取并跳过: 节点数行、单元数行、连接矩阵
+                // 读取并跳过: 节点数行、单元数行、连接矩阵、几何实体索引
                 int nodes_per_element, num_elements;
                 if (parseNodesPerElement(file, nodes_per_element) &&
                     parseNumElements(file, num_elements))
@@ -188,6 +188,10 @@ bool ComsolMeshImporter::parseElements(std::ifstream& file)
                     {
                         std::getline(file, line);
                     }
+
+                    // 跳过几何实体索引部分
+                    std::vector<int> dummy_entities;
+                    parseGeometricEntityIndices(file, num_elements, dummy_entities);
                 }
                 continue;
             }
@@ -210,6 +214,29 @@ bool ComsolMeshImporter::parseElements(std::ifstream& file)
             if (!parseElementConnectivity(file, num_elements, nodes_per_element, element_type))
             {
                 return false;
+            }
+
+            // 5. 解析几何实体索引（与上述解析方法并列）
+            std::vector<int> geometric_entities;
+            if (!parseGeometricEntityIndices(file, num_elements, geometric_entities))
+            {
+                std::cerr << "警告: 解析几何实体索引失败，使用默认值" << std::endl;
+                geometric_entities.resize(num_elements, 0);
+            }
+
+            // 6. 根据单元分类存储几何实体索引
+            ElementClassification classification = classifyElement(element_type, nodes_per_element);
+            if (classification == ElementClassification::VOLUME)
+            {
+                element_geometric_entities_.insert(element_geometric_entities_.end(),
+                                                   geometric_entities.begin(),
+                                                   geometric_entities.end());
+            }
+            else if (classification == ElementClassification::BOUNDARY)
+            {
+                boundary_geometric_entities_.insert(boundary_geometric_entities_.end(),
+                                                    geometric_entities.begin(),
+                                                    geometric_entities.end());
             }
 
             std::cout << "成功解析 " << element_type << " 类型单元 " << num_elements << " 个"
@@ -353,6 +380,16 @@ void ComsolMeshImporter::printImportStatistics() const
         std::cout << "每个边界单元节点数: " << boundary_elements_[0].size() << std::endl;
     }
 
+    // 显示几何实体信息
+    if (!element_geometric_entities_.empty())
+    {
+        std::cout << "体单元几何实体数: " << element_geometric_entities_.size() << std::endl;
+    }
+    if (!boundary_geometric_entities_.empty())
+    {
+        std::cout << "边界单元几何实体数: " << boundary_geometric_entities_.size() << std::endl;
+    }
+
     std::cout << "========================\n" << std::endl;
 }
 
@@ -374,6 +411,8 @@ void ComsolMeshImporter::clearData()
     node_coordinates_.clear();
     element_connectivity_.clear();
     boundary_elements_.clear();
+    boundary_geometric_entities_.clear();
+    element_geometric_entities_.clear();
     is_imported_ = false;
     dimension_ = 0;
     nodes_num_ = 0;
@@ -430,6 +469,16 @@ const std::vector<std::vector<int>>& ComsolMeshImporter::getBoundaryElements() c
     return boundary_elements_;
 }
 
+const std::vector<int>& ComsolMeshImporter::getBoundaryGeometricEntities() const
+{
+    return boundary_geometric_entities_;
+}
+
+const std::vector<int>& ComsolMeshImporter::getElementGeometricEntities() const
+{
+    return element_geometric_entities_;
+}
+
 // --- 辅助解析方法实现 ---
 
 bool ComsolMeshImporter::parseNodesPerElement(std::ifstream& file, int& nodes_per_element)
@@ -484,6 +533,56 @@ bool ComsolMeshImporter::parseNumElements(std::ifstream& file, int& num_elements
     return true;
 }
 
+bool ComsolMeshImporter::parseGeometricEntityIndices(std::ifstream& file, int num_elements,
+                                                     std::vector<int>& geometric_entities)
+{
+    std::string line;
+    geometric_entities.clear();
+    geometric_entities.reserve(num_elements);
+
+    // 查找几何实体索引部分标记
+    bool found_geo_section = false;
+    while (std::getline(file, line))
+    {
+        trimString(line);
+        if (line.find("# Geometric entity indices") != std::string::npos)
+        {
+            found_geo_section = true;
+            std::cout << "找到几何实体索引部分" << std::endl;
+            break;
+        }
+    }
+
+    if (!found_geo_section)
+    {
+        std::cout << "警告: 未找到几何实体索引，使用默认值0" << std::endl;
+        geometric_entities.resize(num_elements, 0);
+        return true;  // 不是错误，只是没有几何实体信息
+    }
+
+    // 读取几何实体索引
+    for (int i = 0; i < num_elements; ++i)
+    {
+        int entity_id;
+        if (file >> entity_id)
+        {
+            geometric_entities.push_back(entity_id);
+        }
+        else
+        {
+            std::cerr << "警告: 无法读取第 " << i << " 个单元的几何实体索引，使用默认值0"
+                      << std::endl;
+            geometric_entities.push_back(0);
+        }
+    }
+
+    // 清除换行符
+    std::getline(file, line);
+
+    std::cout << "成功读取 " << geometric_entities.size() << " 个几何实体索引" << std::endl;
+    return true;
+}
+
 bool ComsolMeshImporter::parseElementConnectivity(std::ifstream& file, int num_elements,
                                                   int nodes_per_element,
                                                   const std::string& element_type)
@@ -518,43 +617,18 @@ bool ComsolMeshImporter::parseElementConnectivity(std::ifstream& file, int num_e
             continue;
         }
 
-        // 使用单元分类判断模块
-        if (isVolumeElement(element_type, nodes_per_element))
+        // 根据单元分类存储到对应容器
+        ElementClassification classification = classifyElement(element_type, nodes_per_element);
+
+        if (classification == ElementClassification::VOLUME)
         {
             element_connectivity_.push_back(node_indices);
         }
-        else if (isBoundaryElement(element_type, nodes_per_element))
+        else if (classification == ElementClassification::BOUNDARY)
         {
             boundary_elements_.push_back(node_indices);
         }
-        // 否则忽略 (已在parseElementType中处理)
-    }
-
-    // 跳过几何实体索引部分
-    std::string geo_line;
-    while (std::getline(file, geo_line))
-    {
-        trimString(geo_line);
-        if (!geo_line.empty())
-            break;
-    }
-
-    // 如果找到几何实体索引部分，跳过它
-    if (geo_line.find("# number of geometric entity indices") != std::string::npos)
-    {
-        // 跳过"# Geometric entity indices"标题行
-        while (std::getline(file, geo_line))
-        {
-            trimString(geo_line);
-            if (geo_line.find("# Geometric entity indices") != std::string::npos)
-                break;
-        }
-
-        // 跳过所有几何实体索引数据
-        for (int i = 0; i < num_elements; ++i)
-        {
-            std::getline(file, geo_line);
-        }
+        // 否则忽略
     }
 
     return true;
@@ -668,22 +742,4 @@ ComsolMeshImporter::ElementClassification ComsolMeshImporter::classifyElement(
     {
         return ElementClassification::IGNORED;  // 未知维度
     }
-}
-
-/**
- * @brief 判断是否为体单元
- */
-bool ComsolMeshImporter::isVolumeElement(const std::string& element_type,
-                                         int nodes_per_element) const
-{
-    return classifyElement(element_type, nodes_per_element) == ElementClassification::VOLUME;
-}
-
-/**
- * @brief 判断是否为边界单元
- */
-bool ComsolMeshImporter::isBoundaryElement(const std::string& element_type,
-                                           int nodes_per_element) const
-{
-    return classifyElement(element_type, nodes_per_element) == ElementClassification::BOUNDARY;
 }

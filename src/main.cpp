@@ -16,9 +16,8 @@ void solveSingleField()
     auto config = std::make_shared<Config>();
 
     std::string problem_type =
-        "CubeUniformCharge";  // 可选: "RobinTest", "ElectricField", "ThermalField",
-                              // "CubeUniformCharge", "Custom"
-    auto problem = ProblemLibrary::ProblemFactory::create(problem_type);
+        "sphere";  // 可修改为 "robin", "electric", "thermal", "cube", "sphere", "custom"
+    auto problem = ProblemLibrary::ProblemFactory::createProblem(problem_type);
 
     std::cout << "求解问题: " << problem->getName() << std::endl;
 
@@ -43,14 +42,14 @@ void solveElectrothermal()
     // 创建网格配置（共享同一个网格）
     auto config = std::make_shared<Config>();
 
-    // 🎯 定义物理参数并创建电热耦合问题配置
+    // 定义物理参数并创建电热耦合问题配置
     ProblemLibrary::ElectrothermalParams params;
     params.sigma0 = 1.0;   // 参考电导率 [S/m]
     params.alpha = 0.003;  // 温度系数 [1/K]
     params.T0 = 300.0;     // 参考温度 [K]
     // 热导率使用 createThermalField() 中的默认值（1.0）
 
-    // 🎯 使用工厂模式创建电热耦合问题
+    // 使用工厂模式创建电热耦合问题
     auto et_problem = ProblemLibrary::ProblemFactory::createElectrothermal(params);
 
     std::cout << "电场边界条件: " << et_problem.electric_problem->getName() << std::endl;
@@ -86,7 +85,7 @@ void solveElectrothermal()
 int main()
 {
     // 选择求解模式
-    int mode = 1;  // 1: 单场求解(3D正方体均匀电荷), 2: 电热耦合
+    int mode = 2;  // 1: 单场求解(3D正方体均匀电荷), 2: 电热耦合
 
     std::cout << "================================================" << std::endl;
     std::cout << "          有限元求解器" << std::endl;

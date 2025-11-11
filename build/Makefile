@@ -196,45 +196,6 @@ FEM_lib/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/build
 .PHONY : FEM_lib/fast
 
-#=============================================================================
-# Target rules for targets named test_3d_integration
-
-# Build rule for target.
-test_3d_integration: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 test_3d_integration
-.PHONY : test_3d_integration
-
-# fast build rule for target.
-test_3d_integration/fast:
-	$(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_3d_integration.dir\build.make tests/CMakeFiles/test_3d_integration.dir/build
-.PHONY : test_3d_integration/fast
-
-#=============================================================================
-# Target rules for targets named test_3d_mesh_import
-
-# Build rule for target.
-test_3d_mesh_import: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 test_3d_mesh_import
-.PHONY : test_3d_mesh_import
-
-# fast build rule for target.
-test_3d_mesh_import/fast:
-	$(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_3d_mesh_import.dir\build.make tests/CMakeFiles/test_3d_mesh_import.dir/build
-.PHONY : test_3d_mesh_import/fast
-
-#=============================================================================
-# Target rules for targets named test_simple_3d_poisson
-
-# Build rule for target.
-test_simple_3d_poisson: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 test_simple_3d_poisson
-.PHONY : test_simple_3d_poisson
-
-# fast build rule for target.
-test_simple_3d_poisson/fast:
-	$(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_simple_3d_poisson.dir\build.make tests/CMakeFiles/test_simple_3d_poisson.dir/build
-.PHONY : test_simple_3d_poisson/fast
-
 src/core/comsol_mesh_importer.obj: src/core/comsol_mesh_importer.cpp.obj
 .PHONY : src/core/comsol_mesh_importer.obj
 
@@ -288,6 +249,33 @@ src/core/config.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/core/config.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/core/config.cpp.s
 .PHONY : src/core/config.cpp.s
+
+src/core/material.obj: src/core/material.cpp.obj
+.PHONY : src/core/material.obj
+
+# target to build an object file
+src/core/material.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/core/material.cpp.obj
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/core/material.cpp.obj
+.PHONY : src/core/material.cpp.obj
+
+src/core/material.i: src/core/material.cpp.i
+.PHONY : src/core/material.i
+
+# target to preprocess a source file
+src/core/material.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/core/material.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/core/material.cpp.i
+.PHONY : src/core/material.cpp.i
+
+src/core/material.s: src/core/material.cpp.s
+.PHONY : src/core/material.s
+
+# target to generate assembly for a file
+src/core/material.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_solution.dir\build.make CMakeFiles/FEM_solution.dir/src/core/material.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\FEM_lib.dir\build.make CMakeFiles/FEM_lib.dir/src/core/material.cpp.s
+.PHONY : src/core/material.cpp.s
 
 src/core/problem_setup.obj: src/core/problem_setup.cpp.obj
 .PHONY : src/core/problem_setup.obj
@@ -841,15 +829,15 @@ help:
 	@echo ... test
 	@echo ... FEM_lib
 	@echo ... FEM_solution
-	@echo ... test_3d_integration
-	@echo ... test_3d_mesh_import
-	@echo ... test_simple_3d_poisson
 	@echo ... src/core/comsol_mesh_importer.obj
 	@echo ... src/core/comsol_mesh_importer.i
 	@echo ... src/core/comsol_mesh_importer.s
 	@echo ... src/core/config.obj
 	@echo ... src/core/config.i
 	@echo ... src/core/config.s
+	@echo ... src/core/material.obj
+	@echo ... src/core/material.i
+	@echo ... src/core/material.s
 	@echo ... src/core/problem_setup.obj
 	@echo ... src/core/problem_setup.i
 	@echo ... src/core/problem_setup.s

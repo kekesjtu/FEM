@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "E:/code/C++/FEM/src/core/comsol_mesh_importer.cpp" "CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/core/comsol_mesh_importer.cpp.obj.d"
   "E:/code/C++/FEM/src/core/config.cpp" "CMakeFiles/FEM_lib.dir/src/core/config.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/core/config.cpp.obj.d"
+  "E:/code/C++/FEM/src/core/material.cpp" "CMakeFiles/FEM_lib.dir/src/core/material.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/core/material.cpp.obj.d"
   "E:/code/C++/FEM/src/core/problem_setup.cpp" "CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/core/problem_setup.cpp.obj.d"
   "E:/code/C++/FEM/src/gauss_quadrature/gauss_quadrature_1d.cpp" "CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.obj.d"
   "E:/code/C++/FEM/src/gauss_quadrature/gauss_quadrature_2d.cpp" "CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.obj" "gcc" "CMakeFiles/FEM_lib.dir/src/gauss_quadrature/gauss_quadrature_2d.cpp.obj.d"

@@ -170,120 +170,6 @@ depend:
 	cd /d E:\code\C++\FEM\build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles\Makefile.cmake 1
 .PHONY : depend
 
-# Convenience name for target.
-tests/CMakeFiles/test_3d_integration.dir/rule:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 tests/CMakeFiles/test_3d_integration.dir/rule
-.PHONY : tests/CMakeFiles/test_3d_integration.dir/rule
-
-# Convenience name for target.
-test_3d_integration: tests/CMakeFiles/test_3d_integration.dir/rule
-.PHONY : test_3d_integration
-
-# fast build rule for target.
-test_3d_integration/fast:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_3d_integration.dir\build.make tests/CMakeFiles/test_3d_integration.dir/build
-.PHONY : test_3d_integration/fast
-
-# Convenience name for target.
-tests/CMakeFiles/test_3d_mesh_import.dir/rule:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 tests/CMakeFiles/test_3d_mesh_import.dir/rule
-.PHONY : tests/CMakeFiles/test_3d_mesh_import.dir/rule
-
-# Convenience name for target.
-test_3d_mesh_import: tests/CMakeFiles/test_3d_mesh_import.dir/rule
-.PHONY : test_3d_mesh_import
-
-# fast build rule for target.
-test_3d_mesh_import/fast:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_3d_mesh_import.dir\build.make tests/CMakeFiles/test_3d_mesh_import.dir/build
-.PHONY : test_3d_mesh_import/fast
-
-# Convenience name for target.
-tests/CMakeFiles/test_simple_3d_poisson.dir/rule:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 tests/CMakeFiles/test_simple_3d_poisson.dir/rule
-.PHONY : tests/CMakeFiles/test_simple_3d_poisson.dir/rule
-
-# Convenience name for target.
-test_simple_3d_poisson: tests/CMakeFiles/test_simple_3d_poisson.dir/rule
-.PHONY : test_simple_3d_poisson
-
-# fast build rule for target.
-test_simple_3d_poisson/fast:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_simple_3d_poisson.dir\build.make tests/CMakeFiles/test_simple_3d_poisson.dir/build
-.PHONY : test_simple_3d_poisson/fast
-
-test_3d_integration.obj: test_3d_integration.cpp.obj
-.PHONY : test_3d_integration.obj
-
-# target to build an object file
-test_3d_integration.cpp.obj:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_3d_integration.dir\build.make tests/CMakeFiles/test_3d_integration.dir/test_3d_integration.cpp.obj
-.PHONY : test_3d_integration.cpp.obj
-
-test_3d_integration.i: test_3d_integration.cpp.i
-.PHONY : test_3d_integration.i
-
-# target to preprocess a source file
-test_3d_integration.cpp.i:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_3d_integration.dir\build.make tests/CMakeFiles/test_3d_integration.dir/test_3d_integration.cpp.i
-.PHONY : test_3d_integration.cpp.i
-
-test_3d_integration.s: test_3d_integration.cpp.s
-.PHONY : test_3d_integration.s
-
-# target to generate assembly for a file
-test_3d_integration.cpp.s:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_3d_integration.dir\build.make tests/CMakeFiles/test_3d_integration.dir/test_3d_integration.cpp.s
-.PHONY : test_3d_integration.cpp.s
-
-test_3d_mesh_import.obj: test_3d_mesh_import.cpp.obj
-.PHONY : test_3d_mesh_import.obj
-
-# target to build an object file
-test_3d_mesh_import.cpp.obj:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_3d_mesh_import.dir\build.make tests/CMakeFiles/test_3d_mesh_import.dir/test_3d_mesh_import.cpp.obj
-.PHONY : test_3d_mesh_import.cpp.obj
-
-test_3d_mesh_import.i: test_3d_mesh_import.cpp.i
-.PHONY : test_3d_mesh_import.i
-
-# target to preprocess a source file
-test_3d_mesh_import.cpp.i:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_3d_mesh_import.dir\build.make tests/CMakeFiles/test_3d_mesh_import.dir/test_3d_mesh_import.cpp.i
-.PHONY : test_3d_mesh_import.cpp.i
-
-test_3d_mesh_import.s: test_3d_mesh_import.cpp.s
-.PHONY : test_3d_mesh_import.s
-
-# target to generate assembly for a file
-test_3d_mesh_import.cpp.s:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_3d_mesh_import.dir\build.make tests/CMakeFiles/test_3d_mesh_import.dir/test_3d_mesh_import.cpp.s
-.PHONY : test_3d_mesh_import.cpp.s
-
-test_simple_3d_poisson.obj: test_simple_3d_poisson.cpp.obj
-.PHONY : test_simple_3d_poisson.obj
-
-# target to build an object file
-test_simple_3d_poisson.cpp.obj:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_simple_3d_poisson.dir\build.make tests/CMakeFiles/test_simple_3d_poisson.dir/test_simple_3d_poisson.cpp.obj
-.PHONY : test_simple_3d_poisson.cpp.obj
-
-test_simple_3d_poisson.i: test_simple_3d_poisson.cpp.i
-.PHONY : test_simple_3d_poisson.i
-
-# target to preprocess a source file
-test_simple_3d_poisson.cpp.i:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_simple_3d_poisson.dir\build.make tests/CMakeFiles/test_simple_3d_poisson.dir/test_simple_3d_poisson.cpp.i
-.PHONY : test_simple_3d_poisson.cpp.i
-
-test_simple_3d_poisson.s: test_simple_3d_poisson.cpp.s
-.PHONY : test_simple_3d_poisson.s
-
-# target to generate assembly for a file
-test_simple_3d_poisson.cpp.s:
-	cd /d E:\code\C++\FEM\build && $(MAKE) $(MAKESILENT) -f tests\CMakeFiles\test_simple_3d_poisson.dir\build.make tests/CMakeFiles/test_simple_3d_poisson.dir/test_simple_3d_poisson.cpp.s
-.PHONY : test_simple_3d_poisson.cpp.s
-
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -297,18 +183,6 @@ help:
 	@echo ... list_install_components
 	@echo ... rebuild_cache
 	@echo ... test
-	@echo ... test_3d_integration
-	@echo ... test_3d_mesh_import
-	@echo ... test_simple_3d_poisson
-	@echo ... test_3d_integration.obj
-	@echo ... test_3d_integration.i
-	@echo ... test_3d_integration.s
-	@echo ... test_3d_mesh_import.obj
-	@echo ... test_3d_mesh_import.i
-	@echo ... test_3d_mesh_import.s
-	@echo ... test_simple_3d_poisson.obj
-	@echo ... test_simple_3d_poisson.i
-	@echo ... test_simple_3d_poisson.s
 .PHONY : help
 
 

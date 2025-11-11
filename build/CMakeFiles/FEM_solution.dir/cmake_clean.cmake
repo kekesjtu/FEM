@@ -3,6 +3,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/FEM_solution.dir/src/core/comsol_mesh_importer.cpp.obj.d"
   "CMakeFiles/FEM_solution.dir/src/core/config.cpp.obj"
   "CMakeFiles/FEM_solution.dir/src/core/config.cpp.obj.d"
+  "CMakeFiles/FEM_solution.dir/src/core/material.cpp.obj"
+  "CMakeFiles/FEM_solution.dir/src/core/material.cpp.obj.d"
   "CMakeFiles/FEM_solution.dir/src/core/problem_setup.cpp.obj"
   "CMakeFiles/FEM_solution.dir/src/core/problem_setup.cpp.obj.d"
   "CMakeFiles/FEM_solution.dir/src/gauss_quadrature/gauss_quadrature_1d.cpp.obj"
