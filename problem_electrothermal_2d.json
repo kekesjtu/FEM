@@ -1,0 +1,66 @@
+{
+  "problem_name": "electrothermal_circle_2d",
+  "description": "二维圆域电热耦合问题",
+  "dimension": 2,
+  "mesh_file": "mesh_data/circle_mesh.mphtxt",
+  "material_library_file": "materials_example.json",
+  
+  "domain_materials": {
+    "0": "copper",
+    "1": "copper"
+  },
+  
+  "fields": {
+    "electric": {
+      "source": {
+        "type": "constant",
+        "value": 0.0,
+        "comment": "电场问题无外部源项"
+      },
+      "boundary_conditions": [
+        {
+          "entities": [0, 1],
+          "type": "Dirichlet",
+          "value": 10.0,
+          "comment": "左半圆高电压"
+        },
+        {
+          "entities": [2, 3],
+          "type": "Dirichlet",
+          "value": 0.0,
+          "comment": "右半圆接地"
+        }
+      ]
+    },
+    
+    "thermal": {
+      "source": {
+        "type": "computed",
+        "comment": "焦耳热由求解器自动计算: Q = sigma(T) * |grad(V)|^2"
+      },
+      "boundary_conditions": [
+        {
+          "entities": [0, 1, 2, 3],
+          "type": "Dirichlet",
+          "value": 0.0,
+          "comment": "边界温度增量为0，即T = T0"
+        }
+      ]
+    }
+  },
+  
+  "coupling": {
+    "type": "electrothermal",
+    "max_iterations": 100,
+    "tolerance": 1e-6,
+    "relaxation_factor": 0.7,
+    "reference_temperature": 300.0
+  },
+  
+  "solver": {
+    "solver_type": "CG",
+    "preconditioner_type": "DiagonalPreconditioner",
+    "tolerance": 1e-8,
+    "max_iterations": 1000
+  }
+}

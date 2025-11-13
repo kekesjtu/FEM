@@ -220,7 +220,10 @@
 				32,
 				33,
 				34,
-				35
+				35,
+				36,
+				37,
+				38
 			]
 		}
 	],
@@ -411,12 +414,27 @@
 		},
 		{
 			"backtrace" : 1,
+			"path" : "include/material_v2.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
 			"path" : "include/problem_definitions.h",
 			"sourceGroupIndex" : 1
 		},
 		{
 			"backtrace" : 1,
 			"path" : "include/problem_setup.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "include/problem_setup_adapter.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "include/problem_v2.h",
 			"sourceGroupIndex" : 1
 		},
 		{

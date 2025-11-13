@@ -1,0 +1,85 @@
+{
+  "materials": {
+    "copper": {
+      "description": "纯铜 - 温度相关电导率",
+      "thermal_conductivity": {
+        "type": "constant",
+        "value": 401.0
+      },
+      "electrical_conductivity": {
+        "type": "expression",
+        "formula": "sigma0 / (1 + alpha * (T - T0))",
+        "variables": ["T"],
+        "parameters": {
+          "sigma0": 5.96e7,
+          "alpha": 0.00393,
+          "T0": 293.15
+        }
+      },
+      "density": {
+        "type": "constant",
+        "value": 8960.0
+      },
+      "specific_heat": {
+        "type": "constant",
+        "value": 385.0
+      }
+    },
+    "silicon": {
+      "description": "硅 - 温度相关热导率和电导率",
+      "thermal_conductivity": {
+        "type": "expression",
+        "formula": "k0 * (T0 / T)^1.3",
+        "variables": ["T"],
+        "parameters": {
+          "k0": 148.0,
+          "T0": 300.0
+        }
+      },
+      "electrical_conductivity": {
+        "type": "expression",
+        "formula": "sigma0 * exp(-Eg / (2 * kb * T))",
+        "variables": ["T"],
+        "parameters": {
+          "sigma0": 1.0e5,
+          "Eg": 1.12,
+          "kb": 8.617e-5
+        }
+      },
+      "density": {
+        "type": "constant",
+        "value": 2329.0
+      },
+      "specific_heat": {
+        "type": "constant",
+        "value": 712.0
+      }
+    },
+    "aluminum": {
+      "description": "铝 - 简单常数属性",
+      "thermal_conductivity": {
+        "type": "constant",
+        "value": 237.0
+      },
+      "electrical_conductivity": {
+        "type": "constant",
+        "value": 3.77e7
+      },
+      "density": {
+        "type": "constant",
+        "value": 2700.0
+      },
+      "specific_heat": {
+        "type": "constant",
+        "value": 900.0
+      }
+    }
+  },
+  "domain_materials": {
+    "1": "copper",
+    "2": "silicon"
+  },
+  "boundary_domain_materials": {
+    "10": "aluminum"
+  }
+}

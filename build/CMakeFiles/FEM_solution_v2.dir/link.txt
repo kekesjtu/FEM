@@ -1,0 +1,3 @@
+E:\msys64\ucrt64\bin\cmake.exe -E rm -f CMakeFiles\FEM_solution_v2.dir/objects.a
+E:\msys64\ucrt64\bin\ar.exe qc CMakeFiles\FEM_solution_v2.dir/objects.a @CMakeFiles\FEM_solution_v2.dir\objects1.rsp
+E:\msys64\ucrt64\bin\g++.exe -g -Wl,--whole-archive CMakeFiles\FEM_solution_v2.dir/objects.a -Wl,--no-whole-archive -o bin\FEM_solution_v2.exe -Wl,--out-implib,lib\libFEM_solution_v2.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\FEM_solution_v2.dir\linkLibs.rsp

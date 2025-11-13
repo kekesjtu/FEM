@@ -422,12 +422,73 @@ CMakeFiles/FEM_solution.dir/src/solvers/fem_solver.cpp.obj: \
  E:/msys64/ucrt64/include/c++/15.2.0/bits/shared_ptr_atomic.h \
  E:/msys64/ucrt64/include/c++/15.2.0/backward/auto_ptr.h \
  E:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_memory_defs.h \
- E:/code/C++/FEM/include/config.h E:/code/C++/FEM/include/problem_setup.h \
+ E:/code/C++/FEM/include/config.h E:/code/C++/FEM/include/material_v2.h \
+ E:/code/C++/FEM/third_party/muparser/muParser.h \
+ E:/code/C++/FEM/third_party/muparser/muParserBase.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/iostream \
+ E:/msys64/ucrt64/include/c++/15.2.0/locale \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_facets_nonio.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/ctime \
+ E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/time_members.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/messages_members.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/codecvt.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_facets_nonio.tcc \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/locale_conv.h \
+ E:/code/C++/FEM/third_party/muparser/muParserDef.h \
+ E:/code/C++/FEM/third_party/muparser/muParserFixes.h \
+ E:/code/C++/FEM/third_party/muparser/muParserTokenReader.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/stack \
+ E:/msys64/ucrt64/include/c++/15.2.0/deque \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_deque.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/deque.tcc \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_stack.h \
+ E:/code/C++/FEM/third_party/muparser/muParserToken.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/utility \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_relops.h \
+ E:/code/C++/FEM/third_party/muparser/muParserError.h \
+ E:/code/C++/FEM/third_party/muparser/muParserCallback.h \
+ E:/code/C++/FEM/third_party/muparser/muParserBytecode.h \
+ E:/code/C++/FEM/third_party/muparser/muParserTemplateMagic.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/random \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/random.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/opt_random.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/random.tcc \
+ E:/msys64/ucrt64/include/c++/15.2.0/numeric \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/stl_numeric.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/pstl/glue_numeric_defs.h \
+ E:/code/C++/FEM/third_party/nlohmann/json.hpp \
+ E:/msys64/ucrt64/include/c++/15.2.0/iterator \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/stream_iterator.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/forward_list \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/forward_list.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/forward_list.tcc \
+ E:/msys64/ucrt64/include/c++/15.2.0/valarray \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/valarray_array.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/valarray_array.tcc \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/valarray_before.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/slice_array.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/valarray_after.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/gslice.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/gslice_array.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/mask_array.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/indirect_array.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/version \
+ E:/msys64/ucrt64/include/c++/15.2.0/filesystem \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/fs_fwd.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/chrono.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/ratio \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/parse_numbers.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/fs_path.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/iomanip \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/quoted_string.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/codecvt \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/fs_dir.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/bits/fs_ops.h \
+ E:/msys64/ucrt64/include/c++/15.2.0/any \
+ E:/code/C++/FEM/include/problem_v2.h \
  E:/code/C++/FEM/include/boundary_condition.h \
  E:/code/C++/FEM/third_party/Eigen/IterativeLinearSolvers \
  E:/code/C++/FEM/third_party/Eigen/SparseLU \
- E:/msys64/ucrt64/include/c++/15.2.0/ctime \
- E:/msys64/ucrt64/include/c++/15.2.0/iostream \
  E:/code/C++/FEM/include/error_analysis.h \
  E:/code/C++/FEM/third_party/Eigen/Dense \
  E:/code/C++/FEM/third_party/Eigen/LU \
@@ -491,6 +552,7 @@ CMakeFiles/FEM_solution.dir/src/solvers/fem_solver.cpp.obj: \
  E:/code/C++/FEM/third_party/Eigen/src/Eigenvalues/GeneralizedEigenSolver.h \
  E:/code/C++/FEM/third_party/Eigen/src/Eigenvalues/RealQZ.h \
  E:/code/C++/FEM/third_party/Eigen/src/Eigenvalues/MatrixBaseEigenvalues.h \
+ E:/code/C++/FEM/include/problem_setup.h \
  E:/code/C++/FEM/include/gauss_quadrature.h \
  E:/code/C++/FEM/include/geometry_mapping.h \
  E:/code/C++/FEM/include/shape_functions.h \
