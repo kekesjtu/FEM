@@ -1,180 +1,200 @@
 #ifndef PROBLEM_SETUP_H
 #define PROBLEM_SETUP_H
 
-#include <functional>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
 #include "boundary_condition.h"
+#include "material.h"
+#include "nlohmann/json.hpp"
 
-// 前向声明以避免循环包含
-class Config;
+using json = nlohmann::json;
 
 /**
- * @brief 物理问题设置类
+ * @brief 物理场定义（电场、热场等）
+ */
+struct FieldConfiguration
+{
+    std::string name;
+
+    // 源项映射：几何实体ID -> 源项（支持不同域有不同源项）
+    std::map<int, MaterialProperty> domain_to_source;
+    bool source_computed = false;  // 是否由求解器计算（如焦耳热）
+
+    // 边界条件映射：几何实体ID -> 边界条件
+    std::map<int, BoundaryCondition> entity_to_bc;
+
+    // 精确解（可选）
+    bool has_exact_solution = false;
+    MaterialProperty exact_solution_u;
+    MaterialProperty exact_solution_grad_x;
+    MaterialProperty exact_solution_grad_y;
+    MaterialProperty exact_solution_grad_z;
+
+    static FieldConfiguration fromJSON(const std::string& field_name, const json& j);
+};
+
+/**
+ * @brief 求解器配置
+ */
+struct SolverConfiguration
+{
+    std::string solver_type = "CG";                              // "SparseLU" 或 "CG"
+    std::string preconditioner_type = "DiagonalPreconditioner";  // 预条件子类型
+    double tolerance = 1e-8;                                     // 收敛容差
+    int max_iterations = 1000;                                   // 最大迭代次数
+
+    static SolverConfiguration fromJSON(const json& j);
+};
+
+/**
+ * @brief 耦合问题配置（如电热耦合）
+ */
+struct CouplingConfiguration
+{
+    std::string type;
+    int max_iterations = 100;
+    double tolerance = 1e-6;
+    double relaxation_factor = 0.7;
+    double reference_temperature = 300.0;
+
+    static CouplingConfiguration fromJSON(const json& j);
+};
+
+/**
+ * @brief 日志配置
+ */
+struct LogConfiguration
+{
+    std::string log_level = "INFO";  // 日志级别："DEBUG", "INFO", "WARNING", "ERROR", "NONE"
+    std::string log_file = "";       // 日志文件路径（空字符串表示不输出到文件）
+
+    static LogConfiguration fromJSON(const json& j);
+};
+
+/**
+ * @brief 问题配置类 V2
  *
- * 负责定义具体物理场的边界条件、精确解等与物理问题相关的设置
- * 与 Config 类分离，Config 只负责网格、积分点等通用配置
+ * 负责：
+ * - 指定网格文件
+ * - 指定几何实体使用的材料
+ * - 设置源项
+ * - 设置边界条件（通过几何实体）
+ * - 提供精确解（可选）
  */
 class ProblemSetup
 {
   public:
-    /**
-     * @brief 构造函数
-     * @param name 问题名称（用于标识，如 "Electric Field", "Thermal Field"）
-     */
-    explicit ProblemSetup(const std::string& name = "Unnamed Problem");
+    // 基本信息
+    std::string name;
+    std::string description;
+    int dimension;
+    std::string mesh_file;
+    std::string material_library_file;
+    double mesh_unit_scale;  // 网格单位缩放因子（例如0.001将mm转为m）
+
+    // 几何实体 -> 材料名映射
+    std::map<int, std::string> domain_to_material;
+
+    // 物理场配置（支持多场问题）
+    std::map<std::string, FieldConfiguration> fields;  // "electric", "thermal"等
+
+    // 配置
+    SolverConfiguration solver;
+    LogConfiguration log;
+    CouplingConfiguration coupling;
+    bool has_coupling;
 
     /**
-     * @brief 设置边界条件（应该在求解前调用）
-     * @param config 配置对象，用于访问边界几何信息
+     * @brief 默认构造
+     */
+    ProblemSetup();
+
+    /**
+     * @brief 从JSON文件加载问题配置
+     */
+    void loadFromJSON(const std::string& json_file);
+
+    /**
+     * @brief 获取指定场的配置
+     */
+    const FieldConfiguration& getField(const std::string& field_name) const;
+
+    /**
+     * @brief 检查是否有指定的场
+     */
+    bool hasField(const std::string& field_name) const;
+
+    /**
+     * @brief 获取域对应的材料名
+     */
+    std::string getMaterialForDomain(int domain_id) const;
+
+    /**
+     * @brief 获取边界实体对应的边界条件
+     */
+    BoundaryCondition getBoundaryConditionForEntity(const std::string& field_name,
+                                                    int entity_id) const;
+
+    /**
+     * @brief 验证配置完整性
      *
-     * 子类必须实现此方法，根据边界几何信息设置物理边界条件
-     * 边界条件将存储在 boundary_conditions_ 中，索引对应 config->getBoundary()
-     */
-    virtual void setupBoundaryConditions(std::shared_ptr<Config> config) = 0;
-
-    /**
-     * @brief 设置边界条件设置函数（Lambda方式，供便捷使用）
-     * @param func 边界条件设置函数，接收 Config 对象
+     * 检查：
+     * - 网格文件是否存在
+     * - 材料库文件是否存在
+     * - 所有域是否都分配了材料
+     * - 边界条件是否完整
      *
-     * 示例：
-     * problem->setBoundarySetupFunction([](std::shared_ptr<Config> config) {
-     *     auto& boundary_conditions = problem->getBoundaryConditionsMutable();
-     *     const auto& boundaries = config->getBoundary();
-     *     const auto& coords = config->getNodeCoordinates();
-     *     int dim = config->getDimension();
-     *
-     *     boundary_conditions.resize(boundaries.size());
-     *     for (size_t i = 0; i < boundaries.size(); ++i) {
-     *         const auto& boundary = boundaries[i];
-     *         // 计算边界中点
-     *         double x = 0.0, y = 0.0;
-     *         for (int node_idx : boundary.global_node_indices_in_element) {
-     *             x += coords[node_idx * dim + 0];
-     *             y += coords[node_idx * dim + 1];
-     *         }
-     *         x /= boundary.global_node_indices_in_element.size();
-     *         y /= boundary.global_node_indices_in_element.size();
-     *
-     *         // 根据位置设置边界条件
-     *         if (x < 0) boundary_conditions[i] = BoundaryCondition::Dirichlet(0.0);
-     *         else boundary_conditions[i] = BoundaryCondition::Dirichlet(1.0);
-     *     }
-     * });
+     * @param warn_only 如果为true，只发出警告；如果为false，抛出异常
      */
-    void setBoundarySetupFunction(std::function<void(std::shared_ptr<Config>)> func);
+    void validate(bool warn_only = false) const;
 
     /**
-     * @brief 设置扩散系数函数 c(x,y)
-     * @param func 系数函数，输入物理坐标，返回系数值
+     * @brief 保存为JSON文件
      */
-    void setCoefficient(std::function<double(const std::vector<double>&)> func);
-
-    /**
-     * @brief 设置源项函数 f(x,y)
-     * @param func 源项函数，输入物理坐标，返回源项值
-     */
-    void setSource(std::function<double(const std::vector<double>&)> func);
-
-    /**
-     * @brief 设置精确解函数（用于误差分析，可选）
-     * @param u_func 精确解函数 u(x,y,...)
-     */
-    void setExactSolutionU(std::function<double(const std::vector<double>&)> func);
-
-    /**
-     * @brief 设置精确解梯度函数（用于误差分析，可选）
-     * @param grad_func 精确解梯度函数 ∇u(x,y,...)
-     */
-    void setExactSolutionGradients(
-        std::function<double(const std::vector<double>&, std::vector<double>&)> func);
-
-    /**
-     * @brief 计算扩散系数 c(x,y)
-     * @param coords 点坐标
-     * @return 扩散系数值
-     */
-    double coefficient(const std::vector<double>& coords) const;
-
-    /**
-     * @brief 计算源项 f(x,y)
-     * @param coords 点坐标
-     * @return 源项值
-     */
-    double source(const std::vector<double>& coords) const;
-
-    /**
-     * @brief 计算精确解（如果已设置）
-     * @param coords 点坐标
-     * @return 精确解值
-     */
-    double exactSolutionU(const std::vector<double>& coords) const;
-
-    /**
-     * @brief 计算精确解梯度（如果已设置）
-     * @param coords 点坐标
-     * @param gradients 输出梯度向量
-     * @return 精确解值
-     */
-    double exactSolutionGradients(const std::vector<double>& coords,
-                                  std::vector<double>& gradients) const;
-
-    /**
-     * @brief 获取边界条件列表（供 FEMSolver 使用）
-     * @return 边界条件列表，索引对应 Config::getBoundary()
-     */
-    const std::vector<BoundaryCondition>& getBoundaryConditions() const;
-
-    /**
-     * @brief 获取指定边界的边界条件
-     * @param boundary_index 边界索引（对应 Config::getBoundary() 中的索引）
-     * @return 边界条件
-     */
-    const BoundaryCondition& getBoundaryCondition(size_t boundary_index) const;
-
-    /**
-     * @brief 获取可修改的边界条件列表（供子类使用）
-     * @return 边界条件列表的可修改引用
-     */
-    std::vector<BoundaryCondition>& getBoundaryConditionsMutable();
-
-    /**
-     * @brief 检查是否设置了精确解
-     */
-    bool hasExactSolution() const;
-
-    /**
-     * @brief 获取问题名称
-     */
-    std::string getName() const
-    {
-        return name_;
-    }
-
-  protected:
-    std::string name_;  ///< 问题名称
-
-    /**
-     * @brief 边界条件列表（索引对应 Config 中的 Boundary）
-     *
-     * boundary_conditions_[i] 对应 config->getBoundary()[i]
-     * 由子类在 setupBoundaryConditions() 中设置
-     */
-    std::vector<BoundaryCondition> boundary_conditions_;
-
-    // 边界条件设置函数（Lambda方式，可选）
-    std::function<void(std::shared_ptr<Config>)> boundary_setup_func_;
+    void saveToJSON(const std::string& json_file) const;
 
   private:
-    // 物理问题函数
-    std::function<double(const std::vector<double>&)> coefficient_func_;  // 扩散系数 c(x,y)
-    std::function<double(const std::vector<double>&)> source_func_;       // 源项 f(x,y)
+    void parseBasicInfo(const json& j);
+    void parseDomainMaterials(const json& j);
+    void parseFields(const json& j);
+    void parseSolver(const json& j);
+    void parseLog(const json& j);
+    void parseCoupling(const json& j);
+    void applyLogConfiguration();  // 应用日志配置到全局Logger
+};
 
-    // 精确解函数（可选，用于误差分析）
-    std::function<double(const std::vector<double>&)> exact_solution_u_func_;
-    std::function<double(const std::vector<double>&, std::vector<double>&)>
-        exact_solution_gradients_func_;
+/**
+ * @brief 问题库工厂类
+ *
+ * 用于创建和管理预定义问题
+ */
+class ProblemLibrary
+{
+  public:
+    /**
+     * @brief 从JSON文件创建问题
+     */
+    static std::shared_ptr<ProblemSetup> createFromJSON(const std::string& json_file);
+
+    /**
+     * @brief 从预定义问题名创建
+     */
+    static std::shared_ptr<ProblemSetup> create(const std::string& problem_name);
+
+    /**
+     * @brief 列出所有可用的预定义问题
+     */
+    static std::vector<std::string> getAvailableProblems();
+
+    /**
+     * @brief 注册预定义问题
+     */
+    static void registerProblem(const std::string& name, const std::string& json_file_path);
+
+  private:
+    static std::map<std::string, std::string> predefined_problems_;
 };
 
 #endif  // PROBLEM_SETUP_H

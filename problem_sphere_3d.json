@@ -2,18 +2,22 @@
   "problem_name": "sphere_uniform_source_3d",
   "description": "三维球域均匀源项问题（带解析解）",
   "dimension": 3,
-  "mesh_file": "mesh_data/sphere_tet_mesh.mphtxt",
+  "mesh_file": "sphere_tet_mesh.mphtxt",
   "material_library_file": "materials_example.json",
-  
+
   "domain_materials": {
-    "1": "aluminum"
+    "1": "custom_single"
   },
-  
+
   "fields": {
-    "thermal": {
+    "electric": {
       "source": {
-        "type": "constant",
-        "value": 10.0
+        "domains": {
+          "1": {
+            "type": "constant",
+            "value": 10.0
+          }
+        }
       },
       "boundary_conditions": [
         {
@@ -46,7 +50,7 @@
       }
     }
   },
-  
+
   "solver": {
     "solver_type": "CG",
     "preconditioner_type": "DiagonalPreconditioner",

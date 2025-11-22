@@ -37,8 +37,7 @@ class Config
 
   private:
     // 网格相关
-    std::string mesh_filename_ =
-        "circle_mesh.mphtxt";  // 网格文件名（只需文件名，自动从mesh_data文件夹加载），用户可直接在此修改
+    std::string mesh_filename_;
     int dimension_;
     int nodes_num_;
     int elements_num_;
@@ -64,12 +63,8 @@ class Config
     int max_error_sampling_points_num_ = 5;  // 最大误差采样点数，用户可直接在此修改
     int gauss_error_points_num_ = 3;         // 高斯误差积分点数，用户可直接在此修改
 
-    // 求解器相关参数
-    std::string solver_type_ = "CG";  // 求解器类型："SparseLU"或"CG"，用户可直接在此修改
-    std::string preconditioner_type_ =
-        "DiagonalPreconditioner";       // 预条件子类型，用户可直接在此修改
-    double solver_tolerance_ = 1e-8;    // 求解器收敛容差，用户可直接在此修改
-    int solver_max_iterations_ = 1000;  // 求解器最大迭代次数，用户可直接在此修改
+    // 网格单位缩放因子
+    double mesh_unit_scale_ = 1.0;  // 默认1.0（不缩放），设为0.001可将mm转换为m
 
     // 文件中将会规定dimension、node_coordinates、element_connectivity、
     // int nodes_num_,int elements_num_,int nodes_num_per_element_;
@@ -115,6 +110,13 @@ class Config
     const std::vector<int>& getBoundaryGeometricEntities() const;
 
     /**
+     * @brief 获取单个边界单元的几何实体ID
+     * @param boundary_idx 边界单元索引
+     * @return 几何实体ID
+     */
+    int getBoundaryGeometricEntity(int boundary_idx) const;
+
+    /**
      * @brief 获取体单元几何实体编码
      * @return 体单元几何实体向量 [element_id] = entity_id
      */
@@ -125,11 +127,9 @@ class Config
     int getBoundaryNodesPerElement() const;  // 返回边界单元节点数（2）
     int getBoundaryGaussPointsNum() const;   // 返回边界积分使用的高斯点数
 
-    // 求解器参数访问器
-    const std::string& getSolverType() const;
-    const std::string& getPreconditionerType() const;
-    double getSolverTolerance() const;
-    int getSolverMaxIterations() const;
+    // 网格单位缩放
+    void setMeshUnitScale(double scale);  // 设置网格单位缩放因子（例如0.001将mm转为m）
+    double getMeshUnitScale() const;
 };
 
 #endif  // CONFIG_H

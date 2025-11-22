@@ -1,0 +1,78 @@
+{
+  "problem_name": "complex_thermal_robin",
+  "description": "复杂几何热传导问题：域11为热源，边界3为恒温边界，其他边界为Robin对流换热",
+  "dimension": 3,
+  "mesh_file": "complex_tet_mesh.mphtxt",
+  "mesh_unit_scale": 0.001,
+  "material_library_file": "materials_example.json",
+
+  "domain_materials": {
+    "Aluminum": [3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19],
+    "FR4": [1],
+    "Plastic": [2],
+    "Silicon": [11]
+  },
+
+  "fields": {
+    "thermal": {
+      "source": {
+        "domains": {
+          "all": {
+            "type": "constant",
+            "value": 0.0,
+            "comment": "默认：所有域无热源"
+          },
+          "11": {
+            "type": "constant",
+            "value": 2e8,
+            "comment": "域11为热源，功率密度2e8 W/m³"
+          }
+        }
+      },
+      "boundary_conditions": [
+        {
+          "entities": [3],
+          "type": "Dirichlet",
+          "value": 323.15,
+          "comment": "边界3：恒温边界 T=323.15K (50°C)"
+        },
+        {
+          "entities": "all",
+          "type": "Robin",
+          "K": 1.0,
+          "L": 50.0,
+          "q": 15157.5,
+          "comment": "其他边界：对流换热边界，h=50 W/(m²·K), T_ext=303.15K。Robin形式：K*κ*dT/dn + h*T = h*T_ext，即 K*dT/dn + L*T = q，其中 L=h=50, q=h*T_ext=50*303.15=15157.5"
+        }
+      ]
+    }
+  },
+
+  "solver": {
+    "solver_type": "CG",
+    "preconditioner_type": "DiagonalPreconditioner",
+    "tolerance": 1e-8,
+    "max_iterations": 5000
+  },
+
+  "log": {
+    "log_level": "INFO",
+    "log_file": ""
+  },
+
+  "comments": {
+    "problem_description": "复杂几何的稳态热传导问题",
+    "governing_equation": "-∇·(κ∇T) = Q in Ω",
+    "boundary_conditions": [
+      "边界3: T = 323.15 K (恒温边界)",
+      "其他边界: κ*dT/dn + h*T = h*T_ext (对流换热边界)"
+    ],
+    "source_term": "域11: Q = 2e8 W/m³; 其他域: Q = 0",
+    "initial_conditions": "所有域初始温度 T_0 = 293.15 K (仅用于说明，稳态问题不需要)",
+    "heat_transfer": {
+      "convection_coefficient": "h = 50 W/(m²·K)",
+      "external_temperature": "T_ext = 303.15 K (30°C)",
+      "robin_formulation": "κ*dT/dn + L*T = q, where L=h, q=h*T_ext"
+    }
+  }
+}

@@ -8,23 +8,33 @@
 #include "config.h"
 #include "gauss_quadrature.h"
 #include "geometry_mapping.h"
+#include "material.h"
 #include "shape_functions.h"
 
 ErrorAnalysis::ErrorAnalysis(std::shared_ptr<Config> config, std::shared_ptr<ProblemSetup> problem,
-                             const Eigen::VectorXd& solution)
-    : config_(config), problem_(problem), solution_(solution)
+                             const Eigen::VectorXd& solution, const std::string& field_name)
+    : config_(config), problem_(problem), solution_(solution), field_name_(field_name)
 {
 }
 
 bool ErrorAnalysis::hasExactSolution() const
 {
-    return problem_ && problem_->hasExactSolution();
+    if (!problem_ || !problem_->hasField(field_name_))
+    {
+        return false;
+    }
+    const auto& field = problem_->getField(field_name_);
+    return field.has_exact_solution;
 }
 
 bool ErrorAnalysis::hasExactGradients() const
 {
-    // 暂时简单返回 hasExactSolution()，因为 ProblemSetup 总是一起设置 U 和梯度
-    return problem_ && problem_->hasExactSolution();
+    if (!problem_ || !problem_->hasField(field_name_))
+    {
+        return false;
+    }
+    const auto& field = problem_->getField(field_name_);
+    return field.has_exact_solution;  // V2系统中精确解和梯度一起定义
 }
 
 double ErrorAnalysis::computeNormError(NormType norm) const
@@ -108,7 +118,15 @@ void ErrorAnalysis::printDetailedNodeErrors(int max_nodes) const
         }
 
         double numerical = solution_(i);
-        double exact = problem_->exactSolutionU(coords);
+
+        // 使用MaterialProperty评估精确解
+        const auto& field = problem_->getField(field_name_);
+        EvaluationContext ctx;
+        ctx.x = (sdim >= 1) ? coords[0] : 0.0;
+        ctx.y = (sdim >= 2) ? coords[1] : 0.0;
+        ctx.z = (sdim >= 3) ? coords[2] : 0.0;
+        double exact = field.exact_solution_u.evaluate(ctx);
+
         double error = std::abs(exact - numerical);
 
         std::cout << std::scientific << std::setprecision(6) << std::setw(18) << numerical
@@ -245,8 +263,13 @@ double ErrorAnalysis::computeLInfinityError() const
                 // 计算该点的数值解
                 double numerical_val = calculateNumericalSolution(element_index, coord_ref);
 
-                // 计算该点的精确解
-                double exact_val = problem_->exactSolutionU(coord_phys);
+                // 计算该点的精确解 - 使用MaterialProperty
+                const auto& field = problem_->getField(field_name_);
+                EvaluationContext ctx;
+                ctx.x = (sdim >= 1) ? coord_phys[0] : 0.0;
+                ctx.y = (sdim >= 2) ? coord_phys[1] : 0.0;
+                ctx.z = (sdim >= 3) ? coord_phys[2] : 0.0;
+                double exact_val = field.exact_solution_u.evaluate(ctx);
 
                 // 计算误差
                 double error = std::abs(exact_val - numerical_val);
@@ -325,7 +348,15 @@ double ErrorAnalysis::computeL2Error() const
             double jacobian = mapping->getJacobianDet(gp_coords_ref);
 
             double numerical = calculateNumericalSolution(i, gp_coords_ref);
-            double exact = problem_->exactSolutionU(phys_coords);
+
+            // 使用MaterialProperty评估精确解
+            const auto& field = problem_->getField(field_name_);
+            EvaluationContext ctx;
+            ctx.x = (sdim >= 1) ? phys_coords[0] : 0.0;
+            ctx.y = (sdim >= 2) ? phys_coords[1] : 0.0;
+            ctx.z = (sdim >= 3) ? phys_coords[2] : 0.0;
+            double exact = field.exact_solution_u.evaluate(ctx);
+
             double error = exact - numerical;
 
             l2_error_squared += error * error * weight * jacobian;
@@ -382,8 +413,21 @@ double ErrorAnalysis::computeH1SeminormError() const
             double jacobian = mapping->getJacobianDet(gp_coords_ref);
 
             auto num_grad = calculateNumericalGradient(i, gp_coords_ref);
+
+            // 使用MaterialProperty评估精确梯度
+            const auto& field = problem_->getField(field_name_);
+            EvaluationContext ctx;
+            ctx.x = (sdim >= 1) ? phys_coords[0] : 0.0;
+            ctx.y = (sdim >= 2) ? phys_coords[1] : 0.0;
+            ctx.z = (sdim >= 3) ? phys_coords[2] : 0.0;
+
             std::vector<double> exact_grad(sdim);
-            problem_->exactSolutionGradients(phys_coords, exact_grad);
+            if (sdim >= 1)
+                exact_grad[0] = field.exact_solution_grad_x.evaluate(ctx);
+            if (sdim >= 2)
+                exact_grad[1] = field.exact_solution_grad_y.evaluate(ctx);
+            if (sdim >= 3)
+                exact_grad[2] = field.exact_solution_grad_z.evaluate(ctx);
 
             double grad_error_squared = 0;
             for (int d = 0; d < sdim; ++d)

@@ -1,109 +1,170 @@
 #include <iostream>
+#include <stdexcept>
+#include "config.h"
 #include "electrothermal_solver.h"
 #include "fem_solver.h"
-#include "problem_definitions.h"
+#include "logger.h"
+#include "material.h"
+#include "problem_setup.h"
 
 /**
- * @brief 单场求解示例：Robin边界条件验证
+ * @brief 单场求解示例（JSON驱动）
+ * @param json_file 问题配置文件路径
  */
-void solveSingleField()
+void solveSingleFieldFromJSON(const std::string& json_file)
 {
-    std::cout << "\n================================================" << std::endl;
-    std::cout << "     单场求解" << std::endl;
-    std::cout << "================================================\n" << std::endl;
+    TIMER_SCOPE("单场求解总耗时");
 
-    // 创建配置对象（只负责网格）
-    auto config = std::make_shared<Config>();
+    LOG_HEADER("单场求解 (JSON驱动)");
 
-    std::string problem_type =
-        "sphere";  // 可修改为 "robin", "electric", "thermal", "cube", "sphere", "custom"
-    auto problem = ProblemLibrary::ProblemFactory::createProblem(problem_type);
+    try
+    {
+        std::shared_ptr<ProblemSetup> problem;
+        std::shared_ptr<MaterialLibrary> materials;
+        std::shared_ptr<Config> config;
+        std::string field_name;
 
-    std::cout << "求解问题: " << problem->getName() << std::endl;
+        // 1. 从JSON加载问题配置（内部会自动应用日志配置）
+        {
+            TIMER_SCOPE_DEBUG("加载问题配置");
+            problem = ProblemLibrary::createFromJSON(json_file);
+            LOG_INFO("问题名称: " + problem->name);
+            LOG_INFO("问题描述: " + problem->description);
+        }
 
-    // 创建FEM求解器
-    FEMSolver solver(config, problem);
+        // 2. 从JSON加载材料库
+        {
+            TIMER_SCOPE_DEBUG("加载材料库");
+            materials = std::make_shared<MaterialLibrary>();
+            materials->loadFromJSON(problem->material_library_file);
+            LOG_INFO("材料库: " + problem->material_library_file);
+        }
 
-    // 一键求解（边界条件、系数、源项已在 problem 中定义）
-    solver.solveComplete();
+        // 3. 创建配置对象并加载网格
+        {
+            TIMER_SCOPE("加载网格");
+            config = std::make_shared<Config>();
+            // 从problem读取网格单位缩放因子
+            config->setMeshUnitScale(problem->mesh_unit_scale);
+            config->setMeshFilename(problem->mesh_file);
+            LOG_INFO("网格文件: " + problem->mesh_file);
+        }
+
+        // 4. 确定要求解的场（假设是第一个场）
+        field_name = problem->fields.begin()->first;
+
+        // 5. 创建FEM求解器
+        FEMSolver solver(config, problem, materials, field_name);
+
+        // 6. 一键求解（内部已有详细计时）
+        solver.solveComplete();
+
+        LOG_INFO("\n单场求解完成！");
+    }
+    catch (const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+        throw;
+    }
 }
 
 /**
- * @brief 电热耦合求解示例
- *
- * 使用预定义的问题库设置电场和热场的边界条件
+ * @brief 电热耦合求解示例（JSON驱动）
+ * @param json_file 问题配置文件路径
  */
-void solveElectrothermal()
+void solveElectrothermalFromJSON(const std::string& json_file)
 {
-    std::cout << "\n================================================" << std::endl;
-    std::cout << "        电热耦合仿真" << std::endl;
-    std::cout << "================================================\n" << std::endl;
+    LOG_HEADER("电热耦合仿真 (JSON驱动)");
 
-    // 创建网格配置（共享同一个网格）
-    auto config = std::make_shared<Config>();
+    try
+    {
+        // 1. 从JSON加载问题配置（内部会自动应用日志配置）
+        auto problem = ProblemLibrary::createFromJSON(json_file);
+        LOG_INFO("问题名称: " + problem->name);
+        LOG_INFO("问题描述: " + problem->description);
 
-    // 定义物理参数并创建电热耦合问题配置
-    ProblemLibrary::ElectrothermalParams params;
-    params.sigma0 = 1.0;   // 参考电导率 [S/m]
-    params.alpha = 0.003;  // 温度系数 [1/K]
-    params.T0 = 300.0;     // 参考温度 [K]
-    // 热导率使用 createThermalField() 中的默认值（1.0）
+        // 验证是否为电热耦合问题
+        if (!problem->has_coupling)
+        {
+            throw std::runtime_error("配置文件不包含耦合配置");
+        }
+        if (!problem->hasField("electric") || !problem->hasField("thermal"))
+        {
+            throw std::runtime_error("电热耦合问题必须定义electric和thermal两个场");
+        }
 
-    // 使用工厂模式创建电热耦合问题
-    auto et_problem = ProblemLibrary::ProblemFactory::createElectrothermal(params);
+        // 2. 从JSON加载材料库
+        auto materials = std::make_shared<MaterialLibrary>();
+        materials->loadFromJSON(problem->material_library_file);
+        LOG_INFO("材料库: " + problem->material_library_file);
 
-    std::cout << "电场边界条件: " << et_problem.electric_problem->getName() << std::endl;
-    std::cout << "  - 左半圆边界 (x<0): V = 1.0 V (施加电压)" << std::endl;
-    std::cout << "  - 右半圆边界 (x>0): V = 0.0 V (接地)" << std::endl;
+        // 3. 创建配置对象并加载网格
+        auto config = std::make_shared<Config>();
+        // 从problem读取网格单位缩放因子
+        config->setMeshUnitScale(problem->mesh_unit_scale);
+        config->setMeshFilename(problem->mesh_file);
 
-    std::cout << "热场边界条件: " << et_problem.thermal_problem->getName() << std::endl;
-    std::cout << "  - 所有边界: ΔT = 0 (保持参考温度 " << params.T0 << " K)" << std::endl;
+        // 4. 创建电热耦合求解器
+        ElectrothermalSolver et_solver(config, problem, materials);
 
-    // 创建电热耦合求解器
-    ElectrothermalSolver et_solver(config, et_problem,
-                                   1e-6,  // 收敛容差
-                                   100,   // 最大迭代次数
-                                   true,  // 详细输出
-                                   0.7);  // 松弛因子：0.5表示新旧解各占50%（可调整0.3-0.7）
+        // 5. 求解
+        et_solver.solve();
 
-    // 执行耦合求解
-    et_solver.solve();
+        // 6. 输出结果
+        et_solver.outputResults("results/electrothermal");
 
-    // 输出结果
-    et_solver.outputResults("results/electrothermal");
-
-    std::cout << "\n电热耦合求解完成！" << std::endl;
-    std::cout << "请使用ParaView查看以下文件：" << std::endl;
-    std::cout << "  - results/electrothermal_V.vtu (电势场)" << std::endl;
-    std::cout << "  - results/electrothermal_T.vtu (温度场)" << std::endl;
-    std::cout << "  - results/electrothermal_Q.vtu (焦耳热密度)" << std::endl;
+        LOG_INFO("\n电热耦合求解完成！");
+        LOG_INFO("请使用ParaView查看以下文件：");
+        LOG_INFO("  - results/electrothermal_V.vtu (电势场)");
+        LOG_INFO("  - results/electrothermal_T.vtu (温度场)");
+        LOG_INFO("  - results/electrothermal_Q.vtu (焦耳热密度)");
+    }
+    catch (const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+        throw;
+    }
 }
 
 /**
- * @brief 主函数
+ * @brief 主函数（V2版本 - 完全JSON驱动）
  */
-int main()
+int main(int argc, char* argv[])
 {
-    // 选择求解模式
-    int mode = 2;  // 1: 单场求解(3D正方体均匀电荷), 2: 电热耦合
+    // 初始化日志系统（默认INFO级别，由JSON配置文件控制）
+    Logger::getInstance().setLogLevel(LogLevel::INFO);
 
-    std::cout << "================================================" << std::endl;
-    std::cout << "          有限元求解器" << std::endl;
-    std::cout << "================================================" << std::endl;
-    std::cout << "模式: " << (mode == 1 ? "单场求解(3D)" : "电热耦合") << std::endl;
+    LOG_HEADER("有限元求解器");
 
-    if (mode == 1)
+    try
     {
-        solveSingleField();
+        std::string json_file = "problem_complex_thermal.json";
+
+        // 支持命令行参数指定JSON文件
+        if (argc > 1)
+        {
+            json_file = argv[1];
+        }
+
+        LOG_INFO("配置文件: " + json_file);
+
+        // 根据文件名判断是单场还是耦合问题
+        if (json_file.find("electrothermal") != std::string::npos)
+        {
+            solveElectrothermalFromJSON(json_file);
+        }
+        else
+        {
+            solveSingleFieldFromJSON(json_file);
+        }
+
+        LOG_HEADER("求解完成");
+
+        return 0;
     }
-    else if (mode == 2)
+    catch (const std::exception& e)
     {
-        solveElectrothermal();
+        LOG_ERROR("\n程序异常终止: " + std::string(e.what()));
+        return 1;
     }
-
-    std::cout << "\n================================================" << std::endl;
-    std::cout << "          求解完成" << std::endl;
-    std::cout << "================================================" << std::endl;
-
-    return 0;
 }

@@ -2,14 +2,13 @@
   "problem_name": "electrothermal_circle_2d",
   "description": "二维圆域电热耦合问题",
   "dimension": 2,
-  "mesh_file": "mesh_data/circle_mesh.mphtxt",
+  "mesh_file": "circle_mesh.mphtxt",
   "material_library_file": "materials_example.json",
-  
+
   "domain_materials": {
-    "0": "copper",
-    "1": "copper"
+    "1": "custom_coupled"
   },
-  
+
   "fields": {
     "electric": {
       "source": {
@@ -32,7 +31,7 @@
         }
       ]
     },
-    
+
     "thermal": {
       "source": {
         "type": "computed",
@@ -48,7 +47,7 @@
       ]
     }
   },
-  
+
   "coupling": {
     "type": "electrothermal",
     "max_iterations": 100,
@@ -56,7 +55,7 @@
     "relaxation_factor": 0.7,
     "reference_temperature": 300.0
   },
-  
+
   "solver": {
     "solver_type": "CG",
     "preconditioner_type": "DiagonalPreconditioner",

@@ -1,6 +1,5 @@
-#include <cmath>  // For std::abs
+#include <cmath>  // For std::abs, std::sqrt
 #include "geometry_mapping.h"
-
 
 // =========================================================================
 // ==              TriangleLinearMapping Implementation                   ==
@@ -12,50 +11,79 @@
  */
 void TriangleLinearMapping::computeJacobian()
 {
-    // 从基类的 element_coords 中提取节点坐标以便于计算
-    // [x0, y0, x1, y1, x2, y2]
-    const double x0 = element_coords_[0], y0 = element_coords_[1];
-    const double x1 = element_coords_[2], y1 = element_coords_[3];
-    const double x2 = element_coords_[4], y2 = element_coords_[5];
+    // 从基类的 element_coords 中提取节点坐标
+    // 2D: [x0, y0, x1, y1, x2, y2] (6个元素)
+    // 3D边界: [x0, y0, z0, x1, y1, z1, x2, y2, z2] (9个元素)
 
-    // 雅可比矩阵 J = [[dx/dxi,  dx/deta],
-    //                [dy/dxi,  dy/deta]]
-    //
-    // 对于线性三角形，形函数为:
-    // N0 = 1 - xi - eta
-    // N1 = xi
-    // N2 = eta
-    //
-    // 坐标映射为:
-    // x(xi, eta) = N0*x0 + N1*x1 + N2*x2
-    // y(xi, eta) = N0*y0 + N1*y1 + N2*y2
-    //
-    // 求导可得:
-    // dx/dxi  = x1 - x0
-    // dx/deta = x2 - x0
-    // dy/dxi  = y1 - y0
-    // dy/deta = y2 - y0
+    const int dim = embedding_dimension_;  // 嵌入空间维度
+
+    // 提取三个顶点的坐标
+    const double x0 = element_coords_[0 * dim + 0], y0 = element_coords_[0 * dim + 1];
+    const double x1 = element_coords_[1 * dim + 0], y1 = element_coords_[1 * dim + 1];
+    const double x2 = element_coords_[2 * dim + 0], y2 = element_coords_[2 * dim + 1];
+
+    // 雅可比矩阵的计算
+    // 对于2D三角形（dim=2）：J 是 2×2 矩阵
+    // 对于3D曲面三角形（dim=3）：J 是 3×2 矩阵，需要用不同方法计算行列式
+
     const double dx_dxi = x1 - x0;
     const double dx_deta = x2 - x0;
     const double dy_dxi = y1 - y0;
     const double dy_deta = y2 - y0;
 
-    // 计算雅可比行列式
-    jacobian_det_ = dx_dxi * dy_deta - dx_deta * dy_dxi;
+    if (dim == 2)
+    {
+        // 2D情况：标准的2×2雅可比行列式
+        jacobian_det_ = dx_dxi * dy_deta - dx_deta * dy_dxi;
+    }
+    else if (dim == 3)
+    {
+        // 3D曲面情况：需要考虑z坐标
+        const double z0 = element_coords_[0 * dim + 2];
+        const double z1 = element_coords_[1 * dim + 2];
+        const double z2 = element_coords_[2 * dim + 2];
+
+        const double dz_dxi = z1 - z0;
+        const double dz_deta = z2 - z0;
+
+        // 雅可比矩阵 J = [dx/dxi  dx/deta ]
+        //                [dy/dxi  dy/deta ]
+        //                [dz/dxi  dz/deta ]
+        //
+        // 对于3×2矩阵，"行列式"实际是曲面法向量的模长
+        // |J| = ||∂r/∂ξ × ∂r/∂η||
+        // 其中 ∂r/∂ξ = (dx/dxi, dy/dxi, dz/dxi)
+        //      ∂r/∂η = (dx/deta, dy/deta, dz/deta)
+
+        // 叉积: n = ∂r/∂ξ × ∂r/∂η
+        double nx = dy_dxi * dz_deta - dz_dxi * dy_deta;
+        double ny = dz_dxi * dx_deta - dx_dxi * dz_deta;
+        double nz = dx_dxi * dy_deta - dy_dxi * dx_deta;
+
+        // 雅可比行列式 = ||n||
+        jacobian_det_ = std::sqrt(nx * nx + ny * ny + nz * nz);
+    }
+    else
+    {
+        throw std::runtime_error("TriangleLinearMapping only supports 2D or 3D embedding");
+    }
 
     if (std::abs(jacobian_det_) < 1e-15)
     {
         throw std::runtime_error("Degenerate triangle element: jacobian determinant is zero.");
     }
 
-    // 计算逆雅可比矩阵 J^-1 = [[dxi/dx,  dxi/dy],
-    //                          [deta/dx, deta/dy]]
-    const double inv_det = 1.0 / jacobian_det_;
-    jacobian_inv_.resize(2, std::vector<double>(2));
-    jacobian_inv_[0][0] = dy_deta * inv_det;   // dxi/dx
-    jacobian_inv_[0][1] = -dx_deta * inv_det;  // dxi/dy
-    jacobian_inv_[1][0] = -dy_dxi * inv_det;   // deta/dx
-    jacobian_inv_[1][1] = dx_dxi * inv_det;    // deta/dy
+    // 计算逆雅可比矩阵（仅对2D情况）
+    if (dim == 2)
+    {
+        const double inv_det = 1.0 / jacobian_det_;
+        jacobian_inv_.resize(2, std::vector<double>(2));
+        jacobian_inv_[0][0] = dy_deta * inv_det;   // dxi/dx
+        jacobian_inv_[0][1] = -dx_deta * inv_det;  // dxi/dy
+        jacobian_inv_[1][0] = -dy_dxi * inv_det;   // deta/dx
+        jacobian_inv_[1][1] = dx_dxi * inv_det;    // deta/dy
+    }
+    // 对于3D曲面，暂不计算逆矩阵（当前边界积分不需要梯度）
 }
 
 void TriangleLinearMapping::mapToPhysical(const std::vector<double>& coord_ref,
@@ -65,7 +93,7 @@ void TriangleLinearMapping::mapToPhysical(const std::vector<double>& coord_ref,
     {
         throw std::invalid_argument("Reference coordinate must have 2 components (xi, eta).");
     }
-    coord_phys.resize(2);
+    coord_phys.resize(embedding_dimension_);
 
     const double xi = coord_ref[0];
     const double eta = coord_ref[1];
@@ -75,10 +103,14 @@ void TriangleLinearMapping::mapToPhysical(const std::vector<double>& coord_ref,
     const double N1 = xi;
     const double N2 = eta;
 
-    // x = N0*x0 + N1*x1 + N2*x2
-    coord_phys[0] = N0 * element_coords_[0] + N1 * element_coords_[2] + N2 * element_coords_[4];
-    // y = N0*y0 + N1*y1 + N2*y2
-    coord_phys[1] = N0 * element_coords_[1] + N1 * element_coords_[3] + N2 * element_coords_[5];
+    const int dim = embedding_dimension_;
+
+    // 对每个坐标维度进行插值
+    for (int d = 0; d < dim; ++d)
+    {
+        coord_phys[d] = N0 * element_coords_[0 * dim + d] + N1 * element_coords_[1 * dim + d] +
+                        N2 * element_coords_[2 * dim + d];
+    }
 }
 
 double TriangleLinearMapping::getJacobianDet(const std::vector<double>& coord_ref) const

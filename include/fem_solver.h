@@ -3,14 +3,16 @@
 
 #include <Eigen/Sparse>
 #include <memory>
+#include <string>
 #include <vector>
 #include "config.h"
+#include "material.h"
 #include "problem_setup.h"
 
 /**
- * @brief 有限元求解器类
+ * @brief 有限元求解器类 (V2版本 - JSON驱动)
  *
- * 封装了完整的有限元求解流程，支持自定义系数和源项函数。
+ * 封装了完整的有限元求解流程,支持通过JSON配置文件定义材料属性、边界条件和源项。
  * 适用于求解形式为 -∇·(c∇u) = f 的偏微分方程。
  */
 class FEMSolver
@@ -18,7 +20,9 @@ class FEMSolver
   private:
     // 配置对象
     std::shared_ptr<Config> config_;
-    std::shared_ptr<ProblemSetup> problem_;  // 物理问题设置
+    std::shared_ptr<ProblemSetup> problem_;       // 问题配置
+    std::shared_ptr<MaterialLibrary> materials_;  // 材料库
+    std::string field_name_;                      // 当前求解的场名称 ("electric", "thermal"等)
 
     // 网格信息
     int N_;  // 节点数
@@ -44,11 +48,14 @@ class FEMSolver
 
   public:
     /**
-     * @brief 构造函数
+     * @brief 构造函数 (V2 API)
      * @param config 配置对象，包含网格信息
-     * @param problem 问题设置，包含边界条件、系数、源项和精确解
+     * @param problem 问题配置(来自JSON)
+     * @param materials 材料库(来自JSON)
+     * @param field_name 要求解的物理场名称 (如 "electric", "thermal")
      */
-    FEMSolver(std::shared_ptr<Config> config, std::shared_ptr<ProblemSetup> problem);
+    FEMSolver(std::shared_ptr<Config> config, std::shared_ptr<ProblemSetup> problem,
+              std::shared_ptr<MaterialLibrary> materials, const std::string& field_name);
 
     // === 高级接口：一键求解 ===
 
@@ -68,8 +75,24 @@ class FEMSolver
 
     /**
      * @brief 组装全局刚度矩阵和载荷向量
+     *
+     * 此函数依次调用 assembleStiffnessMatrix() 和 assembleLoadVector()
      */
     void assemble();
+
+    /**
+     * @brief 仅组装全局刚度矩阵（不处理载荷向量）
+     *
+     * 用于耦合问题中需要单独组装刚度矩阵的情况
+     */
+    void assembleStiffnessMatrix();
+
+    /**
+     * @brief 仅组装载荷向量（不处理刚度矩阵）
+     *
+     * 用于耦合问题中需要单独组装载荷向量的情况
+     */
+    void assembleLoadVector();
 
     /**
      * @brief 设置外部组装的刚度矩阵（用于耦合问题）

@@ -1,12 +1,11 @@
 #include "config.h"
 #include <iostream>
 #include "comsol_mesh_importer.h"
+#include "logger.h"
 
 // 构造函数实现
 Config::Config()
 {
-    loadMeshFromFile(mesh_filename_);  // 网格相关变量初始化完毕
-    setGaussAssemblePoints();          // 矩阵组装计算参数初始化完毕
 }
 
 // 高斯积分点数设置
@@ -104,9 +103,10 @@ void Config::setGaussAssemblePoints()
         gauss_error_points_num_ = gauss_assemble_points_num_;
     }
 
-    std::cout << "设置高斯积分点数: 组装=" << gauss_assemble_points_num_
-              << ", 误差分析=" << gauss_error_points_num_ << " (维度=" << dimension_
-              << ", 单元类型=" << element_type_ << ", 阶数=" << order_ << ")" << std::endl;
+    LOG_DEBUG("设置高斯积分点数: 组装=" + std::to_string(gauss_assemble_points_num_) +
+              ", 误差分析=" + std::to_string(gauss_error_points_num_) + " (维度=" +
+              std::to_string(dimension_) + ", 单元类型=" + std::to_string(element_type_) +
+              ", 阶数=" + std::to_string(order_) + ")");
 }
 
 // 访问器实现
@@ -188,6 +188,15 @@ const std::vector<Config::Boundary>& Config::getBoundary() const
 const std::vector<int>& Config::getBoundaryGeometricEntities() const
 {
     return boundary_geometric_entities_;
+}
+
+int Config::getBoundaryGeometricEntity(int boundary_idx) const
+{
+    if (boundary_idx < 0 || boundary_idx >= static_cast<int>(boundary_geometric_entities_.size()))
+    {
+        throw std::out_of_range("边界索引超出范围");
+    }
+    return boundary_geometric_entities_[boundary_idx];
 }
 
 const std::vector<int>& Config::getElementGeometricEntities() const
@@ -286,25 +295,15 @@ int Config::getBoundaryGaussPointsNum() const
     }
 }
 
-// 求解器参数访问器实现
-const std::string& Config::getSolverType() const
+// 网格单位缩放
+void Config::setMeshUnitScale(double scale)
 {
-    return solver_type_;
+    mesh_unit_scale_ = scale;
 }
 
-const std::string& Config::getPreconditionerType() const
+double Config::getMeshUnitScale() const
 {
-    return preconditioner_type_;
-}
-
-double Config::getSolverTolerance() const
-{
-    return solver_tolerance_;
-}
-
-int Config::getSolverMaxIterations() const
-{
-    return solver_max_iterations_;
+    return mesh_unit_scale_;
 }
 
 // 网格加载实现
@@ -316,8 +315,14 @@ void Config::loadMeshFromFile(const std::string& filename)
 
     // 使用COMSOL网格导入器导入网格
     ComsolMeshImporter importer;
+    // 传递网格单位缩放因子
+    importer.setMeshUnitScale(mesh_unit_scale_);
+
     if (importer.importMesh(full_path))
     {
+        // 输出网格统计信息（只输出一次）
+        importer.printImportStatistics();
+
         // 获取网格基本信息
         dimension_ = importer.getDimension();
         nodes_num_ = importer.getNodesNum();
@@ -390,8 +395,7 @@ void Config::initializeBoundarys(const std::vector<std::vector<int>>& boundary_e
         boundary_type = "个边界单元";
     }
 
-    std::cout << "初始化边界信息: " << boundarys.size() << " " << boundary_type << std::endl;
-    std::cout << "提示：边界条件将由 ProblemSetup 在求解时动态设置" << std::endl;
+    LOG_INFO("初始化边界信息: " + std::to_string(boundarys.size()) + " " + boundary_type);
 }
 
 int Config::findElementContainingEdge(const std::vector<int>& edge_nodes) const

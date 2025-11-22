@@ -38,18 +38,18 @@ struct BoundaryCondition
     }
 
     /**
-     * @brief 构造罗宾边界条件: c*du/dn + h*u = g
-     * @param h 值项系数
-     * @param g 右侧项值
-     * @return Robin 边界条件 (K=1, L=h, q=g)
+     * @brief 构造罗宾边界条件: K*du/dn + L*u = q
+     * @param L 值项系数
+     * @param q 右侧项值
+     * @return Robin 边界条件 (K=1, L, q)
      */
-    static BoundaryCondition Robin(double h, double g)
+    static BoundaryCondition Robin(double L, double q)
     {
-        return {1, h, g};
+        return {1, L, q};
     }
 
     /**
-     * @brief 构造诺曼边界条件: c*du/dn = q_flux
+     * @brief 构造诺曼边界条件: K*du/dn = q_flux
      * @param q_flux 法向通量值
      * @return Neumann 边界条件 (K=1, L=0, q=q_flux)
      */

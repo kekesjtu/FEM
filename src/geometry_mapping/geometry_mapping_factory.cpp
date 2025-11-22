@@ -2,7 +2,6 @@
 #include "config.h"
 #include "geometry_mapping.h"
 
-
 // ================ 工厂模式实现 ================
 
 std::unique_ptr<GeometryMapping> GeometryMappingFactory::createMapping(
@@ -28,7 +27,7 @@ std::unique_ptr<GeometryMapping> GeometryMappingFactory::createMapping(
             switch (order)
             {
                 case 1:
-                    return std::make_unique<TriangleLinearMapping>(element_coords);
+                    return std::make_unique<TriangleLinearMapping>(element_coords, embed_dim);
                 default:
                     throw std::invalid_argument("Unsupported order for Triangle");
             }

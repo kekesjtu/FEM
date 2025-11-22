@@ -1,143 +1,390 @@
 #include "material.h"
+#include <fstream>
 #include <iostream>
-#include "config.h"
+#include <stdexcept>
+#include "logger.h"
 
 // ============================================================================
-// Material 类实现
+// 辅助函数：安全地解析域ID
 // ============================================================================
 
-Material::Material(const std::string& name) : name_(name)
+/**
+ * @brief 安全地将字符串转换为域ID
+ * @param domain_str 域ID字符串（必须是数字）
+ * @return 域ID
+ * @throw std::invalid_argument 如果字符串不是有效的数字
+ */
+static int parseDomainId(const std::string& domain_str)
 {
-}
-
-void Material::setCoefficient(std::function<double(const std::vector<double>&)> func)
-{
-    coefficient_func_ = func;
-    temperature_dependent_coefficient_func_ = nullptr;  // 清除温度依赖
-}
-
-void Material::setTemperatureDependentCoefficient(
-    std::function<double(const std::vector<double>&, double)> func)
-{
-    temperature_dependent_coefficient_func_ = func;
-    coefficient_func_ = nullptr;  // 清除普通系数
-}
-
-void Material::setSource(std::function<double(const std::vector<double>&)> func)
-{
-    source_func_ = func;
-}
-
-double Material::coefficient(const std::vector<double>& coords) const
-{
-    if (temperature_dependent_coefficient_func_)
+    try
     {
-        throw std::runtime_error("材料 '" + name_ +
-                                 "' 的系数依赖温度，请使用 coefficient(coords, temperature)");
+        return std::stoi(domain_str);
     }
-
-    if (!coefficient_func_)
+    catch (const std::exception& e)
     {
-        throw std::runtime_error("材料 '" + name_ + "' 未设置系数函数");
+        throw std::invalid_argument("Invalid domain ID: '" + domain_str + "'. Expected integer.");
     }
-
-    return coefficient_func_(coords);
-}
-
-double Material::coefficient(const std::vector<double>& coords, double temperature) const
-{
-    // 优先使用温度依赖函数
-    if (temperature_dependent_coefficient_func_)
-    {
-        return temperature_dependent_coefficient_func_(coords, temperature);
-    }
-
-    // 回退到不依赖温度的函数
-    if (coefficient_func_)
-    {
-        return coefficient_func_(coords);
-    }
-
-    throw std::runtime_error("材料 '" + name_ + "' 未设置系数函数");
-}
-
-double Material::source(const std::vector<double>& coords) const
-{
-    if (!source_func_)
-    {
-        return 0.0;  // 默认无源项
-    }
-    return source_func_(coords);
 }
 
 // ============================================================================
-// MaterialLibrary 类实现
+// MaterialProperty 实现
 // ============================================================================
 
-int MaterialLibrary::addMaterial(std::shared_ptr<Material> material)
+MaterialProperty::MaterialProperty()
+    : type_(Type::CONSTANT), constant_value_(1.0), parser_initialized_(false)
 {
-    int material_id = static_cast<int>(materials_.size());
-    materials_.push_back(material);
-    material_name_to_id_[material->getName()] = material_id;
-    return material_id;
 }
 
-std::shared_ptr<Material> MaterialLibrary::getMaterialByName(const std::string& name) const
+MaterialProperty::MaterialProperty(double value)
+    : type_(Type::CONSTANT), constant_value_(value), parser_initialized_(false)
 {
-    auto it = material_name_to_id_.find(name);
-    if (it == material_name_to_id_.end())
-    {
-        throw std::runtime_error("未找到材料: " + name);
-    }
-    return materials_[it->second];
 }
 
-std::shared_ptr<Material> MaterialLibrary::getMaterialByID(int material_id) const
+MaterialProperty::MaterialProperty(const std::string& formula,
+                                   const std::vector<std::string>& variables,
+                                   const std::map<std::string, double>& parameters)
+    : type_(Type::EXPRESSION),
+      constant_value_(0.0),
+      formula_(formula),
+      variables_(variables),
+      parameters_(parameters),
+      parser_initialized_(false)
 {
-    if (material_id < 0 || material_id >= static_cast<int>(materials_.size()))
-    {
-        throw std::out_of_range("材料ID超出范围: " + std::to_string(material_id));
-    }
-    return materials_[material_id];
 }
 
-void MaterialLibrary::assignMaterialToDomain(int domain_id, int material_id)
+MaterialProperty MaterialProperty::fromJSON(const json& j)
 {
-    if (material_id < 0 || material_id >= static_cast<int>(materials_.size()))
+    if (!j.contains("type"))
     {
-        throw std::out_of_range("材料ID超出范围: " + std::to_string(material_id));
+        throw std::runtime_error("Material property JSON must contain 'type' field");
     }
-    domain_to_material_[domain_id] = material_id;
+
+    std::string type_str = j["type"];
+
+    if (type_str == "constant")
+    {
+        if (!j.contains("value"))
+        {
+            throw std::runtime_error("Constant material property must have 'value' field");
+        }
+        return MaterialProperty(j["value"].get<double>());
+    }
+    else if (type_str == "expression")
+    {
+        if (!j.contains("formula"))
+        {
+            throw std::runtime_error("Expression material property must have 'formula' field");
+        }
+
+        std::string formula = j["formula"];
+        std::vector<std::string> variables;
+        std::map<std::string, double> parameters;
+
+        // 读取依赖的变量
+        if (j.contains("variables"))
+        {
+            variables = j["variables"].get<std::vector<std::string>>();
+        }
+
+        // 读取参数
+        if (j.contains("parameters"))
+        {
+            parameters = j["parameters"].get<std::map<std::string, double>>();
+        }
+
+        return MaterialProperty(formula, variables, parameters);
+    }
+    else
+    {
+        throw std::runtime_error("Unknown material property type: " + type_str);
+    }
+}
+
+void MaterialProperty::initializeParser(const EvaluationContext& ctx) const
+{
+    if (parser_initialized_)
+    {
+        return;
+    }
+
+    parser_ = std::make_shared<mu::Parser>();
+
+    // 定义公式中的参数(常数)
+    for (const auto& [name, value] : parameters_)
+    {
+        parser_->DefineConst(name, value);
+    }
+
+    // 为每个变量创建存储空间,并定义到parser中
+    for (const auto& var_name : variables_)
+    {
+        // 创建变量存储并初始化为0
+        variable_values_[var_name] = 0.0;
+        // 让parser使用这个存储的指针
+        parser_->DefineVar(var_name, &variable_values_[var_name]);
+    }
+
+    // 设置表达式
+    try
+    {
+        parser_->SetExpr(formula_);
+        parser_initialized_ = true;
+    }
+    catch (mu::Parser::exception_type& e)
+    {
+        std::string msg = "Failed to parse material property formula: ";
+        msg += e.GetMsg();
+        throw std::runtime_error(msg);
+    }
+}
+
+double MaterialProperty::evaluate(const EvaluationContext& ctx) const
+{
+    if (type_ == Type::CONSTANT)
+    {
+        return constant_value_;
+    }
+
+    // 表达式类型
+    if (!parser_initialized_)
+    {
+        initializeParser(ctx);
+    }
+
+    // 更新变量值
+    auto var_map = const_cast<EvaluationContext&>(ctx).getVariableMap();
+    for (const auto& var_name : variables_)
+    {
+        if (var_map.find(var_name) != var_map.end())
+        {
+            variable_values_[var_name] = *var_map[var_name];
+        }
+        else
+        {
+            throw std::runtime_error("Unknown variable in material property formula: " + var_name);
+        }
+    }
+
+    try
+    {
+        return parser_->Eval();
+    }
+    catch (mu::Parser::exception_type& e)
+    {
+        std::string msg = "Error evaluating material property: ";
+        msg += e.GetMsg();
+        throw std::runtime_error(msg);
+    }
+}
+
+// ============================================================================
+// Material 实现
+// ============================================================================
+
+Material::Material()
+    : name("DefaultMaterial"),
+      description("Default material with unit properties"),
+      thermal_conductivity(1.0),
+      electrical_conductivity(1.0),
+      density(1.0),
+      specific_heat(1.0)
+{
+}
+
+Material::Material(const std::string& name)
+    : name(name),
+      description(""),
+      thermal_conductivity(1.0),
+      electrical_conductivity(1.0),
+      density(1.0),
+      specific_heat(1.0)
+{
+}
+
+std::shared_ptr<Material> Material::fromJSON(const std::string& material_name, const json& j)
+{
+    auto material = std::make_shared<Material>(material_name);
+
+    // 读取描述
+    if (j.contains("description"))
+    {
+        material->description = j["description"];
+    }
+
+    // 读取各个属性
+    if (j.contains("thermal_conductivity"))
+    {
+        material->thermal_conductivity = MaterialProperty::fromJSON(j["thermal_conductivity"]);
+        LOG_DEBUG("    - 读取thermal_conductivity属性");
+    }
+
+    if (j.contains("electrical_conductivity"))
+    {
+        material->electrical_conductivity =
+            MaterialProperty::fromJSON(j["electrical_conductivity"]);
+        LOG_DEBUG("    - 读取electrical_conductivity属性");
+    }
+
+    if (j.contains("density"))
+    {
+        material->density = MaterialProperty::fromJSON(j["density"]);
+        LOG_DEBUG("    - 读取density属性");
+    }
+
+    if (j.contains("specific_heat"))
+    {
+        material->specific_heat = MaterialProperty::fromJSON(j["specific_heat"]);
+        LOG_DEBUG("    - 读取specific_heat属性");
+    }
+
+    return material;
+}
+
+json Material::toJSON() const
+{
+    json j;
+    j["name"] = name;
+    j["description"] = description;
+
+    // 属性转换辅助函数
+    auto property_to_json = [](const MaterialProperty& prop) -> json
+    {
+        json p;
+        if (prop.getType() == MaterialProperty::Type::CONSTANT)
+        {
+            p["type"] = "constant";
+            p["value"] = prop.getConstantValue();
+        }
+        else
+        {
+            p["type"] = "expression";
+            p["formula"] = prop.getFormula();
+            if (!prop.getVariables().empty())
+            {
+                p["variables"] = prop.getVariables();
+            }
+            if (!prop.getParameters().empty())
+            {
+                p["parameters"] = prop.getParameters();
+            }
+        }
+        return p;
+    };
+
+    j["thermal_conductivity"] = property_to_json(thermal_conductivity);
+    j["electrical_conductivity"] = property_to_json(electrical_conductivity);
+    j["density"] = property_to_json(density);
+    j["specific_heat"] = property_to_json(specific_heat);
+
+    return j;
+}
+
+// ============================================================================
+// MaterialLibrary 实现
+// ============================================================================
+
+MaterialLibrary::MaterialLibrary()
+{
+}
+
+void MaterialLibrary::loadFromJSON(const std::string& json_file)
+{
+    std::ifstream file(json_file);
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Failed to open material library file: " + json_file);
+    }
+
+    json j;
+    try
+    {
+        file >> j;
+    }
+    catch (json::parse_error& e)
+    {
+        throw std::runtime_error("Failed to parse JSON file: " + std::string(e.what()));
+    }
+
+    loadFromJSONString(j.dump());
+}
+
+void MaterialLibrary::loadFromJSONString(const std::string& json_str)
+{
+    json j;
+    try
+    {
+        j = json::parse(json_str);
+    }
+    catch (json::parse_error& e)
+    {
+        throw std::runtime_error("Failed to parse JSON string: " + std::string(e.what()));
+    }
+
+    // 加载材料
+    if (j.contains("materials"))
+    {
+        for (auto& [material_name, material_data] : j["materials"].items())
+        {
+            auto material = Material::fromJSON(material_name, material_data);
+            addMaterial(material_name, material);
+            LOG_DEBUG("  加载材料: '" + material_name + "'");
+        }
+    }
+
+    // 加载域到材料的映射
+    if (j.contains("domain_materials"))
+    {
+        for (auto& [domain_id_str, material_name] : j["domain_materials"].items())
+        {
+            int domain_id = parseDomainId(domain_id_str);
+            assignMaterialToDomain(domain_id, material_name);
+        }
+    }
+
+    // 加载边界域到材料的映射
+    if (j.contains("boundary_domain_materials"))
+    {
+        for (auto& [domain_id_str, material_name] : j["boundary_domain_materials"].items())
+        {
+            int domain_id = parseDomainId(domain_id_str);
+            assignMaterialToBoundaryDomain(domain_id, material_name);
+        }
+    }
+}
+
+void MaterialLibrary::addMaterial(const std::string& name, std::shared_ptr<Material> material)
+{
+    materials_[name] = material;
+}
+
+std::shared_ptr<Material> MaterialLibrary::getMaterial(const std::string& name) const
+{
+    auto it = materials_.find(name);
+    if (it == materials_.end())
+    {
+        throw std::runtime_error("Material not found: " + name);
+    }
+    return it->second;
 }
 
 void MaterialLibrary::assignMaterialToDomain(int domain_id, const std::string& material_name)
 {
-    auto it = material_name_to_id_.find(material_name);
-    if (it == material_name_to_id_.end())
+    // 检查材料是否存在
+    if (materials_.find(material_name) == materials_.end())
     {
-        throw std::runtime_error("未找到材料: " + material_name);
+        throw std::runtime_error("Cannot assign unknown material: " + material_name);
     }
-    assignMaterialToDomain(domain_id, it->second);
-}
-
-void MaterialLibrary::assignMaterialToBoundaryDomain(int boundary_domain_id, int material_id)
-{
-    if (material_id < 0 || material_id >= static_cast<int>(materials_.size()))
-    {
-        throw std::out_of_range("材料ID超出范围: " + std::to_string(material_id));
-    }
-    boundary_domain_to_material_[boundary_domain_id] = material_id;
+    domain_to_material_[domain_id] = material_name;
 }
 
 void MaterialLibrary::assignMaterialToBoundaryDomain(int boundary_domain_id,
                                                      const std::string& material_name)
 {
-    auto it = material_name_to_id_.find(material_name);
-    if (it == material_name_to_id_.end())
+    if (materials_.find(material_name) == materials_.end())
     {
-        throw std::runtime_error("未找到材料: " + material_name);
+        throw std::runtime_error("Cannot assign unknown material: " + material_name);
     }
-    assignMaterialToBoundaryDomain(boundary_domain_id, it->second);
+    boundary_domain_to_material_[boundary_domain_id] = material_name;
 }
 
 std::shared_ptr<Material> MaterialLibrary::getMaterialForDomain(int domain_id) const
@@ -145,91 +392,66 @@ std::shared_ptr<Material> MaterialLibrary::getMaterialForDomain(int domain_id) c
     auto it = domain_to_material_.find(domain_id);
     if (it == domain_to_material_.end())
     {
-        throw std::runtime_error("域 " + std::to_string(domain_id) + " 未分配材料");
+        throw std::runtime_error("No material assigned to domain: " + std::to_string(domain_id));
     }
-    return materials_[it->second];
+    return getMaterial(it->second);
 }
 
-std::shared_ptr<Material> MaterialLibrary::getMaterialForElement(int element_id) const
+std::shared_ptr<Material> MaterialLibrary::getMaterialForBoundaryDomain(
+    int boundary_domain_id) const
 {
-    if (element_to_domain_.empty())
-    {
-        throw std::runtime_error(
-            "单元-域映射未设置。请先调用 setElementToDomainMap() 或 loadFromConfig()");
-    }
-
-    if (element_id < 0 || element_id >= static_cast<int>(element_to_domain_.size()))
-    {
-        throw std::out_of_range("单元ID超出范围: " + std::to_string(element_id));
-    }
-
-    int domain_id = element_to_domain_[element_id];
-    return getMaterialForDomain(domain_id);
-}
-
-std::shared_ptr<Material> MaterialLibrary::getMaterialForBoundary(
-    int boundary_id, std::shared_ptr<Config> config) const
-{
-    if (!config)
-    {
-        throw std::runtime_error("Config 对象为空");
-    }
-
-    // 从 Config 获取边界几何实体编码
-    const auto& boundary_geometric_entities = config->getBoundaryGeometricEntities();
-
-    if (boundary_id < 0 || boundary_id >= static_cast<int>(boundary_geometric_entities.size()))
-    {
-        throw std::out_of_range("边界ID超出范围: " + std::to_string(boundary_id));
-    }
-
-    // 获取边界的几何实体 ID
-    int entity_id = boundary_geometric_entities[boundary_id];
-
-    // 在边界域映射中查找对应的材料
-    auto it = boundary_domain_to_material_.find(entity_id);
+    auto it = boundary_domain_to_material_.find(boundary_domain_id);
     if (it == boundary_domain_to_material_.end())
     {
-        throw std::runtime_error("边界几何域 " + std::to_string(entity_id) + " 未分配材料");
+        throw std::runtime_error("No material assigned to boundary domain: " +
+                                 std::to_string(boundary_domain_id));
     }
-
-    return materials_[it->second];
+    return getMaterial(it->second);
 }
 
-void MaterialLibrary::setElementToDomainMap(const std::vector<int>& element_to_domain)
-{
-    element_to_domain_ = element_to_domain;
-}
-
-void MaterialLibrary::loadFromConfig(std::shared_ptr<Config> config)
-{
-    if (!config)
-    {
-        throw std::runtime_error("Config 对象为空");
-    }
-
-    // 从 Config 读取体单元几何实体映射
-    const auto& element_geometric_entities = config->getElementGeometricEntities();
-
-    if (!element_geometric_entities.empty())
-    {
-        element_to_domain_ = element_geometric_entities;
-        std::cout << "从 Config 加载了 " << element_to_domain_.size() << " 个单元的几何实体映射"
-                  << std::endl;
-    }
-    else
-    {
-        std::cerr << "警告: Config 中没有体单元几何实体信息" << std::endl;
-    }
-}
-
-std::vector<std::string> MaterialLibrary::getAllMaterialNames() const
+std::vector<std::string> MaterialLibrary::getMaterialNames() const
 {
     std::vector<std::string> names;
-    names.reserve(materials_.size());
-    for (const auto& material : materials_)
+    for (const auto& [name, material] : materials_)
     {
-        names.push_back(material->getName());
+        names.push_back(name);
     }
     return names;
+}
+
+void MaterialLibrary::saveToJSON(const std::string& json_file) const
+{
+    json j;
+
+    // 保存材料
+    json materials_json;
+    for (const auto& [name, material] : materials_)
+    {
+        materials_json[name] = material->toJSON();
+    }
+    j["materials"] = materials_json;
+
+    // 保存域映射
+    json domain_materials_json;
+    for (const auto& [domain_id, material_name] : domain_to_material_)
+    {
+        domain_materials_json[std::to_string(domain_id)] = material_name;
+    }
+    j["domain_materials"] = domain_materials_json;
+
+    // 保存边界域映射
+    json boundary_domain_materials_json;
+    for (const auto& [domain_id, material_name] : boundary_domain_to_material_)
+    {
+        boundary_domain_materials_json[std::to_string(domain_id)] = material_name;
+    }
+    j["boundary_domain_materials"] = boundary_domain_materials_json;
+
+    // 写入文件
+    std::ofstream file(json_file);
+    if (!file.is_open())
+    {
+        throw std::runtime_error("Failed to open file for writing: " + json_file);
+    }
+    file << j.dump(2);  // 2个空格缩进
 }

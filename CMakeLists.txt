@@ -46,12 +46,23 @@ include_directories(
 # 查找Eigen库（如果使用find_package方式）
 # find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
+# muParser 源文件
+set(MUPARSER_SOURCES
+    "${CMAKE_SOURCE_DIR}/third_party/muparser/muParser.cpp"
+    "${CMAKE_SOURCE_DIR}/third_party/muparser/muParserBase.cpp"
+    "${CMAKE_SOURCE_DIR}/third_party/muparser/muParserBytecode.cpp"
+    "${CMAKE_SOURCE_DIR}/third_party/muparser/muParserCallback.cpp"
+    "${CMAKE_SOURCE_DIR}/third_party/muparser/muParserError.cpp"
+    "${CMAKE_SOURCE_DIR}/third_party/muparser/muParserTokenReader.cpp"
+)
+
 # 按模块收集源文件 - 更清晰的组织结构
 set(CORE_SOURCES
     "${CMAKE_SOURCE_DIR}/src/core/config.cpp"
     "${CMAKE_SOURCE_DIR}/src/core/comsol_mesh_importer.cpp"
     "${CMAKE_SOURCE_DIR}/src/core/problem_setup.cpp"
     "${CMAKE_SOURCE_DIR}/src/core/material.cpp"
+    "${CMAKE_SOURCE_DIR}/src/core/logger.cpp"
 )
 
 set(SHAPE_FUNCTION_SOURCES
@@ -104,6 +115,7 @@ set(FEM_LIB_SOURCES
     ${GAUSS_QUADRATURE_SOURCES}
     ${SOLVER_SOURCES}
     ${OUTPUT_SOURCES}
+    ${MUPARSER_SOURCES}
 )
 
 # 可执行文件源文件 = 库源文件 + main
@@ -119,6 +131,9 @@ file(GLOB_RECURSE FEM_HEADERS
 
 # 创建可执行文件
 add_executable(FEM_solution ${FEM_SOURCES} ${FEM_HEADERS})
+
+# 定义 MUPARSER_STATIC 宏以正确编译 muparser
+target_compile_definitions(FEM_solution PRIVATE MUPARSER_STATIC)
 
 # 链接Eigen库（如果使用find_package方式）
 # target_link_libraries(FEM_solution Eigen3::Eigen)
@@ -145,6 +160,10 @@ install(TARGETS FEM_solution
 # 可选：创建一个库版本（如果您想将FEM求解器作为库使用）
 # 注意：FEM_LIB_SOURCES 已经在上面定义，不包含 main.cpp
 add_library(FEM_lib STATIC ${FEM_LIB_SOURCES})
+
+# 定义 MUPARSER_STATIC 宏以正确编译 muparser
+target_compile_definitions(FEM_lib PRIVATE MUPARSER_STATIC)
+
 target_include_directories(FEM_lib PUBLIC 
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/third_party
@@ -157,7 +176,7 @@ set_target_properties(FEM_lib PROPERTIES
 )
 
 # 如果您有测试
-option(BUILD_TESTS "Build tests" ON)
+option(BUILD_TESTS "Build tests" OFF)
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)

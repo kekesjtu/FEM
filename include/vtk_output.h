@@ -61,7 +61,8 @@ class VTKOutput
      */
     virtual void outputDenseSamplingError(const std::string& filename,
                                           std::shared_ptr<Config> config,
-                                          std::shared_ptr<ProblemSetup> problem) = 0;
+                                          std::shared_ptr<ProblemSetup> problem,
+                                          const std::string& field_name) = 0;
 
   protected:
     bool ensureDirectoryExists(const std::string& directory);
@@ -112,7 +113,8 @@ class TriangleVTKOutput2D : public VTKOutput2D
         const std::function<double(const std::vector<double>&)>& exact_func) override;
 
     void outputDenseSamplingError(const std::string& filename, std::shared_ptr<Config> config,
-                                  std::shared_ptr<ProblemSetup> problem) override;
+                                  std::shared_ptr<ProblemSetup> problem,
+                                  const std::string& field_name) override;
 
   private:
     // 辅助函数，计算单元内任意参考坐标点的数值解
@@ -139,7 +141,8 @@ class TetrahedronVTKOutput3D : public VTKOutput3D
         const std::function<double(const std::vector<double>&)>& exact_func) override;
 
     void outputDenseSamplingError(const std::string& filename, std::shared_ptr<Config> config,
-                                  std::shared_ptr<ProblemSetup> problem) override;
+                                  std::shared_ptr<ProblemSetup> problem,
+                                  const std::string& field_name) override;
 
   private:
     // 辅助函数，计算单元内任意参考坐标点的数值解

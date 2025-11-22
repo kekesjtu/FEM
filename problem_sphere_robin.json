@@ -1,0 +1,84 @@
+{
+  "problem_name": "sphere_robin_bc_3d",
+  "description": "三维球域Robin边界条件验证问题（带解析解）",
+  "dimension": 3,
+  "mesh_file": "sphere_tet_mesh.mphtxt",
+  "material_library_file": "materials_example.json",
+
+  "domain_materials": {
+    "1": "custom_single"
+  },
+
+  "fields": {
+    "electric": {
+      "source": {
+        "domains": {
+          "1": {
+            "type": "constant",
+            "value": 12.0
+          }
+        }
+      },
+      "boundary_conditions": [
+        {
+          "entities": "all",
+          "type": "Robin",
+          "K": 1.0,
+          "L": 1.0,
+          "q": 1.0,
+          "comment": "Robin边界条件: K*du/dn + L*u = q，即 du/dn + u = 1"
+        }
+      ],
+      "exact_solution": {
+        "u": {
+          "type": "expression",
+          "formula": "7 - 2*(x*x + y*y + z*z)",
+          "variables": ["x", "y", "z"],
+          "comment": "u = 7 - 2*r^2, 在r=0时 u=7, 在r=1时 u=5"
+        },
+        "grad_x": {
+          "type": "expression",
+          "formula": "-4*x",
+          "variables": ["x"],
+          "comment": "du/dx = -4x"
+        },
+        "grad_y": {
+          "type": "expression",
+          "formula": "-4*y",
+          "variables": ["y"],
+          "comment": "du/dy = -4y"
+        },
+        "grad_z": {
+          "type": "expression",
+          "formula": "-4*z",
+          "variables": ["z"],
+          "comment": "du/dz = -4z"
+        }
+      }
+    }
+  },
+
+  "solver": {
+    "solver_type": "CG",
+    "preconditioner_type": "DiagonalPreconditioner",
+    "tolerance": 1e-8,
+    "max_iterations": 1000
+  },
+
+  "comments": {
+    "problem_description": "验证三维Robin边界条件的实现",
+    "governing_equation": "-∇²u = f in Ω (单位球域)",
+    "boundary_condition": "du/dn + u = 1 on ∂Ω (球面 r=1)",
+    "exact_solution": "u = 7 - 2r²",
+    "source_term": "f = 12 (由 -∇²u = -∇²(7-2r²) = -(-6) = 12)",
+    "verification": [
+      "在球心(0,0,0): u = 7 - 2*0 = 7",
+      "在球面(r=1): u = 7 - 2*1 = 5",
+      "梯度: ∇u = (-4x, -4y, -4z) = -4r",
+      "法向导数(向外): du/dn = ∇u·n = -4r·(r/|r|) = -4 (在r=1处)",
+      "Robin条件验证: du/dn + u = -4 + 5 = 1 ✓"
+    ],
+    "material": "使用 custom_single 材料，系数κ=1",
+    "mesh": "sphere_tet_mesh.mphtxt (单位球四面体网格)"
+  }
+}

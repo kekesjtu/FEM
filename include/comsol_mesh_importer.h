@@ -105,6 +105,12 @@ class ComsolMeshImporter
      */
     const std::vector<int>& getElementGeometricEntities() const;
 
+    /**
+     * @brief 设置网格单位缩放因子
+     * @param scale 缩放因子（例如0.001将mm转换为m）
+     */
+    void setMeshUnitScale(double scale);
+
   private:
     // 单元分类枚举
     enum class ElementClassification
@@ -135,6 +141,8 @@ class ComsolMeshImporter
     std::vector<int>
         boundary_geometric_entities_;  ///< 边界单元几何实体编码 [boundary_id] = entity_id
     std::vector<int> element_geometric_entities_;  ///< 体单元几何实体编码 [element_id] = entity_id
+
+    double mesh_unit_scale_;  ///< 网格单位缩放因子（默认1.0）
 
     // 主解析方法
     bool parseFile(const std::string& filename);

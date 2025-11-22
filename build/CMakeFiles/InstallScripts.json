@@ -1,8 +1,7 @@
 {
 	"InstallScripts" : 
 	[
-		"E:/code/C++/FEM/build/cmake_install.cmake",
-		"E:/code/C++/FEM/build/tests/cmake_install.cmake"
+		"E:/code/C++/FEM/build/cmake_install.cmake"
 	],
 	"Parallel" : false
 }

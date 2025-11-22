@@ -8,6 +8,7 @@
     "files.associations": {
       "*.asm": "masm",
       "*.uvprojx": "c",
+      "*.c": "c",
       "ostream": "cpp",
       "array": "cpp",
       "atomic": "cpp",
@@ -71,8 +72,22 @@
       "thread": "cpp",
       "cinttypes": "cpp",
       "typeinfo": "cpp",
-      "variant": "cpp"
-    }
+      "variant": "cpp",
+      "any": "cpp",
+      "codecvt": "cpp",
+      "cstdarg": "cpp",
+      "forward_list": "cpp",
+      "stack": "cpp",
+      "valarray": "cpp",
+      "bitset": "cpp",
+      "condition_variable": "cpp",
+      "mutex": "cpp",
+      "chrono": "cpp",
+      "expected": "cpp",
+      "regex": "cpp",
+      "source_location": "cpp"
+    },
+    "markdown.validate.enabled": true
     // ...existing code...
   }
 }

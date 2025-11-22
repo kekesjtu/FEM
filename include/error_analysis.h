@@ -3,8 +3,10 @@
 
 #include <Eigen/Dense>
 #include <memory>
+#include <string>
 #include <vector>
 #include "config.h"
+#include "material.h"
 #include "problem_setup.h"
 
 class ErrorAnalysis
@@ -19,7 +21,7 @@ class ErrorAnalysis
 
     // 构造函数，依赖Config、ProblemSetup和数值解
     ErrorAnalysis(std::shared_ptr<Config> config, std::shared_ptr<ProblemSetup> problem,
-                  const Eigen::VectorXd& solution);
+                  const Eigen::VectorXd& solution, const std::string& field_name);
 
     ~ErrorAnalysis() = default;
 
@@ -47,6 +49,7 @@ class ErrorAnalysis
     std::shared_ptr<Config> config_;
     std::shared_ptr<ProblemSetup> problem_;
     const Eigen::VectorXd& solution_;
+    std::string field_name_;  // 当前分析的场名称
 };
 
 #endif  // ERROR_ANALYSIS_H

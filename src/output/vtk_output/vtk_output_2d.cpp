@@ -1,4 +1,3 @@
-#include "vtk_output.h"
 #include <Eigen/Core>
 #include <cmath>     // 用于std::abs
 #include <fstream>   // 用于文件输出
@@ -7,6 +6,8 @@
 #include "config.h"
 #include "geometry_mapping.h"  // 用于几何映射
 #include "shape_functions.h"   // 用于形函数计算
+#include "vtk_output.h"
+
 
 // ============================================================================
 // TriangleVTKOutput2D 类的实现
@@ -213,11 +214,19 @@ void TriangleVTKOutput2D::outputExactSolution(
 
 void TriangleVTKOutput2D::outputDenseSamplingError(const std::string& filename,
                                                    std::shared_ptr<Config> config,
-                                                   std::shared_ptr<ProblemSetup> problem)
+                                                   std::shared_ptr<ProblemSetup> problem,
+                                                   const std::string& field_name)
 {
-    if (!problem || !problem->hasExactSolution())
+    if (!problem || !problem->hasField(field_name))
     {
-        std::cout << "警告：未设置精确解，跳过误差输出" << std::endl;
+        std::cout << "警告：未设置精确解或不存在该场，跳过误差输出" << std::endl;
+        return;
+    }
+
+    const auto& field = problem->getField(field_name);
+    if (!field.has_exact_solution)
+    {
+        std::cout << "警告：该场没有定义解析解，跳过误差输出" << std::endl;
         return;
     }
 
@@ -246,8 +255,16 @@ void TriangleVTKOutput2D::outputDenseSamplingError(const std::string& filename,
     std::vector<double> dense_numerical;
     std::vector<double> dense_exact;
 
-    auto exact_func = [problem](const std::vector<double>& coords) -> double
-    { return problem->exactSolutionU(coords); };
+    auto exact_func = [problem, field_name](const std::vector<double>& coords) -> double
+    {
+        const auto& field_local = problem->getField(field_name);
+        EvaluationContext ctx;
+        int dim = static_cast<int>(coords.size());
+        ctx.x = (dim >= 1) ? coords[0] : 0.0;
+        ctx.y = (dim >= 2) ? coords[1] : 0.0;
+        ctx.z = (dim >= 3) ? coords[2] : 0.0;
+        return field_local.exact_solution_u.evaluate(ctx);
+    };
 
     // 遍历每个原始单元进行采样
     for (int e = 0; e < elements_num; ++e)

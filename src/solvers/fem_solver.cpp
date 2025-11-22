@@ -7,36 +7,74 @@
 #include "error_analysis.h"
 #include "gauss_quadrature.h"
 #include "geometry_mapping.h"
+#include "logger.h"
+#include "material.h"
 #include "shape_functions.h"
 #include "vtk_output.h"
 
-// --- FEMSolver 类实现 ---
+// --- FEMSolver 类实现 (V2版本 - JSON驱动) ---
 
 // 构造函数
-FEMSolver::FEMSolver(std::shared_ptr<Config> config, std::shared_ptr<ProblemSetup> problem)
-    : config_(config), problem_(problem), N_(0), M_(0), n_(0)
+FEMSolver::FEMSolver(std::shared_ptr<Config> config, std::shared_ptr<ProblemSetup> problem,
+                     std::shared_ptr<MaterialLibrary> materials, const std::string& field_name)
+    : config_(config),
+      problem_(problem),
+      materials_(materials),
+      field_name_(field_name),
+      N_(0),
+      M_(0),
+      n_(0)
 {
-    // 初始化时不做具体操作，等待 preprocess() 调用
-    // 所有物理问题设置（边界条件、系数、源项）应在 ProblemSetup 中完成
+    // 验证参数
+    if (!config)
+    {
+        throw std::runtime_error("Config对象不能为空");
+    }
+    if (!problem)
+    {
+        throw std::runtime_error("ProblemSetup对象不能为空");
+    }
+    if (!materials)
+    {
+        throw std::runtime_error("MaterialLibrary对象不能为空");
+    }
+    if (!problem->hasField(field_name))
+    {
+        throw std::runtime_error("问题配置中不存在场: " + field_name);
+    }
 }
 
 // 高级接口：完整求解
 void FEMSolver::solveComplete()
 {
-    preprocess();
-    std::cout << "步骤 1: 网格生成和预处理完成。" << std::endl;
+    TIMER_SCOPE("FEM完整求解 (" + field_name_ + ")");
 
-    assemble();
-    std::cout << "步骤 2: 全局矩阵组装完成。" << std::endl;
+    LOG_SUBHEADER("求解物理场: " + field_name_);
 
-    applyBoundaryConditions();
-    std::cout << "步骤 3: 边界条件施加完成。" << std::endl;
+    {
+        TIMER_SCOPE("1.网格生成和预处理完成");
+        preprocess();
+    }
 
-    solve();
-    std::cout << "步骤 4: 线性方程组求解完成。" << std::endl;
+    {
+        TIMER_SCOPE("2.全局矩阵组装完成");
+        assemble();
+    }
 
-    postprocess();
-    std::cout << "步骤 5: 后处理完成。" << std::endl;
+    {
+        TIMER_SCOPE("3.边界条件施加完成");
+        applyBoundaryConditions();
+    }
+
+    {
+        TIMER_SCOPE("4: 线性方程组求解完成");
+        solve();
+    }
+
+    {
+        TIMER_SCOPE_DEBUG("5.后处理完成");
+        postprocess();
+    }
 }
 
 // 预处理
@@ -47,14 +85,6 @@ void FEMSolver::preprocess()
     M_ = config_->getElementsNum();
     n_ = config_->getNodesNumPerElement();
 
-    int dimension = config_->getDimension();
-
-    // 在预处理阶段设置边界条件
-    if (problem_)
-    {
-        problem_->setupBoundaryConditions(config_);
-    }
-
     // 初始化矩阵和向量
     K_global_.resize(N_, N_);
     // 动态计算稀疏矩阵预留空间每个节点大约连接n²个其他节点
@@ -62,12 +92,17 @@ void FEMSolver::preprocess()
     b_ = Eigen::VectorXd::Zero(N_);
     u_ = Eigen::VectorXd::Zero(N_);
 
-    std::cout << "网格生成完成：" << N_ << " 个节点，" << M_ << " 个单元" << std::endl;
-    std::cout << "维度: " << dimension << "D" << std::endl;
-    std::cout << "单元类型: 每个单元" << n_ << "个节点" << std::endl;
+    LOG_DEBUG("初始化场 [" + field_name_ + "]: " + std::to_string(N_) + " 个节点, " +
+              std::to_string(M_) + " 个单元");
 }
 
 void FEMSolver::assemble()
+{
+    assembleStiffnessMatrix();
+    assembleLoadVector();
+}
+
+void FEMSolver::assembleStiffnessMatrix()
 {
     // 清空并预留空间
     triplet_list_.clear();
@@ -88,6 +123,29 @@ void FEMSolver::assemble()
                 triplet_list_.push_back(T_entry(global_row, global_col, K_e_val));
             }
         }
+    }
+
+    LOG_DEBUG("组装刚度矩阵：收集了 " + std::to_string(triplet_list_.size()) + " 个矩阵元素");
+    // 注意：矩阵构建延迟到 applyBoundaryConditions() 中进行
+}
+
+void FEMSolver::assembleLoadVector()
+{
+    // 确保 b_ 已经初始化（在 preprocess 中完成）
+    if (b_.size() != N_)
+    {
+        b_ = Eigen::VectorXd::Zero(N_);
+    }
+    else
+    {
+        b_.setZero();  // 重置为0
+    }
+
+    const auto& connectivity = config_->getElementConnectivity();
+
+    // 组装载荷向量
+    for (int e = 0; e < M_; ++e)
+    {
         for (int beta = 0; beta < n_; ++beta)
         {
             double b_e_val = calculateLoadEntry(e, beta);
@@ -95,9 +153,6 @@ void FEMSolver::assemble()
             b_(global_row) += b_e_val;
         }
     }
-
-    std::cout << "组装完成：收集了 " << triplet_list_.size() << " 个矩阵元素" << std::endl;
-    // 注意：矩阵构建延迟到 applyBoundaryConditions() 中进行
 }
 
 void FEMSolver::setStiffnessMatrix(const Eigen::SparseMatrix<double>& K_external)
@@ -125,14 +180,9 @@ void FEMSolver::applyBoundaryConditions()
     // 3. Robin (K≠0, L≠0): c*du/dn + (L/K)*u = q/K
 
     const auto& boundarys = config_->getBoundary();
-    const auto& boundary_conditions = problem_->getBoundaryConditions();
+    const auto& field = problem_->getField(field_name_);
 
-    if (boundarys.size() != boundary_conditions.size())
-    {
-        throw std::runtime_error("边界几何数量与边界条件数量不匹配");
-    }
-
-    std::cout << "处理边界条件，共 " << boundarys.size() << " 个边界单元" << std::endl;
+    LOG_DEBUG("处理边界条件，共 " + std::to_string(boundarys.size()) + " 个边界单元");
 
     // 统计不同类型的边界条件
     int dirichlet_count = 0;
@@ -147,7 +197,24 @@ void FEMSolver::applyBoundaryConditions()
     for (size_t boundary_idx = 0; boundary_idx < boundarys.size(); ++boundary_idx)
     {
         const auto& boundary = boundarys[boundary_idx];
-        const auto& bc = boundary_conditions[boundary_idx];
+
+        // 通过几何实体ID查找边界条件
+        int entity_id = config_->getBoundaryGeometricEntity(boundary_idx);
+
+        // 检查该实体是否有边界条件定义
+        // 首先查找具体entity_id，如果没有则查找"all"(-1)
+        auto it_specific = field.entity_to_bc.find(entity_id);
+        auto it_all = field.entity_to_bc.find(-1);
+
+        if (it_specific == field.entity_to_bc.end() && it_all == field.entity_to_bc.end())
+        {
+            // 没有定义边界条件,跳过(默认为自然边界条件)
+            continue;
+        }
+
+        // 优先使用具体的entity_id，其次使用"all"
+        const auto& bc =
+            (it_specific != field.entity_to_bc.end()) ? it_specific->second : it_all->second;
 
         // 判断边界条件类型
         if (bc.K_bc == 0)
@@ -200,10 +267,10 @@ void FEMSolver::applyBoundaryConditions()
         }
     }
 
-    std::cout << "边界条件统计：" << std::endl;
-    std::cout << "  Dirichlet 边界单元数: " << dirichlet_count << std::endl;
-    std::cout << "  Neumann 边界单元数: " << neumann_count << std::endl;
-    std::cout << "  Robin 边界单元数: " << robin_count << std::endl;
+    LOG_DEBUG("边界条件统计:");
+    LOG_DEBUG("  Dirichlet 边界单元数: " + std::to_string(dirichlet_count));
+    LOG_DEBUG("  Neumann 边界单元数: " + std::to_string(neumann_count));
+    LOG_DEBUG("  Robin 边界单元数: " + std::to_string(robin_count));
 
     // 统计 Dirichlet 节点
     std::vector<int> dirichlet_nodes;
@@ -218,15 +285,13 @@ void FEMSolver::applyBoundaryConditions()
             min_dirichlet_val = std::min(min_dirichlet_val, dirichlet_values[i]);
         }
     }
-    std::cout << "  Dirichlet 边界节点数: " << dirichlet_nodes.size() << std::endl;
-    std::cout << "  Dirichlet 值范围: [" << min_dirichlet_val << ", " << max_dirichlet_val << "]"
-              << std::endl;
+    LOG_DEBUG("  Dirichlet 边界节点数: " + std::to_string(dirichlet_nodes.size()));
+    LOG_DEBUG("  Dirichlet 值范围: [" + std::to_string(min_dirichlet_val) + ", " +
+              std::to_string(max_dirichlet_val) + "]");
 
     // 第二遍：处理 Dirichlet 边界条件，从三元组中过滤
     if (!dirichlet_nodes.empty())
     {
-        std::cout << "  应用 Dirichlet 边界条件，过滤三元组..." << std::endl;
-
         // 第一步:先修改右端项(需要用到原始矩阵元素)
         for (const auto& triplet : triplet_list_)
         {
@@ -282,10 +347,16 @@ void FEMSolver::applyBoundaryConditions()
     }
 
     // 最后：一次性从三元组构建稀疏矩阵
-    std::cout << "  从 " << triplet_list_.size() << " 个三元组构建稀疏矩阵..." << std::endl;
+    LOG_DEBUG("  从 " + std::to_string(triplet_list_.size()) + " 个三元组构建稀疏矩阵...");
     K_global_.setFromTriplets(triplet_list_.begin(), triplet_list_.end());
     K_global_.makeCompressed();
-    std::cout << "  矩阵构建完成，非零元素数: " << K_global_.nonZeros() << std::endl;
+    LOG_DEBUG("  矩阵构建完成，非零元素数: " + std::to_string(K_global_.nonZeros()));
+
+    // 调试：检查载荷向量的范围
+    LOG_DEBUG("  载荷向量统计:");
+    LOG_DEBUG("    最小值: " + std::to_string(b_.minCoeff()));
+    LOG_DEBUG("    最大值: " + std::to_string(b_.maxCoeff()));
+    LOG_DEBUG("    平均值: " + std::to_string(b_.mean()));
 
     // 清空三元组列表释放内存
     triplet_list_.clear();
@@ -294,11 +365,11 @@ void FEMSolver::applyBoundaryConditions()
 
 void FEMSolver::solve()
 {
-    // 从Config获取求解器参数
-    const std::string& solver_type = config_->getSolverType();
-    const std::string& preconditioner_type = config_->getPreconditionerType();
-    double tol = config_->getSolverTolerance();
-    int max_iter = config_->getSolverMaxIterations();
+    // 从ProblemSetup获取求解器参数
+    const std::string& solver_type = problem_->solver.solver_type;
+    const std::string& preconditioner_type = problem_->solver.preconditioner_type;
+    double tol = problem_->solver.tolerance;
+    int max_iter = problem_->solver.max_iterations;
 
     clock_t start = clock();
 
@@ -313,13 +384,13 @@ void FEMSolver::solve()
         solver.factorize(K_global_);
         if (solver.info() != Eigen::Success)
         {
-            std::cerr << "分解失败！" << std::endl;
+            LOG_ERROR("分解失败！");
             return;
         }
         u_ = solver.solve(b_);
         if (solver.info() != Eigen::Success)
         {
-            std::cerr << "求解失败！" << std::endl;
+            LOG_ERROR("求解失败！");
             return;
         }
     }
@@ -351,33 +422,52 @@ void FEMSolver::solve()
             error = solver.error();
         }
 
-        // 默认输出CG求解器的迭代信息
-        std::cout << "CG求解完成：" << std::endl;
-        std::cout << "  迭代次数: " << iterations << std::endl;
-        std::cout << "  估计误差: " << error << std::endl;
+        // 输出CG求解器的迭代信息
+        LOG_DEBUG("CG求解完成: 迭代 " + std::to_string(iterations) + " 次, 误差 " +
+                  std::to_string(error));
     }
     // 可以添加其他迭代求解器...
 
     clock_t end = clock();
     double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
 
-    // 默认输出求解信息
-    std::cout << "求解耗时: " << time_spent << " 秒" << std::endl;
+    // 输出求解信息
+    LOG_DEBUG("求解耗时: " + std::to_string(time_spent) + " 秒");
     double residual_norm = (K_global_ * u_ - b_).norm() / b_.norm();
-    std::cout << "相对残差: " << residual_norm << std::endl;
+    LOG_DEBUG("相对残差: " + std::to_string(residual_norm));
 }
 
 void FEMSolver::postprocess()
 {
-    using namespace std;
+    // === 输出求解结果统计信息 ===
+    LOG_INFO("求解结果统计 [" + field_name_ + "]:");
+    LOG_INFO("  最小值: " + std::to_string(u_.minCoeff()));
+    LOG_INFO("  最大值: " + std::to_string(u_.maxCoeff()));
+    LOG_INFO("  平均值: " + std::to_string(u_.mean()));
 
-    int dimension = config_->getDimension();
-    cout << "网格信息: " << N_ << " 个节点，" << M_ << " 个单元" << endl;
-    cout << "维度: " << dimension << "D" << endl;
-    cout << "单元类型: 每个单元" << n_ << "个节点" << endl;
+    // 找出异常值
+    int count_negative = 0;
+    int count_very_large = 0;
+    double threshold_large = 1e6;  // 超过1e6认为异常大
+    for (int i = 0; i < u_.size(); ++i)
+    {
+        if (u_(i) < 0)
+            count_negative++;
+        if (u_(i) > threshold_large)
+            count_very_large++;
+    }
+    if (count_negative > 0)
+    {
+        LOG_WARNING("  发现 " + std::to_string(count_negative) + " 个负值节点");
+    }
+    if (count_very_large > 0)
+    {
+        LOG_WARNING("  发现 " + std::to_string(count_very_large) + " 个异常大值节点 (>" +
+                    std::to_string(threshold_large) + ")");
+    }
 
     // 创建误差分析器
-    auto errorAnalyzer = std::make_shared<ErrorAnalysis>(config_, problem_, u_);
+    auto errorAnalyzer = std::make_shared<ErrorAnalysis>(config_, problem_, u_, field_name_);
 
     // 输出误差分析摘要
     errorAnalyzer->printErrorSummary();
@@ -385,41 +475,41 @@ void FEMSolver::postprocess()
     // 输出节点误差详情（前10个节点）
     errorAnalyzer->printDetailedNodeErrors(10);
 
-    // 输出VTK文件用于ParaView可视化
-    cout << "\n--- " << dimension << "维VTK文件输出 ---" << endl;
-
     // 创建VTK输出对象
     auto vtkOutput = VTKOutputFactory::createVTKOutput(config_, u_);
 
     // 输出数值解
     vtkOutput->outputNumericalSolution("results/numerical_solution");
 
-    // 输出精确解（如果 ProblemSetup 中有定义）
-    bool has_exact = false;
-    if (problem_ && problem_->hasExactSolution())
-    {
-        auto exact_func = [&](const std::vector<double>& coords) -> double
-        { return problem_->exactSolutionU(coords); };
-        vtkOutput->outputExactSolution("results/exact_solution", exact_func);
-        has_exact = true;
-    }
+    // 检查是否有精确解(V2版本使用FieldConfiguration)
+    const auto& field = problem_->getField(field_name_);
+    bool has_exact = field.has_exact_solution;
 
-    // 输出加密采样误差文件（如果有精确解）
-    if (problem_ && problem_->hasExactSolution())
-    {
-        vtkOutput->outputDenseSamplingError("results/comparison", config_, problem_);
-    }
-
-    cout << "\n ParaView可视化指南:" << endl;
-    cout << "1. numerical_solution.vtu - 查看数值解分布" << endl;
+    // 输出精确解
     if (has_exact)
     {
-        cout << "2. exact_solution.vtu     - 查看解析解分布" << endl;
-        cout << "3. comparison.vtu         - 误差分析" << endl;
+        // 创建Lambda函数包装MaterialProperty的evaluate
+        auto exact_func = [&field](const std::vector<double>& coords) -> double
+        {
+            EvaluationContext ctx;
+            ctx.x = (coords.size() >= 1) ? coords[0] : 0.0;
+            ctx.y = (coords.size() >= 2) ? coords[1] : 0.0;
+            ctx.z = (coords.size() >= 3) ? coords[2] : 0.0;
+            return field.exact_solution_u.evaluate(ctx);
+        };
+        vtkOutput->outputExactSolution("results/exact_solution", exact_func);
+        LOG_INFO("2. exact_solution.vtu - 查看精确解分布");
+    }
+
+    LOG_INFO(" ParaView可视化指南:");
+    LOG_INFO("1. numerical_solution.vtu - 查看数值解分布");
+    if (has_exact)
+    {
+        LOG_INFO("2. exact_solution.vtu - 查看精确解分布");
     }
     else
     {
-        cout << "注意：该问题未定义解析解，仅输出数值解文件" << endl;
+        LOG_INFO("注意：该问题未定义解析解，仅输出数值解文件");
     }
 }
 
@@ -457,6 +547,7 @@ double FEMSolver::calculateStiffnessEntry(int e, int alpha, int beta)
     // 从Config获取单元节点坐标
     const auto& connectivity = config_->getElementConnectivity();
     const auto& coordinates = config_->getNodeCoordinates();
+    const auto& element_entities = config_->getElementGeometricEntities();
     int dimension = config_->getDimension();
 
     std::vector<double> element_coords(n_ * dimension);
@@ -468,6 +559,11 @@ double FEMSolver::calculateStiffnessEntry(int e, int alpha, int beta)
             element_coords[i * dimension + d] = coordinates[node_idx * dimension + d];
         }
     }
+
+    // 获取该单元的材料
+    int entity_id = element_entities[e];
+    std::string material_name = problem_->getMaterialForDomain(entity_id);
+    auto material = materials_->getMaterial(material_name);
 
     // 创建几何映射对象
     auto mapping = GeometryMappingFactory::createMapping(element_coords, config_);
@@ -506,11 +602,25 @@ double FEMSolver::calculateStiffnessEntry(int e, int alpha, int beta)
         std::vector<double> pointsPhys;
         mapping->mapToPhysical(pointsRef, pointsPhys);
 
-        // 计算扩散系数（从 ProblemSetup 获取）
+        // 构造评估上下文
+        EvaluationContext ctx;
+        ctx.x = (dimension >= 1) ? pointsPhys[0] : 0.0;
+        ctx.y = (dimension >= 2) ? pointsPhys[1] : 0.0;
+        ctx.z = (dimension >= 3) ? pointsPhys[2] : 0.0;
+
+        // 从材料获取扩散系数 (对于电场是sigma,对于热场是k)
         double coeff = 1.0;
-        if (problem_)
+        if (field_name_ == "electric")
         {
-            coeff = problem_->coefficient(pointsPhys);
+            coeff = material->electrical_conductivity.evaluate(ctx);
+        }
+        else if (field_name_ == "thermal")
+        {
+            coeff = material->thermal_conductivity.evaluate(ctx);
+        }
+        else
+        {
+            throw std::runtime_error("未知的场类型: " + field_name_);
         }
 
         // 计算积分被积函数：c(x,y) * ∇φ_alpha · ∇φ_beta
@@ -531,6 +641,7 @@ double FEMSolver::calculateLoadEntry(int e, int beta)
     // 从Config获取单元节点坐标
     const auto& connectivity = config_->getElementConnectivity();
     const auto& coordinates = config_->getNodeCoordinates();
+    const auto& element_entities = config_->getElementGeometricEntities();  // 获取单元的几何实体ID
     int dimension = config_->getDimension();
 
     std::vector<double> element_coords(n_ * dimension);
@@ -555,6 +666,12 @@ double FEMSolver::calculateLoadEntry(int e, int beta)
     const auto& points = gaussPoint->getPoints();
     const auto& weights = gaussPoint->getWeights();
 
+    // 获取当前场的配置
+    const auto& field = problem_->getField(field_name_);
+
+    // 获取该单元的几何实体ID，用于查找对应的源项
+    int entity_id = element_entities[e];
+
     double entryValue = 0.0;
     for (int gpIndex = 0; gpIndex < gaussPoint->getNumPoints(); ++gpIndex)
     {
@@ -572,12 +689,31 @@ double FEMSolver::calculateLoadEntry(int e, int beta)
         auto shapeFunction = ShapeFunctionFactory::createShapeFunction(config_);
         double N_test_beta = shapeFunction->computeTestFunction(beta, pointsRef);
 
-        // 计算源项（从 ProblemSetup 获取）
+        // 构造评估上下文
+        EvaluationContext ctx;
+        ctx.x = (dimension >= 1) ? pointsPhys[0] : 0.0;
+        ctx.y = (dimension >= 2) ? pointsPhys[1] : 0.0;
+        ctx.z = (dimension >= 3) ? pointsPhys[2] : 0.0;
+
+        // 计算源项（从 FieldConfiguration 根据单元的几何实体ID获取）
         double f_xy = 0.0;
-        if (problem_)
+        if (!field.source_computed)  // 如果不是由求解器计算的源项
         {
-            f_xy = problem_->source(pointsPhys);
+            // 首先查找具体entity_id的源项，如果没有则使用默认源项(-1)
+            auto it_specific = field.domain_to_source.find(entity_id);
+            auto it_default = field.domain_to_source.find(-1);
+
+            if (it_specific != field.domain_to_source.end())
+            {
+                f_xy = it_specific->second.evaluate(ctx);
+            }
+            else if (it_default != field.domain_to_source.end())
+            {
+                f_xy = it_default->second.evaluate(ctx);
+            }
+            // 否则源项为0（未指定）
         }
+        // 否则源项为0,将由耦合求解器在外部设置
 
         double integrand = f_xy * N_test_beta;
         entryValue += integrand * mapping->getJacobianDet(pointsRef) * weights[gpIndex];
@@ -628,11 +764,33 @@ double FEMSolver::calculateBoundaryStiffness(const Config::Boundary& boundary, i
     const auto& points = gaussPoint->getPoints();
     const auto& weights = gaussPoint->getWeights();
 
-    // 从 ProblemSetup 获取边界条件
-    const auto& bc = problem_->getBoundaryCondition(boundary_idx);
+    // 通过几何实体ID获取边界条件
+    int entity_id = config_->getBoundaryGeometricEntity(boundary_idx);
+    const auto& field = problem_->getField(field_name_);
+
+    // 检查该实体是否有边界条件定义
+    auto it_specific = field.entity_to_bc.find(entity_id);
+    auto it_all = field.entity_to_bc.find(-1);
+
+    if (it_specific == field.entity_to_bc.end() && it_all == field.entity_to_bc.end())
+    {
+        return 0.0;  // 没有边界条件,返回0
+    }
+    const auto& bc =
+        (it_specific != field.entity_to_bc.end()) ? it_specific->second : it_all->second;
 
     // 边界条件系数
     double L_over_K = bc.L_bc / bc.K_bc;
+
+    // 调试：输出第一个Robin边界的参数
+    static bool first_robin_logged = false;
+    if (!first_robin_logged && bc.K_bc != 0 && bc.L_bc != 0.0)
+    {
+        LOG_DEBUG("Robin边界参数: K=" + std::to_string(bc.K_bc) + ", L=" + std::to_string(bc.L_bc) +
+                  ", q=" + std::to_string(bc.q_bc));
+        LOG_DEBUG("  L/K = " + std::to_string(L_over_K));
+        first_robin_logged = true;
+    }
 
     // 边界参考坐标维度 = 体维度 - 1
     int boundary_dim = config_->getDimension() - 1;
@@ -704,11 +862,33 @@ double FEMSolver::calculateBoundaryLoad(const Config::Boundary& boundary, int lo
     const auto& points = gaussPoint->getPoints();
     const auto& weights = gaussPoint->getWeights();
 
-    // 从 ProblemSetup 获取边界条件
-    const auto& bc = problem_->getBoundaryCondition(boundary_idx);
+    // 通过几何实体ID获取边界条件
+    int entity_id = config_->getBoundaryGeometricEntity(boundary_idx);
+    const auto& field = problem_->getField(field_name_);
+
+    // 检查该实体是否有边界条件定义
+    auto it_specific = field.entity_to_bc.find(entity_id);
+    auto it_all = field.entity_to_bc.find(-1);
+
+    if (it_specific == field.entity_to_bc.end() && it_all == field.entity_to_bc.end())
+    {
+        return 0.0;  // 没有边界条件,返回0
+    }
+    const auto& bc =
+        (it_specific != field.entity_to_bc.end()) ? it_specific->second : it_all->second;
 
     // 边界参考坐标维度 = 体维度 - 1
     int boundary_dim = config_->getDimension() - 1;
+
+    // 调试：输出第一个Robin边界载荷参数
+    static bool first_robin_load_logged = false;
+    if (!first_robin_load_logged && bc.K_bc != 0)
+    {
+        double q_over_K = bc.q_bc / bc.K_bc;
+        LOG_DEBUG("Robin边界载荷: q=" + std::to_string(bc.q_bc) + ", K=" + std::to_string(bc.K_bc));
+        LOG_DEBUG("  q/K = " + std::to_string(q_over_K));
+        first_robin_load_logged = true;
+    }
 
     double entryValue = 0.0;
     for (int gpIndex = 0; gpIndex < gaussPoint->getNumPoints(); ++gpIndex)

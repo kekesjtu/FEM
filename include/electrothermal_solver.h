@@ -6,7 +6,8 @@
 #include <string>
 #include "config.h"
 #include "fem_solver.h"
-#include "problem_definitions.h"
+#include "material.h"
+#include "problem_setup.h"
 
 /**
  * @brief 电热耦合求解器类
@@ -24,20 +25,20 @@
 class ElectrothermalSolver
 {
   private:
+    // 配置和材料
+    std::shared_ptr<Config> config_;
+    std::shared_ptr<ProblemSetup> problem_;
+    std::shared_ptr<MaterialLibrary> materials_;
+
     // 两个场的FEM求解器
     std::shared_ptr<FEMSolver> electric_solver_;  // 电场求解器
     std::shared_ptr<FEMSolver> thermal_solver_;   // 热场求解器
 
-    // 物理参数
-    double sigma0_;  // 参考电导率 [S/m]
-    double alpha_;   // 电导率温度系数 [1/K]
-    double T0_;      // 参考温度 [K]
-
-    // 迭代参数
+    // 迭代参数(从problem_的coupling配置读取)
     double tol_;                // 收敛容差（相对误差）
     int max_iter_;              // 最大迭代次数
-    bool verbose_;              // 是否输出详细信息
     double relaxation_factor_;  // 松弛因子 (0,1]，用于稳定迭代
+    double T0_;                 // 参考温度 [K]
 
     // 当前场解
     Eigen::VectorXd T_current_;  // 当前温度增量场 ΔT [K]（绝对温度 = T0 + ΔT）
@@ -106,20 +107,26 @@ class ElectrothermalSolver
      */
     double calculateThermalLoadEntry(int e, int beta);
 
+    /**
+     * @brief 计算节点焦耳热密度场（使用单元平均）
+     *
+     * 在每个单元中心计算焦耳热密度，然后分配到单元节点并平均。
+     *
+     * @return 节点焦耳热密度向量 [W/m³]
+     */
+    Eigen::VectorXd computeJouleHeatField();
+
   public:
     /**
-     * @brief 构造函数
+     * @brief 构造函数 (V2 API - JSON驱动)
      *
      * @param config 网格配置对象（电场和热场共享同一个网格）
-     * @param et_problem 电热耦合问题配置（包含两个场的ProblemSetup和物理参数）
-     * @param tol 收敛容差（默认1e-6）
-     * @param max_iter 最大迭代次数（默认100）
+     * @param problem 问题配置对象(包含electric和thermal两个场)
+     * @param materials 材料库对象
      * @param verbose 是否输出详细信息（默认true）
-     * @param relaxation 松弛因子（默认0.5），范围(0,1]，值越小迭代越稳定但可能更慢
      */
-    ElectrothermalSolver(std::shared_ptr<Config> config,
-                         const ProblemLibrary::ElectrothermalProblem& et_problem, double tol = 1e-6,
-                         int max_iter = 100, bool verbose = true, double relaxation = 0.5);
+    ElectrothermalSolver(std::shared_ptr<Config> config, std::shared_ptr<ProblemSetup> problem,
+                         std::shared_ptr<MaterialLibrary> materials);
 
     /**
      * @brief 执行电热耦合迭代求解
@@ -146,23 +153,6 @@ class ElectrothermalSolver
      * - {prefix}_Q.vtu : 焦耳热密度分布
      */
     void outputResults(const std::string& prefix = "results/electrothermal");
-
-    // 访问器
-
-    /**
-     * @brief 获取电势场解
-     */
-    const Eigen::VectorXd& getElectricPotential() const;
-
-    /**
-     * @brief 获取温度增量场解 ΔT（绝对温度 = T0 + ΔT）
-     */
-    const Eigen::VectorXd& getTemperature() const;
-
-    /**
-     * @brief 获取迭代次数（solve()后有效）
-     */
-    int getIterations() const;
 };
 
 #endif  // ELECTROTHERMAL_SOLVER_H

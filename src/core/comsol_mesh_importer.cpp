@@ -3,9 +3,15 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include "logger.h"
 
 ComsolMeshImporter::ComsolMeshImporter()
-    : is_imported_(false), dimension_(0), nodes_num_(0), elements_num_(0), nodes_num_per_element_(0)
+    : is_imported_(false),
+      dimension_(0),
+      nodes_num_(0),
+      elements_num_(0),
+      nodes_num_per_element_(0),
+      mesh_unit_scale_(1.0)
 {
 }
 
@@ -19,17 +25,16 @@ bool ComsolMeshImporter::importMesh(const std::string& filename)
     filename_ = filename;
     clearData();
 
-    std::cout << "开始导入COMSOL网格文件: " << filename << std::endl;
+    LOG_DEBUG("开始导入COMSOL网格文件: " + filename);
 
     if (!parseFile(filename))
     {
-        std::cerr << "解析网格文件失败" << std::endl;
+        LOG_ERROR("解析网格文件失败");
         return false;
     }
 
     // 由于节点索引是连续的，无需重新映射
     is_imported_ = true;
-    printImportStatistics();
 
     return true;
 }
@@ -39,29 +44,29 @@ bool ComsolMeshImporter::parseFile(const std::string& filename)
     std::ifstream file(filename);
     if (!file.is_open())
     {
-        std::cerr << "无法打开文件: " << filename << std::endl;
+        LOG_ERROR("无法打开文件: " + filename);
         return false;
     }
 
     // 1. 解析空间维度
     if (!parseDimension(file))
     {
-        std::cerr << "解析维度信息失败" << std::endl;
+        LOG_ERROR("解析维度信息失败");
         return false;
     }
-    std::cout << "空间维度: " << dimension_ << "D" << std::endl;
+    LOG_DEBUG("空间维度: " + std::to_string(dimension_) + "D");
 
     // 2. 解析节点坐标
     if (!parseNodes(file))
     {
-        std::cerr << "解析节点坐标失败" << std::endl;
+        LOG_ERROR("解析节点坐标失败");
         return false;
     }
 
     // 3. 解析单元信息
     if (!parseElements(file))
     {
-        std::cerr << "解析单元信息失败" << std::endl;
+        LOG_ERROR("解析单元信息失败");
         return false;
     }
 
@@ -99,7 +104,7 @@ bool ComsolMeshImporter::parseNodes(std::ifstream& file)
 
     if (file.eof())
     {
-        std::cerr << "未找到节点坐标部分" << std::endl;
+        LOG_ERROR("未找到节点坐标部分");
         return false;
     }
 
@@ -153,17 +158,23 @@ bool ComsolMeshImporter::parseNodes(std::ifstream& file)
     {
         for (double coord : node)
         {
-            node_coordinates_.push_back(coord);
+            // 应用网格单位缩放因子
+            node_coordinates_.push_back(coord * mesh_unit_scale_);
         }
     }
 
-    std::cout << "解析得到 " << nodes_num_ << " 个 " << dimension_ << "D 节点" << std::endl;
+    if (mesh_unit_scale_ != 1.0)
+    {
+        LOG_INFO("网格坐标已缩放: 缩放因子 = " + std::to_string(mesh_unit_scale_));
+    }
+    LOG_DEBUG("解析得到 " + std::to_string(nodes_num_) + " 个 " + std::to_string(dimension_) +
+              "D 节点");
     return nodes_num_ > 0;
 }
 
 bool ComsolMeshImporter::parseElements(std::ifstream& file)
 {
-    std::cout << "开始解析单元信息..." << std::endl;
+    LOG_DEBUG("开始解析单元信息...");
 
     std::string line;
     // 寻找单元类型信息
@@ -171,7 +182,7 @@ bool ComsolMeshImporter::parseElements(std::ifstream& file)
     {
         if (line.find("# Type #") != std::string::npos)
         {
-            std::cout << "找到单元类型: " << line << std::endl;
+            LOG_DEBUG("找到单元类型: " + line);
 
             // 1. 解析单元类型(tri/tet/edg/vtx)
             std::string element_type;
@@ -220,7 +231,7 @@ bool ComsolMeshImporter::parseElements(std::ifstream& file)
             std::vector<int> geometric_entities;
             if (!parseGeometricEntityIndices(file, num_elements, geometric_entities))
             {
-                std::cerr << "警告: 解析几何实体索引失败，使用默认值" << std::endl;
+                LOG_WARNING("解析几何实体索引失败，使用默认值");
                 geometric_entities.resize(num_elements, 0);
             }
 
@@ -239,8 +250,8 @@ bool ComsolMeshImporter::parseElements(std::ifstream& file)
                                                     geometric_entities.end());
             }
 
-            std::cout << "成功解析 " << element_type << " 类型单元 " << num_elements << " 个"
-                      << std::endl;
+            LOG_DEBUG("成功解析 " + element_type + " 类型单元 " + std::to_string(num_elements) +
+                      " 个");
         }
 
         // 检查是否结束
@@ -257,9 +268,9 @@ bool ComsolMeshImporter::parseElements(std::ifstream& file)
         nodes_num_per_element_ = static_cast<int>(element_connectivity_[0].size());
     }
 
-    std::cout << "单元解析完成，共解析到 " << elements_num_ << " 个体单元，每个 "
-              << nodes_num_per_element_ << " 个节点" << std::endl;
-    std::cout << "边界单元数: " << boundary_elements_.size() << std::endl;
+    LOG_DEBUG("单元解析完成，共解析到 " + std::to_string(elements_num_) + " 个体单元，每个 " +
+              std::to_string(nodes_num_per_element_) + " 个节点");
+    LOG_DEBUG("边界单元数: " + std::to_string(boundary_elements_.size()));
 
     return elements_num_ > 0;
 }
@@ -284,38 +295,38 @@ bool ComsolMeshImporter::parseElementType(std::ifstream& file, std::string& elem
     if (type_line.find("tri") != std::string::npos)
     {
         element_type = "tri";
-        std::cout << "识别为三角形单元" << std::endl;
+        LOG_DEBUG("识别为三角形单元");
         return true;
     }
     else if (type_line.find("tet") != std::string::npos)
     {
         element_type = "tet";
-        std::cout << "识别为四面体单元" << std::endl;
+        LOG_DEBUG("识别为四面体单元");
         return true;
     }
     else if (type_line.find("quad") != std::string::npos)
     {
         element_type = "quad";
-        std::cout << "识别为四边形单元" << std::endl;
+        LOG_DEBUG("识别为四边形单元");
         return true;
     }
     else if (type_line.find("hex") != std::string::npos)
     {
         element_type = "hex";
-        std::cout << "识别为六面体单元" << std::endl;
+        LOG_DEBUG("识别为六面体单元");
         return true;
     }
     else if (type_line.find("prism") != std::string::npos)
     {
         element_type = "prism";
-        std::cout << "识别为棱柱单元" << std::endl;
+        LOG_DEBUG("识别为棱柱单元");
         return true;
     }
     else if (type_line.find("pyramid") != std::string::npos ||
              type_line.find("pyr") != std::string::npos)
     {
         element_type = "pyramid";
-        std::cout << "识别为金字塔单元" << std::endl;
+        LOG_DEBUG("识别为金字塔单元");
         return true;
     }
     else if (type_line.find("edg") != std::string::npos)
@@ -327,16 +338,16 @@ bool ComsolMeshImporter::parseElementType(std::ifstream& file, std::string& elem
         // 3D: 忽略(低两维)
         if (dimension_ == 3)
         {
-            std::cout << "3D网格中忽略边单元(低两维)" << std::endl;
+            LOG_DEBUG("3D网格中忽略边单元(低两维)");
             return false;  // 跳过
         }
         else if (dimension_ == 2)
         {
-            std::cout << "识别为边单元(2D边界)" << std::endl;
+            LOG_DEBUG("识别为边单元(2D边界)");
         }
         else  // dimension_ == 1
         {
-            std::cout << "识别为边单元(1D体单元)" << std::endl;
+            LOG_DEBUG("识别为边单元(1D体单元)");
         }
         return true;
     }
@@ -349,48 +360,46 @@ bool ComsolMeshImporter::parseElementType(std::ifstream& file, std::string& elem
         // 3D: 忽略(低三维)
         if (dimension_ == 1)
         {
-            std::cout << "识别为顶点单元(1D边界)" << std::endl;
+            LOG_DEBUG("识别为顶点单元(1D边界)");
             return true;
         }
         else
         {
-            std::cout << "忽略顶点单元(低两维或更多)" << std::endl;
+            LOG_DEBUG("忽略顶点单元(低两维或更多)");
             return false;  // 跳过
         }
     }
     else
     {
-        std::cout << "未知类型: " << type_line << "，跳过" << std::endl;
+        LOG_DEBUG("未知类型: " + type_line + "，跳过");
         return false;
     }
 }
 
 void ComsolMeshImporter::printImportStatistics() const
 {
-    std::cout << "\n=== 网格导入统计信息 ===" << std::endl;
-    std::cout << "文件名: " << filename_ << std::endl;
-    std::cout << "空间维度: " << dimension_ << "D" << std::endl;
-    std::cout << "节点总数: " << nodes_num_ << std::endl;
-    std::cout << "体单元数: " << elements_num_ << std::endl;
-    std::cout << "每个体单元节点数: " << nodes_num_per_element_ << std::endl;
-    std::cout << "边界单元数: " << boundary_elements_.size() << std::endl;
+    LOG_HEADER("网格导入统计信息");
+    LOG_INFO("文件名: " + filename_);
+    LOG_INFO("空间维度: " + std::to_string(dimension_) + "D");
+    LOG_INFO("节点总数: " + std::to_string(nodes_num_));
+    LOG_INFO("体单元数: " + std::to_string(elements_num_));
+    LOG_INFO("每个体单元节点数: " + std::to_string(nodes_num_per_element_));
+    LOG_INFO("边界单元数: " + std::to_string(boundary_elements_.size()));
 
     if (!boundary_elements_.empty())
     {
-        std::cout << "每个边界单元节点数: " << boundary_elements_[0].size() << std::endl;
+        LOG_INFO("每个边界单元节点数: " + std::to_string(boundary_elements_[0].size()));
     }
 
     // 显示几何实体信息
     if (!element_geometric_entities_.empty())
     {
-        std::cout << "体单元几何实体数: " << element_geometric_entities_.size() << std::endl;
+        LOG_DEBUG("体单元几何实体数: " + std::to_string(element_geometric_entities_.size()));
     }
     if (!boundary_geometric_entities_.empty())
     {
-        std::cout << "边界单元几何实体数: " << boundary_geometric_entities_.size() << std::endl;
+        LOG_DEBUG("边界单元几何实体数: " + std::to_string(boundary_geometric_entities_.size()));
     }
-
-    std::cout << "========================\n" << std::endl;
 }
 
 bool ComsolMeshImporter::skipToNextSection(std::ifstream& file, std::string& line)
@@ -479,6 +488,11 @@ const std::vector<int>& ComsolMeshImporter::getElementGeometricEntities() const
     return element_geometric_entities_;
 }
 
+void ComsolMeshImporter::setMeshUnitScale(double scale)
+{
+    mesh_unit_scale_ = scale;
+}
+
 // --- 辅助解析方法实现 ---
 
 bool ComsolMeshImporter::parseNodesPerElement(std::ifstream& file, int& nodes_per_element)
@@ -490,7 +504,7 @@ bool ComsolMeshImporter::parseNodesPerElement(std::ifstream& file, int& nodes_pe
     {
         if (!std::getline(file, line))
         {
-            std::cerr << "无法读取每个单元的节点数" << std::endl;
+            LOG_ERROR("无法读取每个单元的节点数");
             return false;
         }
         trimString(line);
@@ -499,11 +513,11 @@ bool ComsolMeshImporter::parseNodesPerElement(std::ifstream& file, int& nodes_pe
     // 解析节点数
     if (!(std::istringstream(line) >> nodes_per_element))
     {
-        std::cerr << "无法解析节点数: '" << line << "'" << std::endl;
+        LOG_ERROR("无法解析节点数: '" + line + "'");
         return false;
     }
 
-    std::cout << "每个单元节点数: " << nodes_per_element << std::endl;
+    LOG_DEBUG("每个单元节点数: " + std::to_string(nodes_per_element));
     return true;
 }
 
@@ -516,7 +530,7 @@ bool ComsolMeshImporter::parseNumElements(std::ifstream& file, int& num_elements
     {
         if (!std::getline(file, line))
         {
-            std::cerr << "无法读取单元数量" << std::endl;
+            LOG_ERROR("无法读取单元数量");
             return false;
         }
         trimString(line);
@@ -525,11 +539,11 @@ bool ComsolMeshImporter::parseNumElements(std::ifstream& file, int& num_elements
     // 解析单元数量
     if (!(std::istringstream(line) >> num_elements))
     {
-        std::cerr << "无法解析单元数量: '" << line << "'" << std::endl;
+        LOG_ERROR("无法解析单元数量: '" + line + "'");
         return false;
     }
 
-    std::cout << "单元数量: " << num_elements << std::endl;
+    LOG_DEBUG("单元数量: " + std::to_string(num_elements));
     return true;
 }
 
@@ -548,14 +562,14 @@ bool ComsolMeshImporter::parseGeometricEntityIndices(std::ifstream& file, int nu
         if (line.find("# Geometric entity indices") != std::string::npos)
         {
             found_geo_section = true;
-            std::cout << "找到几何实体索引部分" << std::endl;
+            LOG_DEBUG("找到几何实体索引部分");
             break;
         }
     }
 
     if (!found_geo_section)
     {
-        std::cout << "警告: 未找到几何实体索引，使用默认值0" << std::endl;
+        LOG_WARNING("未找到几何实体索引，使用默认值0");
         geometric_entities.resize(num_elements, 0);
         return true;  // 不是错误，只是没有几何实体信息
     }
@@ -570,8 +584,7 @@ bool ComsolMeshImporter::parseGeometricEntityIndices(std::ifstream& file, int nu
         }
         else
         {
-            std::cerr << "警告: 无法读取第 " << i << " 个单元的几何实体索引，使用默认值0"
-                      << std::endl;
+            LOG_WARNING("无法读取第 " + std::to_string(i) + " 个单元的几何实体索引，使用默认值0");
             geometric_entities.push_back(0);
         }
     }
@@ -579,7 +592,7 @@ bool ComsolMeshImporter::parseGeometricEntityIndices(std::ifstream& file, int nu
     // 清除换行符
     std::getline(file, line);
 
-    std::cout << "成功读取 " << geometric_entities.size() << " 个几何实体索引" << std::endl;
+    LOG_DEBUG("成功读取 " + std::to_string(geometric_entities.size()) + " 个几何实体索引");
     return true;
 }
 
@@ -597,7 +610,7 @@ bool ComsolMeshImporter::parseElementConnectivity(std::ifstream& file, int num_e
     {
         if (!std::getline(file, line))
         {
-            std::cerr << "无法读取第 " << i << " 个单元" << std::endl;
+            LOG_ERROR("无法读取第 " + std::to_string(i) + " 个单元");
             return false;
         }
 
@@ -612,8 +625,9 @@ bool ComsolMeshImporter::parseElementConnectivity(std::ifstream& file, int num_e
 
         if (static_cast<int>(node_indices.size()) != nodes_per_element)
         {
-            std::cerr << "单元 " << i << " 节点数不匹配，期望 " << nodes_per_element << "，实际 "
-                      << node_indices.size() << std::endl;
+            LOG_ERROR("单元 " + std::to_string(i) + " 节点数不匹配，期望 " +
+                      std::to_string(nodes_per_element) + "，实际 " +
+                      std::to_string(node_indices.size()));
             continue;
         }
 
